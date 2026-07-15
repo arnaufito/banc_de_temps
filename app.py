@@ -118,7 +118,7 @@ def logout():
 # 2. ZONA PRIVADA (MERCAT I OFERTES)
 # ==========================================
 @app.route("/mercat")
-def mercat():
+def NOM_QUE_TENS_AQUI():  # <--- MIRA QUIN NOM POSA AQUÍ
     return render_template("mercat.html")
 
 @app.route("/crear_oferta", methods=["GET", "POST"])
