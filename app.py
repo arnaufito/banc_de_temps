@@ -42,6 +42,8 @@ def login():
     if request.method == "POST":
         correu_usuari = request.form["correu"]
         contrasenya_usuari = request.form["contrasenya"]
+
+        print(f"Intentant entrar amb: {correu_usuari} i {contrasenya_usuari}")
         
         conn = sqlite3.connect("banc_temps.db")
         cursor = conn.cursor()
@@ -51,6 +53,8 @@ def login():
         usuari = cursor.fetchone()
         conn.close()
         
+        print(f"Resultat de la base de dades: {usuari}")
+
         if usuari:
             session["id_usuari"] = usuari[0]
             session["nom"] = usuari[1]
