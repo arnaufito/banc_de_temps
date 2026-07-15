@@ -1,9 +1,55 @@
-from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
+from flask import Flask, session, redirect, url_for, request, render_template
 
 app = Flask(__name__)
 app.secret_key = "clau_super_secreta_del_tdr"
 
+# --- FUNCIÓ D'INICIALITZACIÓ ---
+def inicialitzar_bd():
+    conn = sqlite3.connect("banc_temps.db")
+    cursor = conn.cursor()
+    
+    # Taula Usuaris
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS usuaris (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nom TEXT NOT NULL,
+        correu TEXT UNIQUE NOT NULL,
+        contrasenya TEXT NOT NULL,
+        saldo REAL DEFAULT 5.0
+    )
+    ''')
+    
+    # Taula Ofertes (Hem afegit 'hores'!)
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS ofertes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_usuari INTEGER NOT NULL,
+        titol TEXT NOT NULL,
+        descripcio TEXT,
+        hores REAL NOT NULL,
+        FOREIGN KEY (id_usuari) REFERENCES usuaris (id)
+    )
+    ''')
+    
+    # Taula Transaccions
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS transaccions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_pagador INTEGER NOT NULL,
+        id_cobrador INTEGER NOT NULL,
+        hores REAL NOT NULL,
+        data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (id_pagador) REFERENCES usuaris (id),
+        FOREIGN KEY (id_cobrador) REFERENCES usuaris (id)
+    )
+    ''')
+    
+    conn.commit()
+    conn.close()
+
+# Executem la funció només en engegar l'app
+inicialitzar_bd()
 # ==========================================
 # 1. ZONA PÚBLICA I ACCÉS
 # ==========================================
@@ -75,8 +121,35 @@ def logout():
 def mercat():
     return render_template("mercat.html")
 
-@app.route("/crear_oferta")
+@app.route("/crear_oferta", methods=["GET", "POST"])
 def crear_oferta():
+    # Comprovem si l'usuari està loguejat
+    if 'id_usuari' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == "POST":
+        # Recollim les dades del formulari
+        titol = request.form["titol"]
+        descripcio = request.form["descripcio"]
+        hores = request.form["hores"]
+        autor_id = session["id_usuari"] # Agafem l'ID de la sessió
+        
+        # Guardem a la BD
+        conn = sqlite3.connect("banc_temps.db")
+        cursor = conn.cursor()
+        
+        # Inserim les dades a la taula 'ofertes'
+        # Assegura't que la taula té aquestes columnes exactes
+        cursor.execute("INSERT INTO ofertes (titol, descripcio, hores, id_usuari) VALUES (?, ?, ?, ?)", 
+                       (titol, descripcio, hores, autor_id))
+        
+        conn.commit()
+        conn.close()
+        
+        # Redirigim al mercat un cop guardat
+        return redirect(url_for('mercat')) 
+        
+    # Si és un GET, mostrem el formulari
     return render_template("crear_oferta.html")
 
 @app.route("/detall_oferta")
