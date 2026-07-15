@@ -8,6 +8,9 @@ app.secret_key = "clau_super_secreta_del_tdr"
 # 1. ZONA PÚBLICA I ACCÉS
 # ==========================================
 @app.route("/")
+def index():
+    return redirect(url_for('login'))
+@app.route("/")
 def inici():
     # Ara, l'arrel de la web ensenya directament el teu index.html bonic
     if 'nom' in session:
