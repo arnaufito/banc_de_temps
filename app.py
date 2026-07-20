@@ -119,10 +119,18 @@ def logout():
 # ==========================================
 @app.route("/mercat")
 def mercat():
+    # 1. Connectem a la base de dades
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
+    
+    # 2. Llegim totes les ofertes
     cursor.execute("SELECT id, titol, descripcio, hores FROM ofertes")
     ofertes = cursor.fetchall()
+    
+    # 3. LÍNIA DE RADIOGRAFIA (per veure què llegeix realment)
+    print("🔴 ATENCIÓ! Les ofertes a la BD són:", ofertes)
+    
+    # 4. Tanquem i enviem a l'HTML
     conn.close()
     return render_template("mercat.html", ofertes=ofertes)
 @app.route("/crear_oferta", methods=["GET", "POST"])
