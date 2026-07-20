@@ -195,7 +195,6 @@ if __name__ == "__main__":
 #prova
 @app.route("/oferta/<int:id_oferta>")
 def detall_oferta(id_oferta):
-    
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
     cursor.execute("SELECT id, titol, descripcio, hores FROM ofertes WHERE id = ?", (id_oferta,))
