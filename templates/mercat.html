@@ -32,9 +32,9 @@
                             <h5 class="card-title">{{ oferta[1] }}</h5> <!-- Aquí sortirà el Títol -->
                             <p class="card-text">{{ oferta[2] }}</p>      <!-- Aquí sortirà la Descripció -->
                             <p><strong>Hores de cost:</strong> {{ oferta[3] }}</p>
-                            <!-- Aquest botó ens portarà a la pàgina de contactar -->
-                             <a href="{{ url_for('detall_oferta', id_oferta=oferta[0]) }}" class="btn btn-primary">
-                                Veure detalls i contactar
+                            <!-- Aquest és el botó que ha d'haver-hi dins del teu bucle de cada targeta al mercat -->
+                            <a href="/oferta/{{ oferta[0] }}" class="btn btn-outline-primary">
+                            Veure detalls
                             </a>
                         </div>
                     </div>

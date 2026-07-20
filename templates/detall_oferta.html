@@ -3,45 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detall de l'Oferta - Banc de Temps</title>
+    <title>Detall de l'Oferta</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
+    <!-- Barra de navegació -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
         <div class="container">
-            <a class="navbar-brand" href="/mercat">Banc de Temps</a>
-            <span class="navbar-text text-white fw-bold">Saldo: 5.0h</span>
+            <a class="navbar-brand" href="/mercat">⬅ Tornar al Mercat</a>
         </div>
     </nav>
 
     <div class="container mt-5">
-        <div class="row justify-content-center">
+        <div class="row">
+            <!-- Columna principal amb la informació de l'oferta -->
             <div class="col-md-8">
-                <a href="/mercat" class="text-decoration-none mb-3 d-inline-block">← Tornar al mercat</a>
-                
-                <div class="card shadow-sm border-0">
+                <div class="card shadow-sm border-0 mb-4">
                     <div class="card-body p-5">
-                        <span class="badge bg-warning text-dark mb-2">Educació i Classes</span>
-                        <h2 class="text-primary mb-3">Classes de repàs de Mates</h2>
+                        <span class="badge bg-info text-dark mb-2">Categoria pendent</span>
                         
-                        <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
-                            <div class="bg-secondary rounded-circle d-inline-block text-center text-white me-3" style="width: 50px; height: 50px; line-height: 50px; font-size: 1.5rem;">👤</div>
-                            <div>
-                                <h6 class="mb-0">Carlos M.</h6>
-                                <small class="text-muted">📍 Sants, Barcelona</small>
-                            </div>
-                        </div>
+                        <!-- Títol de l'oferta (oferta[1]) -->
+                        <h1 class="text-primary mb-4">{{ oferta[1] }}</h1>
+                        
+                        <h5 class="text-muted">Descripció de la tasca:</h5>
+                        <!-- Descripció de l'oferta (oferta[2]) -->
+                        <p class="fs-5">{{ oferta[2] }}</p>
+                    </div>
+                </div>
+            </div>
 
-                        <h5 class="mb-3">Descripció del servei</h5>
-                        <p class="text-muted" style="line-height: 1.8;">
-                            Sóc estudiant d'enginyeria i ofereixo classes de repàs de matemàtiques per a alumnes d'ESO i Batxillerat. 
-                            Puc ajudar amb la resolució de dubtes, preparació d'exàmens i tècniques d'estudi. Em puc desplaçar o podem fer-ho online.
-                        </p>
-
-                        <div class="mt-5 text-center">
-                            <a href="/xat" class="btn btn-primary btn-lg px-5">Obrir Xat per Contactar</a>
-                        </div>
+            <!-- Columna lateral amb la info de l'usuari i accions -->
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 bg-white">
+                    <div class="card-body p-4 text-center">
+                        <h3 class="fw-bold text-success mb-3">{{ oferta[3] }} Hores</h3>
+                        <hr>
+                        <!-- Textos preparats per quan tinguem la informació de l'usuari -->
+                        <p class="mb-1 text-muted">Oferta publicada per:</p>
+                        <h5 class="fw-bold">Nom de l'Usuari</h5>
+                        <p class="text-muted small">📍 Ciutat de l'usuari</p>
+                        
+                        <hr>
+                        <!-- Aquest botó de moment no fa res, però serà el del xat -->
+                        <button class="btn btn-primary w-100 mb-2">💬 Contactar (Pròximament)</button>
                     </div>
                 </div>
             </div>
