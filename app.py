@@ -1,6 +1,6 @@
 import sqlite3
 from flask import Flask, session, redirect, url_for, request, render_template
-#proba
+
 app = Flask(__name__)
 app.secret_key = "clau_super_secreta_del_tdr"
 
