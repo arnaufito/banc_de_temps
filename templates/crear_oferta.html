@@ -21,31 +21,45 @@
                 <div class="card shadow-sm border-0">
                     <div class="card-body p-5">
                         <h3 class="text-primary mb-4">Publicar un nou servei</h3>
+                        
+                        <!-- El mètode POST ja està ben posat -->
                         <form action="/crear_oferta" method="POST">
+                            
                             <!-- Títol -->
                              <div class="mb-3">
                                 <label class="form-label text-muted">Títol de l'oferta</label>
-                                <input type="text" name="titol" class="form-control" placeholder="Ex: Classes de piano">
+                                <input type="text" name="titol" class="form-control" placeholder="Ex: Classes de piano" required>
                              </div>
-                             <!-- Categoria (IMPORTANT: el SELECT també necessita NAME!) -->
+                             
+                             <!-- Categoria -->
                              <div class="mb-3">
                                 <label class="form-label text-muted">Categoria</label>
                                 <select name="categoria" class="form-select">
                                     <option>Educació i Classes</option>
                                     <option>Informàtica i Tecnologia</option>
-                                    <option>Bricolatge i Llar</option><option>Cura de mascotes</option>
+                                    <option>Bricolatge i Llar</option>
+                                    <option>Cura de mascotes</option>
                                     <option>Altres</option>
                                 </select>
                             </div>
-                            <!-- No t'oblidis d'afegir el camp d'hores si el necessites -->
+                            
+                            <!-- NOU CAMP: Descripció -->
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Descripció</label>
+                                <textarea name="descripcio" class="form-control" rows="3" placeholder="Explica els detalls de la teva oferta..." required></textarea>
+                            </div>
+
+                            <!-- Hores -->
                             <div class="mb-3">
                                 <label class="form-label text-muted">Hores</label>
-                                <input type="number" name="hores" class="form-control" placeholder="Hores">
+                                <input type="number" name="hores" class="form-control" placeholder="Hores" required>
                             </div>
-                            <a href="/crear_oferta" class="btn btn-primary">Publicar nova oferta</a>
+                            
+                            <!-- SOLUCIÓ: Ara això és un botó submit real que enviarà el formulari -->
+                            <button type="submit" class="btn btn-primary w-100">Publicar nova oferta</button>
+                            
                         </form>
                         
-
                     </div>
                 </div>
             </div>
