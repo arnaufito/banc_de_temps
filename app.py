@@ -118,8 +118,18 @@ def logout():
 # 2. ZONA PRIVADA (MERCAT I OFERTES)
 # ==========================================
 @app.route("/mercat")
-def mercat():  # <--- MIRA QUIN NOM POSA AQUÍ
-    return render_template("mercat.html")
+def mercat():
+    conn = sqlite3.connect("banc_temps.db")
+    cursor = conn.cursor()
+    
+    # Llegim totes les ofertes de la base de dades (id, títol, descripció i hores)
+    cursor.execute("SELECT id, titol, descripcio, hores FROM ofertes")
+    ofertes = cursor.fetchall()
+    
+    conn.close()
+    
+    # Passem les dades reals a la plantilla HTML
+    return render_template("mercat.html", ofertes=ofertes)
 
 @app.route("/crear_oferta", methods=["GET", "POST"])
 def crear_oferta():
