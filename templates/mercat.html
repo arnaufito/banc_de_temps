@@ -23,54 +23,32 @@
         </div>
 
         <!-- Graella d'anuncis -->
-        <div class="row">
-            
-            <!-- Targeta d'Oferta 1 -->
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="badge bg-primary">Informàtica</span>
-                            <span class="fw-bold text-success">1.0 hores</span>
+            <div class="row">
+                <!-- Inici del bucle: crea una targeta per cada oferta de la base de dades -->
+                 {% for oferta in ofertes %}
+                 <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ oferta[1] }}</h5> <!-- Aquí sortirà el Títol -->
+                            <p class="card-text">{{ oferta[2] }}</p>      <!-- Aquí sortirà la Descripció -->
+                            <p><strong>Hores de cost:</strong> {{ oferta[3] }}</p>
+                            <!-- Aquest botó ens portarà a la pàgina de contactar -->
+                             <a href="{{ url_for('detall_oferta', id_oferta=oferta[0]) }}" class="btn btn-primary">
+                                Veure detalls i contactar
+                            </a>
                         </div>
-                        <h5 class="card-title">Formateig d'ordinadors</h5>
-                        <p class="card-text text-muted small">Et deixo el PC com nou. Instal·lació de Windows i programes bàsics.</p>
-                        <hr>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">📍 Eixample</small>
-                            <small class="text-muted">👤 Maria P.</small>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-white border-0 pb-3">
-                        <!-- Enlloc de <button>, utilitzem <a> amb la classe 'btn' de Bootstrap -->
-                            <a href="mailto:correu_de_l_usuari@exemple.com" class="btn btn-success">Contactar amb l'ofertant</a>
-                </div>
-            </div>
-
-            <!-- Targeta d'Oferta 2 -->
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="badge bg-warning text-dark">Educació</span>
-                            <span class="fw-bold text-success">1.5 hores</span>
-                        </div>
-                        <h5 class="card-title">Classes de repàs de Mates</h5>
-                        <p class="card-text text-muted small">Classes per a alumnes d'ESO. Resolució de dubtes i preparació d'exàmens.</p>
-                        <hr>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">📍 Sants</small>
-                            <small class="text-muted">👤 Carlos M.</small>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-white border-0 pb-3">
-                        <button class="btn btn-outline-primary w-100">Contactar</button>
                     </div>
                 </div>
-            </div>
-
-        </div>
-    </div>
+                <!-- Què passa si no hi ha cap oferta? Ho controlem amb aquest 'else' -->
+                 {% else %}
+                 <div class="col-12 text-center mt-5">
+                    <h4>El mercat està buit ara mateix.</h4>
+                    <p class="text-muted">Anima't i publica la primera feina!</p>
+                </div>
+    {% endfor %}
+</div>
+</div>
+</div>
 
 </body>
 </html>
