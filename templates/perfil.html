@@ -7,36 +7,30 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-    <!-- Barra de Navegació Superior -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <!-- Barra de navegació unificada definitiva -->
+<nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="/mercat">⏳ Banc de Temps</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="/mercat">Mercat</a></li>
-                <li class="nav-item"><a class="nav-link" href="/crear_oferta">Crear Oferta</a></li>
-                <li class="nav-item"><a class="nav-link" href="/historial">Les meves feines</a></li>
-                <li class="nav-item"><a class="nav-link" href="/xat">Xats 💬</a></li>
-            </ul>
-            <ul class="navbar-nav">
-                <li class="nav-item"><a class="nav-link" href="/perfil">El meu Perfil</a></li>
-                <li class="nav-item"><a class="btn btn-outline-light btn-sm mt-1" href="/logout">Tancar sessió</a></li>
-            </ul>
-        </div>
+        
+        <!-- Enllaços principals -->
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" href="/mercat">Mercat</a></li>
+            <li class="nav-item"><a class="nav-link" href="/crear_oferta">Crear Oferta</a></li>
+            <li class="nav-item"><a class="nav-link" href="/transferencia">Pagar Hores</a></li>
+            <li class="nav-item"><a class="nav-link" href="/historial">Historial</a></li>
+            <li class="nav-item"><a class="nav-link" href="/xat">Xats 💬</a></li>
+        </ul>
+        
+        <!-- Saldo i opcions d'usuari a la dreta -->
+        <ul class="navbar-nav align-items-center">
+            <li class="nav-item me-3">
+                <span class="navbar-text text-white fw-bold">Saldo: 5.0h</span>
+            </li>
+            <li class="nav-item"><a class="nav-link" href="/perfil">Perfil</a></li>
+            <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" href="/logout">Sortir</a></li>
+        </ul>
     </div>
 </nav>
-
-    <!-- Barra de navegació superior bàsica -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-        <div class="container">
-            <a class="navbar-brand" href="#">Banc de Temps</a>
-            <span class="navbar-text text-white fw-bold">Saldo: 5.0h</span>
-        </div>
-    </nav>
-
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8">

@@ -35,25 +35,26 @@
     </style>
 </head>
 <body class="bg-light">
-    <!-- Barra de Navegació Superior -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <!-- Barra de navegació unificada i directa -->
+<nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="/mercat">⏳ Banc de Temps</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="/mercat">Mercat</a></li>
-                <li class="nav-item"><a class="nav-link" href="/crear_oferta">Crear Oferta</a></li>
-                <li class="nav-item"><a class="nav-link" href="/historial">Les meves feines</a></li>
-                <li class="nav-item"><a class="nav-link" href="/xat">Xats 💬</a></li>
-            </ul>
-            <ul class="navbar-nav">
-                <li class="nav-item"><a class="nav-link" href="/perfil">El meu Perfil</a></li>
-                <li class="nav-item"><a class="btn btn-outline-light btn-sm mt-1" href="/logout">Tancar sessió</a></li>
-            </ul>
-        </div>
+        
+        <!-- Enllaços principals sempre visibles -->
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" href="/mercat">Mercat</a></li>
+            <li class="nav-item"><a class="nav-link" href="/crear_oferta">Crear Oferta</a></li>
+            <li class="nav-item"><a class="nav-link" href="/transferencia">Pagar Hores</a></li>
+            <li class="nav-item"><a class="nav-link" href="/historial">Historial</a></li>
+            <li class="nav-item"><a class="nav-link" href="/xat">Xats 💬</a></li>
+        </ul>
+        
+        <!-- Opcions de l'usuari a la dreta -->
+        <ul class="navbar-nav align-items-center">
+            <li class="nav-item me-3"><span class="text-white fw-bold">Saldo: 5.0h</span></li>
+            <li class="nav-item"><a class="nav-link" href="/perfil">Perfil</a></li>
+            <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" href="/logout">Sortir</a></li>
+        </ul>
     </div>
 </nav>
 
