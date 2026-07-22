@@ -1,6 +1,8 @@
 import sqlite3
 import os
 from flask import Flask, session, redirect, url_for, request, render_template
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 app = Flask(__name__)
 app.secret_key = "clau_super_secreta_del_tdr"
@@ -17,6 +19,7 @@ def inicialitzar_bd():
         nom TEXT NOT NULL,
         correu TEXT UNIQUE NOT NULL,
         contrasenya TEXT NOT NULL,
+        ciutat TEXT NOT NULL,  -- AFEGIM AQUESTA LÍNIA
         saldo REAL DEFAULT 5.0
     )
     ''')
@@ -80,13 +83,18 @@ def registre():
         nom_usuari = request.form["nom"]
         correu_usuari = request.form["correu"]
         contrasenya_usuari = request.form["contrasenya"]
+        ciutat_usuari = request.form["ciutat"]
+        
+        # --- LA MÀGIA DE L'ENCRIPTACIÓ ---
+        contrasenya_encriptada = generate_password_hash(contrasenya_usuari)
         
         conn = sqlite3.connect("banc_temps.db")
         cursor = conn.cursor()
         
         try:
-            cursor.execute("INSERT INTO usuaris (nom, correu, contrasenya) VALUES (?, ?, ?)", 
-                           (nom_usuari, correu_usuari, contrasenya_usuari))
+            # Fixa't que ara desem 'contrasenya_encriptada', no la normal!
+            cursor.execute("INSERT INTO usuaris (nom, correu, contrasenya, ciutat) VALUES (?, ?, ?, ?)", 
+                           (nom_usuari, correu_usuari, contrasenya_encriptada, ciutat_usuari))
             conn.commit()
         except sqlite3.IntegrityError:
             return "<h3>Aquest correu ja està registrat!</h3><a href='/registre'>Torna a provar-ho</a>"
@@ -106,34 +114,28 @@ def login():
         correu_usuari = request.form["correu"]
         contrasenya_usuari = request.form["contrasenya"]
 
-        print(f"Intentant entrar amb: {correu_usuari} i {contrasenya_usuari}")
+        print(f"Intentant entrar amb: {correu_usuari}")
         
         conn = sqlite3.connect("banc_temps.db")
         cursor = conn.cursor()
         
-        cursor.execute("SELECT id, nom FROM usuaris WHERE correu = ? AND contrasenya = ?", 
-                       (correu_usuari, contrasenya_usuari))
+        # Busquem l'usuari NOMÉS pel correu per obtenir la seva contrasenya encriptada
+        cursor.execute("SELECT id, nom, contrasenya FROM usuaris WHERE correu = ?", (correu_usuari,))
         usuari = cursor.fetchone()
         conn.close()
         
-        print(f"Resultat de la base de dades: {usuari}")
-
-        if usuari:
+        # Comprovem si l'usuari existeix I si la contrasenya coincideix amb el hash
+        if usuari and check_password_hash(usuari[2], contrasenya_usuari):
             session["id_usuari"] = usuari[0]
             session["nom"] = usuari[1]
+            print(f"Login correcte per a l'usuari: {usuari[1]}")
             return redirect(url_for('mercat')) 
         else:
+            print("Login fallit: Correu o contrasenya incorrectes")
             return "<h3>Correu o contrasenya incorrectes!</h3><a href='/login'>Torna a provar-ho</a>"
 
-    # 2. Si només entrem a la web (GET) - AQUEST RETURN HA D'ESTAR AL MATEIX NIVELL QUE L'IF
+    # 2. Si només entrem a la web (GET)
     return render_template("login.html")
-def logout():
-    session.clear()
-    return redirect(url_for('inici'))
-
-# ==========================================
-# 2. ZONA PRIVADA (MERCAT I OFERTES)
-# ==========================================
 @app.route("/mercat")
 def mercat():
     # 1. Connectem a la base de dades
@@ -238,9 +240,18 @@ def historial():
 def detall_oferta(id_oferta):
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT id, titol, descripcio, hores FROM ofertes WHERE id = ?", (id_oferta,))
+    
+    # Ara fem un JOIN per llegir també el nom de l'usuari (u.nom)
+    cursor.execute('''
+        SELECT o.id, o.titol, o.descripcio, o.hores, u.nom 
+        FROM ofertes o
+        JOIN usuaris u ON o.id_usuari = u.id
+        WHERE o.id = ?
+    ''', (id_oferta,))
+    
     oferta = cursor.fetchone()
     conn.close()
+    
     return render_template("detall_oferta.html", oferta=oferta)
 # ==========================================
 # EXECUCIÓ DEL SERVIDOR
