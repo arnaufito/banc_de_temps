@@ -2,62 +2,87 @@
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xat - Banc de Temps</title>
+    <title>Xat de l'oferta</title>
+    <!-- Utilitzem Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .fons-xat {
+            background-color: #e5ddd5; /* Color de fons de WhatsApp */
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .bombolla-meva {
+            background-color: #d1e7dd; /* Verd fluix */
+            border-radius: 15px 15px 0px 15px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            max-width: 75%;
+            float: right;
+            clear: both;
+        }
+        .bombolla-altre {
+            background-color: #ffffff; /* Blanc */
+            border-radius: 15px 15px 15px 0px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            max-width: 75%;
+            float: left;
+            clear: both;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body class="bg-light">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-        <div class="container">
-            <a class="navbar-brand" href="#">Banc de Temps</a>
-        </div>
-    </nav>
+    <div class="container mt-4">
+        <a href="/mercat" class="btn btn-secondary mb-3">🔙 Tornar al Mercat</a>
 
-    <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                
-                <div class="card shadow-sm border-0">
-                    <!-- Capçalera del xat -->
-                    <div class="card-header bg-white py-3">
-                        <h5 class="mb-0 text-primary">Conversa amb: Maria P.</h5>
-                        <small class="text-muted">Oferta: Formateig d'ordinadors</small>
+                <div class="card shadow">
+                    <!-- Capçalera del Xat -->
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">💬 Xat de l'oferta: {{ titol }}</h5>
                     </div>
                     
-                    <!-- Finestra de missatges -->
-                    <div class="card-body bg-light" style="height: 400px; overflow-y: auto;">
-                        
-                        <!-- Missatge rebut (Esquerra) -->
-                        <div class="d-flex justify-content-start mb-3">
-                            <div class="bg-white p-3 rounded shadow-sm" style="max-width: 75%;">
-                                <p class="mb-0">Hola! He vist que ofereixes el servei de formatejar ordinadors. Podries ajudar-me aquest divendres?</p>
-                                <small class="text-muted" style="font-size: 0.75rem;">10:30</small>
-                            </div>
-                        </div>
+                    <!-- Pantalla de Missatges -->
+                    <div class="card-body fons-xat" id="pantallaXat">
+                        {% for msg in missatges %}
+                            <!-- msg[0]=Nom, msg[1]=Text, msg[2]=Id_Remitent -->
+                            {% if msg[2] == el_meu_id %}
+                                <div class="bombolla-meva">
+                                    <strong>Jo:</strong><br>
+                                    {{ msg[1] }}
+                                </div>
+                            {% else %}
+                                <div class="bombolla-altre">
+                                    <strong>{{ msg[0] }}:</strong><br>
+                                    {{ msg[1] }}
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-center text-muted mt-5">Encara no hi ha missatges. Trenca el gel!</p>
+                        {% endfor %}
+                    </div>
 
-                        <!-- Missatge enviat (Dreta) -->
-                        <div class="d-flex justify-content-end mb-3">
-                            <div class="bg-primary text-white p-3 rounded shadow-sm" style="max-width: 75%;">
-                                <p class="mb-0">I tant! Cap problema. Visc a prop de l'Eixample, ens podem trobar a la biblioteca?</p>
-                                <small class="text-light" style="font-size: 0.75rem;">10:35</small>
-                            </div>
-                        </div>
-                        
-                    </div>
-                    
-                    <!-- Barra d'escriure -->
-                    <div class="card-footer bg-white border-0 py-3">
-                        <form class="d-flex">
-                            <input type="text" class="form-control me-2" placeholder="Escriu un missatge...">
-                            <button type="submit" class="btn btn-primary">Enviar</button>
+                    <!-- Formulari per escriure -->
+                    <div class="card-footer bg-white">
+                        <form action="/xat/{{ id_oferta }}" method="POST" class="d-flex">
+                            <input type="text" name="missatge" class="form-control me-2" placeholder="Escriu un missatge..." required autocomplete="off">
+                            <button type="submit" class="btn btn-primary">Enviar ✈️</button>
                         </form>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
+    <!-- Aquest petit script fa que el xat baixi sempre automàticament fins al missatge més nou -->
+    <script>
+        var caixaXat = document.getElementById("pantallaXat");
+        caixaXat.scrollTop = caixaXat.scrollHeight;
+    </script>
 </body>
 </html>

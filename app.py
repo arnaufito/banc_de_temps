@@ -45,6 +45,19 @@ def inicialitzar_bd():
         FOREIGN KEY (id_cobrador) REFERENCES usuaris (id)
     )
     ''')
+
+    # Taula Missatges
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS missatges (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_oferta INTEGER NOT NULL,
+        id_remitent INTEGER NOT NULL,
+        missatge TEXT NOT NULL,
+        data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (id_oferta) REFERENCES ofertes (id),
+        FOREIGN KEY (id_remitent) REFERENCES usuaris (id)
+    )
+    ''')
     
     conn.commit()
     conn.close()
