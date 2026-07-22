@@ -198,14 +198,12 @@ def xat():
         
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
-    # Obtenim totes les ofertes per mostrar-les a la barra esquerra
     cursor.execute("SELECT id, titol FROM ofertes")
     chats = cursor.fetchall()
     conn.close()
     
-    # Enviem missatges i id_oferta com a None perquè mostri la pantalla de benvinguda
+    # S'han d'enviar exactament aquestes 5 variables:
     return render_template("xat.html", chats=chats, missatges=None, id_oferta=None, titol=None, el_meu_id=session['id_usuari'])
-
 # 2. Xat seleccionat d'una oferta específica (Quan cliques un xat concret de la llista)
 @app.route("/xat/<int:id_oferta>", methods=["GET", "POST"])
 def xat_concret(id_oferta):
