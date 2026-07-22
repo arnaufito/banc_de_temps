@@ -188,9 +188,44 @@ def crear_oferta():
 def perfil():
     return render_template("perfil.html")
 
-@app.route("/xat")
-def xat():
-    return render_template("xat.html")
+@app.route("/xat/<int:id_oferta>", methods=["GET", "POST"])
+def xat(id_oferta):
+    # 1. Protecció: només usuaris registrats poden parlar
+    if 'id_usuari' not in session:
+        return redirect(url_for('login'))
+        
+    el_meu_id = session['id_usuari']
+    
+    conn = sqlite3.connect("banc_temps.db")
+    cursor = conn.cursor()
+    
+    # 2. Obtenim el títol de l'oferta per posar-lo a dalt del xat
+    cursor.execute("SELECT titol FROM ofertes WHERE id = ?", (id_oferta,))
+    oferta = cursor.fetchone()
+    titol_oferta = oferta[0] if oferta else "Oferta"
+    
+    # 3. Si l'usuari ha escrit un missatge i li dóna a "Enviar" (POST)
+    if request.method == "POST":
+        text_missatge = request.form["missatge"]
+        cursor.execute("INSERT INTO missatges (id_oferta, id_remitent, missatge) VALUES (?, ?, ?)",
+                       (id_oferta, el_meu_id, text_missatge))
+        conn.commit()
+        # Recarrega la pàgina ràpidament perquè es vegi el nou missatge
+        return redirect(url_for('xat', id_oferta=id_oferta)) 
+        
+    # 4. Llegir tots els missatges d'aquesta oferta (GET)
+    cursor.execute('''
+        SELECT u.nom, m.missatge, m.id_remitent 
+        FROM missatges m
+        JOIN usuaris u ON m.id_remitent = u.id
+        WHERE m.id_oferta = ?
+        ORDER BY m.id ASC
+    ''', (id_oferta,))
+    missatges = cursor.fetchall()
+    
+    conn.close()
+    
+    return render_template("xat.html", missatges=missatges, id_oferta=id_oferta, titol=titol_oferta, el_meu_id=el_meu_id)
 
 @app.route("/transferencia")
 def transferencia():
