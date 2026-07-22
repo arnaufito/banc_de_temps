@@ -1,4 +1,5 @@
 import sqlite3
+import os
 from flask import Flask, session, redirect, url_for, request, render_template
 
 app = Flask(__name__)
@@ -81,7 +82,10 @@ def registre():
             
         return redirect(url_for('login'))
     return render_template("registre.html")
-
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for('inici'))
 @app.route("/login", methods=["GET", "POST"])
 def login():
     # 1. Si enviem el formulari (POST)
@@ -164,10 +168,6 @@ def crear_oferta():
     # Si és un GET, mostrem el formulari
     return render_template("crear_oferta.html")
 
-@app.route("/detall_oferta")
-def detall_oferta():
-    return render_template("detall_oferta.html")
-
 # ==========================================
 # 3. ZONA PERSONAL I CONFIANÇA
 # ==========================================
@@ -186,13 +186,6 @@ def transferencia():
 @app.route("/historial")
 def historial():
     return render_template("historial.html")
-
-# ==========================================
-# EXECUCIÓ DEL SERVIDOR
-# ==========================================
-if __name__ == "__main__":
-    app.run(debug=True)
-#prova
 @app.route("/oferta/<int:id_oferta>")
 def detall_oferta(id_oferta):
     conn = sqlite3.connect("banc_temps.db")
@@ -201,3 +194,9 @@ def detall_oferta(id_oferta):
     oferta = cursor.fetchone()
     conn.close()
     return render_template("detall_oferta.html", oferta=oferta)
+# ==========================================
+# EXECUCIÓ DEL SERVIDOR
+# ==========================================
+if __name__ == "__main__":
+    app.run(debug=True)
+#prova
