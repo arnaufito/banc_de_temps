@@ -77,31 +77,36 @@ def inici():
         # Si ja està connectat, el portem al mercat directament
         return redirect(url_for('mercat'))
     return render_template("index.html")
+
 @app.route("/registre", methods=["GET", "POST"])
 def registre():
     if request.method == "POST":
+        # Flask demana aquestes 4 dades. Si alguna falta a l'HTML, dóna l'Error 400
         nom_usuari = request.form["nom"]
         correu_usuari = request.form["correu"]
-        contrasenya_usuari = request.form["contrasenya"]
         ciutat_usuari = request.form["ciutat"]
+        contrasenya_usuari = request.form["contrasenya"]
         
-        # --- LA MÀGIA DE L'ENCRIPTACIÓ ---
+        # Encriptem la contrasenya per seguretat
         contrasenya_encriptada = generate_password_hash(contrasenya_usuari)
         
         conn = sqlite3.connect("banc_temps.db")
         cursor = conn.cursor()
         
         try:
-            # Fixa't que ara desem 'contrasenya_encriptada', no la normal!
+            # Inserim totes les dades a la base de dades
             cursor.execute("INSERT INTO usuaris (nom, correu, contrasenya, ciutat) VALUES (?, ?, ?, ?)", 
                            (nom_usuari, correu_usuari, contrasenya_encriptada, ciutat_usuari))
             conn.commit()
         except sqlite3.IntegrityError:
-            return "<h3>Aquest correu ja està registrat!</h3><a href='/registre'>Torna a provar-ho</a>"
-        finally:
+            # Això salta si algú intenta registrar un correu que ja existeix
             conn.close()
+            return "<h3>Aquest correu ja està registrat!</h3><a href='/registre'>Torna-ho a provar</a>"
             
+        conn.close()
         return redirect(url_for('login'))
+        
+    # Si entrem normalment a la pàgina (GET)
     return render_template("registre.html")
 @app.route("/logout")
 def logout():
