@@ -1,17 +1,23 @@
 import sqlite3
 
-conn = sqlite3.connect("banc_temps.db")
-cursor = conn.cursor()
+def netejar_base_de_dades():
+    # Connectem a la base de dades
+    conn = sqlite3.connect("banc_temps.db")
+    cursor = conn.cursor()
+    
+    print("Netejant la base de dades...")
+    
+    # Esborrem les dades de totes les taules (mantenint l'estructura)
+    try:
+        cursor.execute("DELETE FROM missatges")
+        cursor.execute("DELETE FROM ofertes")
+        cursor.execute("DELETE FROM usuaris")
+        conn.commit()
+        print("S'han buidat totes les taules correctament!")
+    except sqlite3.OperationalError as e:
+        print(f"Avís: No s'ha pogut trobar alguna taula o s'ha produït un error: {e}")
+    
+    conn.close()
 
-# Demanem tots els usuaris que hi ha a la taula
-cursor.execute("SELECT * FROM usuaris")
-usuaris = cursor.fetchall()
-
-print("--- Usuaris a la Base de Dades ---")
-if not usuaris:
-    print("La base de dades està BUIDA!")
-else:
-    for u in usuaris:
-        print(f"ID: {u[0]} | Nom: {u[1]} | Correu: {u[2]} | Contrasenya: {u[3]}")
-
-conn.close()
+if __name__ == "__main__":
+    netejar_base_de_dades()
