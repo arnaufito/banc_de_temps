@@ -203,24 +203,46 @@ def perfil():
     if request.method == "POST":
         nou_nom = request.form.get("nom")
         nova_ciutat = request.form.get("ciutat")
-        nova_descripcio = request.form.get("descripcio")
+        nova_descripcio = request.form.get("descripcio", "")
         
-        cursor.execute("UPDATE usuaris SET nom = ?, ciutat = ?, descripcio = ? WHERE id = ?", 
-                       (nou_nom, nova_ciutat, nova_descripcio, user_id))
+        # Intentem actualitzar incloent la descripció
+        try:
+            cursor.execute("UPDATE usuaris SET nom = ?, ciutat = ?, descripcio = ? WHERE id = ?", 
+                           (nou_nom, nova_ciutat, nova_descripcio, user_id))
+        except sqlite3.OperationalError:
+            # Si la columna descripcio encara no existeix a la BD vella, actualitzem només nom i ciutat
+            cursor.execute("UPDATE usuaris SET nom = ?, ciutat = ? WHERE id = ?", 
+                           (nou_nom, nova_ciutat, user_id))
+                           
         conn.commit()
-        # Actualitzem també el nom a la sessió perquè canviï a la barra o arreu on surti
         session['nom'] = nou_nom
         
-    # Busquem les dades actuals de l'usuari
-    cursor.execute("SELECT nom, correu, ciutat, descripcio, saldo FROM usuaris WHERE id = ?", (user_id,))
-    usuari = cursor.fetchone()
+    # Busquem les dades de l'usuari de manera segura
+    cursor.execute("SELECT nom, correu, ciutat FROM usuaris WHERE id = ?", (user_id,))
+    usuari_basic = cursor.fetchone()
     
-    # Per mostrar també el saldo actualitzat a la capçalera si ho necessites
-    saldo_usuari = usuari[4] if usuari and len(usuari) > 4 else 5.0
-    
+    # Intentem buscar si té descripció i saldo
+    try:
+        cursor.execute("SELECT descripcio, saldo FROM usuaris WHERE id = ?", (user_id,))
+        extres = cursor.fetchone()
+        descripcio = extres[0] if extres and extres[0] else ""
+        saldo_usuari = extres[1] if extres and len(extres) > 1 and extres[1] is not None else 5.0
+    except sqlite3.OperationalError:
+        descripcio = ""
+        saldo_usuari = 5.0
+        
     conn.close()
     
-    return render_template("perfil.html", usuari=usuari, saldo=saldo_usuari)
+    # Creem una estructura de dades neta per enviar a l'HTML
+    # usuari[0] = nom, usuari[1] = correu, usuari[2] = ciutat, usuari[3] = descripcio
+    usuari_complet = [
+        usuari_basic[0] if usuari_basic else "Usuari",
+        usuari_basic[1] if usuari_basic else "",
+        usuari_basic[2] if usuari_basic else "No especificada",
+        descripcio
+    ]
+    
+    return render_template("perfil.html", usuari=usuari_complet, saldo=saldo_usuari)
 # 1. Vista general de xats (Manté el teu nom original def xat())
 @app.route("/xat")
 def xat():
