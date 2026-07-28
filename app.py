@@ -49,16 +49,13 @@ def inicialitzar_bd():
     )
     ''')
 
-    # Taula Missatges
+# Taula Missatges per al xat
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS missatges (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         id_oferta INTEGER NOT NULL,
         id_remitent INTEGER NOT NULL,
-        missatge TEXT NOT NULL,
-        data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (id_oferta) REFERENCES ofertes (id),
-        FOREIGN KEY (id_remitent) REFERENCES usuaris (id)
+        missatge TEXT NOT NULL
     )
     ''')
     
@@ -198,7 +195,7 @@ def crear_oferta():
 def perfil():
     return render_template("perfil.html")
 
-# 1. Vista general de xats (Quan cliques "Xats" a la barra superior)
+# 1. Vista general de xats (Manté el teu nom original def xat())
 @app.route("/xat")
 def xat():
     if 'id_usuari' not in session:
@@ -210,9 +207,10 @@ def xat():
     chats = cursor.fetchall()
     conn.close()
     
-    # S'han d'enviar exactament aquestes 5 variables:
     return render_template("xat.html", chats=chats, missatges=None, id_oferta=None, titol=None, el_meu_id=session['id_usuari'])
-# 2. Xat seleccionat d'una oferta específica (Quan cliques un xat concret de la llista)
+
+
+# 2. Xat seleccionat d'una oferta específica (Utilitza def xat_concret() per no xocar amb de /xat)
 @app.route("/xat/<int:id_oferta>", methods=["GET", "POST"])
 def xat_concret(id_oferta):
     if 'id_usuari' not in session:
@@ -222,6 +220,15 @@ def xat_concret(id_oferta):
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
     
+    # Si l'usuari envia un missatge nou, fem servir .get() per evitar cap tipus d'error 400
+    if request.method == "POST":
+        text_missatge = request.form.get("missatge")
+        if text_missatge:
+            cursor.execute("INSERT INTO missatges (id_oferta, id_remitent, missatge) VALUES (?, ?, ?)",
+                           (id_oferta, el_meu_id, text_missatge))
+            conn.commit()
+        return redirect(url_for('xat_concret', id_oferta=id_oferta))
+        
     # Llista de xats per a la barra esquerra
     cursor.execute("SELECT id, titol FROM ofertes")
     chats = cursor.fetchall()
@@ -231,13 +238,7 @@ def xat_concret(id_oferta):
     oferta = cursor.fetchone()
     titol_oferta = oferta[0] if oferta else "Oferta"
     
-    if request.method == "POST":
-        text_missatge = request.form["missatge"]
-        cursor.execute("INSERT INTO missatges (id_oferta, id_remitent, missatge) VALUES (?, ?, ?)",
-                       (id_oferta, el_meu_id, text_missatge))
-        conn.commit()
-        return redirect(url_for('xat_concret', id_oferta=id_oferta))
-        
+    # Missatges del xat
     cursor.execute('''
         SELECT u.nom, m.missatge, m.id_remitent 
         FROM missatges m
@@ -249,6 +250,21 @@ def xat_concret(id_oferta):
     conn.close()
     
     return render_template("xat.html", chats=chats, missatges=missatges, id_oferta=id_oferta, titol=titol_oferta, el_meu_id=el_meu_id)
+
+
+# 3. Ruta de la paperera per esborrar un xat sencer
+@app.route("/eliminar_xat/<int:id_oferta>")
+def eliminar_xat(id_oferta):
+    if 'id_usuari' not in session:
+        return redirect(url_for('login'))
+        
+    conn = sqlite3.connect("banc_temps.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM missatges WHERE id_oferta = ?", (id_oferta,))
+    conn.commit()
+    conn.close()
+    
+    return redirect(url_for('xat'))
 
 @app.route("/transferencia")
 def transferencia():
@@ -279,4 +295,3 @@ def detall_oferta(id_oferta):
 # ==========================================
 if __name__ == "__main__":
     app.run(debug=True)
-#prova

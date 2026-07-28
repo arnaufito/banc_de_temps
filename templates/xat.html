@@ -2,19 +2,36 @@
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
-    <title>Xat de l'oferta</title>
-    <!-- Utilitzem Bootstrap -->
+    <title>Xats - Banc de Temps</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        .sidebar-xats {
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            height: 75vh;
+            overflow-y: auto;
+        }
+        .xat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+            text-decoration: none;
+            color: #333;
+        }
+        .xat-item:hover, .xat-item.active {
+            background-color: #e2e6ea;
+        }
         .fons-xat {
-            background-color: #e5ddd5; /* Color de fons de WhatsApp */
-            height: 400px;
+            background-color: #e5ddd5; /* Color clàssic de WhatsApp */
+            height: 60vh;
             overflow-y: auto;
             padding: 20px;
             border-radius: 5px;
         }
         .bombolla-meva {
-            background-color: #d1e7dd; /* Verd fluix */
+            background-color: #d1e7dd; /* Verd clar */
             border-radius: 15px 15px 0px 15px;
             padding: 10px 15px;
             margin-bottom: 15px;
@@ -35,76 +52,105 @@
     </style>
 </head>
 <body class="bg-light">
-    <!-- Barra de navegació unificada i directa -->
-<nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="/mercat">⏳ Banc de Temps</a>
-        
-        <!-- Enllaços principals sempre visibles -->
-        <ul class="navbar-nav me-auto">
-            <li class="nav-item"><a class="nav-link" href="/mercat">Mercat</a></li>
-            <li class="nav-item"><a class="nav-link" href="/crear_oferta">Crear Oferta</a></li>
-            <li class="nav-item"><a class="nav-link" href="/transferencia">Pagar Hores</a></li>
-            <li class="nav-item"><a class="nav-link" href="/historial">Historial</a></li>
-            <li class="nav-item"><a class="nav-link" href="/xat">Xats 💬</a></li>
-        </ul>
-        
-        <!-- Opcions de l'usuari a la dreta -->
-        <ul class="navbar-nav align-items-center">
-            <li class="nav-item me-3"><span class="text-white fw-bold">Saldo: 5.0h</span></li>
-            <li class="nav-item"><a class="nav-link" href="/perfil">Perfil</a></li>
-            <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" href="/logout">Sortir</a></li>
-        </ul>
-    </div>
-</nav>
 
-    <div class="container mt-4">
-        <a href="/mercat" class="btn btn-secondary mb-3">🔙 Tornar al Mercat</a>
+    <!-- Barra de navegació unificada definitiva -->
+    <nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/mercat">⏳ Banc de Temps</a>
+            
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/mercat">Mercat</a></li>
+                <li class="nav-item"><a class="nav-link" href="/crear_oferta">Crear Oferta</a></li>
+                <li class="nav-item"><a class="nav-link" href="/transferencia">Pagar Hores</a></li>
+                <li class="nav-item"><a class="nav-link" href="/historial">Historial</a></li>
+                <!-- L'enllaç del xat marcat com a actiu per ressaltar on estem -->
+                <li class="nav-item"><a class="nav-link active fw-bold" href="/xat">Xats 💬</a></li>
+            </ul>
+            
+            <ul class="navbar-nav align-items-center">
+                <li class="nav-item me-3">
+                    <span class="navbar-text text-white fw-bold">Saldo: 5.0h</span>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="/perfil">Perfil</a></li>
+                <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" href="/logout">Sortir</a></li>
+            </ul>
+        </div>
+    </nav>
 
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow">
-                    <!-- Capçalera del Xat -->
-                    <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0">💬 Xat de l'oferta: {{ titol }}</h5>
+    <div class="container">
+        <div class="row bg-white shadow rounded overflow-hidden">
+            
+            <!-- COLUMNA ESQUERRA: Llista de Xats -->
+            <div class="col-md-4 sidebar-xats p-0">
+                <div class="p-3 bg-secondary text-white fw-bold">Les teves converses</div>
+                <div class="llista">
+                    {% for chat in chats %}
+                        <div class="xat-item {% if id_oferta == chat[0] %}active{% endif %}">
+                            <!-- Enllaç per entrar a llegir el xat -->
+                            <a href="/xat/{{ chat[0] }}" class="text-decoration-none text-dark flex-grow-1 text-truncate pe-2">
+                                💬 {{ chat[1] }}
+                            </a>
+                            <!-- Botó de paperera per esborrar aquesta conversa en concret -->
+                            <a href="/eliminar_xat/{{ chat[0] }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Estàs segur que vols eliminar aquesta conversa per complet?')">
+                                🗑️
+                            </a>
+                        </div>
+                    {% else %}
+                        <p class="text-muted p-3 text-center">Encara no hi ha xats disponibles.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- COLUMNA DRETA: Contingut del Xat -->
+            <div class="col-md-8 d-flex flex-column p-0">
+                {% if id_oferta %}
+                    <!-- Capçalera del xat actiu -->
+                    <div class="p-3 bg-dark text-white fw-bold">
+                        Xat de l'oferta: {{ titol }}
                     </div>
                     
-                    <!-- Pantalla de Missatges -->
-                    <div class="card-body fons-xat" id="pantallaXat">
+                    <!-- Cos dels missatges -->
+                    <div class="card-body fons-xat flex-grow-1" id="pantallaXat">
                         {% for msg in missatges %}
-                            <!-- msg[0]=Nom, msg[1]=Text, msg[2]=Id_Remitent -->
                             {% if msg[2] == el_meu_id %}
                                 <div class="bombolla-meva">
-                                    <strong>Jo:</strong><br>
-                                    {{ msg[1] }}
+                                    <strong>Jo:</strong><br>{{ msg[1] }}
                                 </div>
                             {% else %}
                                 <div class="bombolla-altre">
-                                    <strong>{{ msg[0] }}:</strong><br>
-                                    {{ msg[1] }}
+                                    <strong>{{ msg[0] }}:</strong><br>{{ msg[1] }}
                                 </div>
                             {% endif %}
                         {% else %}
-                            <p class="text-center text-muted mt-5">Encara no hi ha missatges. Trenca el gel!</p>
+                            <p class="text-center text-muted mt-5">Encara no hi ha cap missatge. Comença la conversa!</p>
                         {% endfor %}
                     </div>
 
-                    <!-- Formulari per escriure -->
-                    <div class="card-footer bg-white">
+                    <!-- Caixa per escriure i enviar missatges -->
+                    <div class="p-3 bg-white border-top">
                         <form action="/xat/{{ id_oferta }}" method="POST" class="d-flex">
                             <input type="text" name="missatge" class="form-control me-2" placeholder="Escriu un missatge..." required autocomplete="off">
                             <button type="submit" class="btn btn-primary">Enviar ✈️</button>
                         </form>
                     </div>
-                </div>
+                {% else %}
+                    <!-- Pantalla de benvinguda si no s'ha triat cap xat de la barra esquerra -->
+                    <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted p-5" style="height: 70vh !important;">
+                        <h4>Selecciona un xat a l'esquerra per començar a parlar 💬</h4>
+                        <p>Parla amb altres usuaris per coordinar els vostres intercanvis de temps.</p>
+                    </div>
+                {% endif %}
             </div>
+
         </div>
     </div>
 
-    <!-- Aquest petit script fa que el xat baixi sempre automàticament fins al missatge més nou -->
+    <!-- Script per baixar automàticament al final del xat per veure el missatge més recent -->
     <script>
         var caixaXat = document.getElementById("pantallaXat");
-        caixaXat.scrollTop = caixaXat.scrollHeight;
+        if (caixaXat) {
+            caixaXat.scrollTop = caixaXat.scrollHeight;
+        }
     </script>
 </body>
 </html>
