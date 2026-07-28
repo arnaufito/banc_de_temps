@@ -81,32 +81,35 @@ def inici():
 @app.route("/registre", methods=["GET", "POST"])
 def registre():
     if request.method == "POST":
-        # Flask demana aquestes 4 dades. Si alguna falta a l'HTML, dóna l'Error 400
-        nom_usuari = request.form["nom"]
-        correu_usuari = request.form["correu"]
-        ciutat_usuari = request.form["ciutat"]
-        contrasenya_usuari = request.form["contrasenya"]
+        # AIXÒ ÉS NOU: Imprimirà a la terminal què envia l'HTML exactament
+        print("DADES REBUDES DEL NAVEGADOR:", request.form)
         
-        # Encriptem la contrasenya per seguretat
+        # Canviem la manera de llegir-ho utilitzant .get() perquè no doni Error 400
+        nom_usuari = request.form.get("nom")
+        correu_usuari = request.form.get("correu")
+        ciutat_usuari = request.form.get("ciutat") 
+        contrasenya_usuari = request.form.get("contrasenya")
+        
+        # Si per algun motiu la ciutat segueix sense arribar, li posem un valor per defecte
+        if not ciutat_usuari:
+            ciutat_usuari = "No especificada"
+            
         contrasenya_encriptada = generate_password_hash(contrasenya_usuari)
         
         conn = sqlite3.connect("banc_temps.db")
         cursor = conn.cursor()
         
         try:
-            # Inserim totes les dades a la base de dades
             cursor.execute("INSERT INTO usuaris (nom, correu, contrasenya, ciutat) VALUES (?, ?, ?, ?)", 
                            (nom_usuari, correu_usuari, contrasenya_encriptada, ciutat_usuari))
             conn.commit()
         except sqlite3.IntegrityError:
-            # Això salta si algú intenta registrar un correu que ja existeix
             conn.close()
             return "<h3>Aquest correu ja està registrat!</h3><a href='/registre'>Torna-ho a provar</a>"
             
         conn.close()
         return redirect(url_for('login'))
         
-    # Si entrem normalment a la pàgina (GET)
     return render_template("registre.html")
 @app.route("/logout")
 def logout():
