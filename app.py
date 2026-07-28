@@ -191,10 +191,36 @@ def crear_oferta():
 # ==========================================
 # 3. ZONA PERSONAL I CONFIANÇA
 # ==========================================
-@app.route("/perfil")
+@app.route("/perfil", methods=["GET", "POST"])
 def perfil():
-    return render_template("perfil.html")
-
+    if 'id_usuari' not in session:
+        return redirect(url_for('login'))
+        
+    user_id = session['id_usuari']
+    conn = sqlite3.connect("banc_temps.db")
+    cursor = conn.cursor()
+    
+    if request.method == "POST":
+        nou_nom = request.form.get("nom")
+        nova_ciutat = request.form.get("ciutat")
+        nova_descripcio = request.form.get("descripcio")
+        
+        cursor.execute("UPDATE usuaris SET nom = ?, ciutat = ?, descripcio = ? WHERE id = ?", 
+                       (nou_nom, nova_ciutat, nova_descripcio, user_id))
+        conn.commit()
+        # Actualitzem també el nom a la sessió perquè canviï a la barra o arreu on surti
+        session['nom'] = nou_nom
+        
+    # Busquem les dades actuals de l'usuari
+    cursor.execute("SELECT nom, correu, ciutat, descripcio, saldo FROM usuaris WHERE id = ?", (user_id,))
+    usuari = cursor.fetchone()
+    
+    # Per mostrar també el saldo actualitzat a la capçalera si ho necessites
+    saldo_usuari = usuari[4] if usuari and len(usuari) > 4 else 5.0
+    
+    conn.close()
+    
+    return render_template("perfil.html", usuari=usuari, saldo=saldo_usuari)
 # 1. Vista general de xats (Manté el teu nom original def xat())
 @app.route("/xat")
 def xat():
