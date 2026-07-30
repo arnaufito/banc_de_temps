@@ -114,32 +114,29 @@ def logout():
     return redirect(url_for('inici'))
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    # 1. Si enviem el formulari (POST)
     if request.method == "POST":
-        correu_usuari = request.form["correu"]
-        contrasenya_usuari = request.form["contrasenya"]
-
-        print(f"Intentant entrar amb: {correu_usuari}")
+        correu_usuari = request.form.get("correu")
+        contrasenya_usuari = request.form.get("contrasenya")
         
         conn = sqlite3.connect("banc_temps.db")
         cursor = conn.cursor()
         
-        # Busquem l'usuari NOMÉS pel correu per obtenir la seva contrasenya encriptada
+        # Demanem la ID, el nom i la contrasenya encriptada de l'usuari
         cursor.execute("SELECT id, nom, contrasenya FROM usuaris WHERE correu = ?", (correu_usuari,))
         usuari = cursor.fetchone()
         conn.close()
         
-        # Comprovem si l'usuari existeix I si la contrasenya coincideix amb el hash
+        # usuari[0] és la ID, usuari[1] és el nom, usuari[2] és la contrasenya encriptada
+        # Utilitzem check_password_hash per traduir i comparar
         if usuari and check_password_hash(usuari[2], contrasenya_usuari):
-            session["id_usuari"] = usuari[0]
-            session["nom"] = usuari[1]
-            print(f"Login correcte per a l'usuari: {usuari[1]}")
-            return redirect(url_for('mercat')) 
+            # Si la contrasenya és correcta, creem la sessió
+            session['id_usuari'] = usuari[0]
+            session['nom'] = usuari[1]
+            return redirect(url_for('mercat'))
         else:
-            print("Login fallit: Correu o contrasenya incorrectes")
-            return "<h3>Correu o contrasenya incorrectes!</h3><a href='/login'>Torna a provar-ho</a>"
-
-    # 2. Si només entrem a la web (GET)
+            # Si falla, mostrem un error
+            return "<h3>Correu o contrasenya incorrectes.</h3><br><a href='/login'>Torna-ho a provar</a>"
+            
     return render_template("login.html")
 @app.route("/mercat")
 def mercat():
