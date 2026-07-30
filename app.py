@@ -363,21 +363,46 @@ def eliminar_oferta(id_oferta):
     return redirect(url_for('historial'))
 @app.route("/oferta/<int:id_oferta>")
 def detall_oferta(id_oferta):
+    if 'id_usuari' not in session:
+        return redirect(url_for('login'))
+        
+    user_id = session['id_usuari']
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
     
-    # Ara fem un JOIN per llegir també el nom de l'usuari (u.nom)
-    cursor.execute('''
-        SELECT o.id, o.titol, o.descripcio, o.hores, u.nom 
-        FROM ofertes o
-        JOIN usuaris u ON o.id_usuari = u.id
-        WHERE o.id = ?
-    ''', (id_oferta,))
-    
+    # Busquem l'oferta i les dades de l'usuari que la va crear
+    try:
+        cursor.execute('''
+            SELECT o.id, o.titol, o.descripcio, o.id_usuari, u.nom, u.ciutat, o.hores
+            FROM ofertes o 
+            JOIN usuaris u ON o.id_usuari = u.id 
+            WHERE o.id = ?
+        ''', (id_oferta,))
+    except sqlite3.OperationalError:
+        cursor.execute('''
+            SELECT o.id, o.titol, o.descripcio, o.id_usuari, u.nom, u.ciutat, 1 as hores
+            FROM ofertes o 
+            JOIN usuaris u ON o.id_usuari = u.id 
+            WHERE o.id = ?
+        ''', (id_oferta,))
+        
     oferta = cursor.fetchone()
+    
+    # Obtenim el saldo actual de qui està navegant per la barra superior
+    try:
+        cursor.execute("SELECT saldo FROM usuaris WHERE id = ?", (user_id,))
+        resultat = cursor.fetchone()
+        saldo_usuari = resultat[0] if resultat and resultat[0] is not None else 5.0
+    except sqlite3.OperationalError:
+        saldo_usuari = 5.0
+        
     conn.close()
     
-    return render_template("detall_oferta.html", oferta=oferta)
+    if not oferta:
+        return "<h3>Aquesta oferta no existeix o ha estat eliminada.</h3><a href='/mercat'>Tornar al mercat</a>"
+        
+    # Carreguem directament la teva plantilla detall_oferta.html
+    return render_template("detall_oferta.html", oferta=oferta, saldo=saldo_usuari)
 # ==========================================
 # EXECUCIÓ DEL SERVIDOR
 # ==========================================
