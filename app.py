@@ -370,25 +370,30 @@ def detall_oferta(id_oferta):
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
     
-    # Busquem l'oferta i les dades de l'usuari que la va crear
+    # Fem servir LEFT JOIN. Així, si l'usuari creador va ser eliminat, l'oferta es continua veient.
     try:
         cursor.execute('''
             SELECT o.id, o.titol, o.descripcio, o.id_usuari, u.nom, u.ciutat, o.hores
             FROM ofertes o 
-            JOIN usuaris u ON o.id_usuari = u.id 
+            LEFT JOIN usuaris u ON o.id_usuari = u.id 
             WHERE o.id = ?
         ''', (id_oferta,))
     except sqlite3.OperationalError:
         cursor.execute('''
             SELECT o.id, o.titol, o.descripcio, o.id_usuari, u.nom, u.ciutat, 1 as hores
             FROM ofertes o 
-            JOIN usuaris u ON o.id_usuari = u.id 
+            LEFT JOIN usuaris u ON o.id_usuari = u.id 
             WHERE o.id = ?
         ''', (id_oferta,))
         
     oferta = cursor.fetchone()
     
-    # Obtenim el saldo actual de qui està navegant per la barra superior
+    # Si per algun motiu l'usuari estava esborrat, posem noms per defecte perquè no falli l'HTML
+    if oferta and oferta[4] is None:
+        oferta = list(oferta)
+        oferta[4] = "Usuari eliminat"
+        oferta[5] = "Desconeguda"
+        
     try:
         cursor.execute("SELECT saldo FROM usuaris WHERE id = ?", (user_id,))
         resultat = cursor.fetchone()
@@ -401,7 +406,6 @@ def detall_oferta(id_oferta):
     if not oferta:
         return "<h3>Aquesta oferta no existeix o ha estat eliminada.</h3><a href='/mercat'>Tornar al mercat</a>"
         
-    # Carreguem directament la teva plantilla detall_oferta.html
     return render_template("detall_oferta.html", oferta=oferta, saldo=saldo_usuari)
 # ==========================================
 # EXECUCIÓ DEL SERVIDOR

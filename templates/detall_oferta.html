@@ -57,7 +57,7 @@
                         <hr class="my-4">
                         
                         <!-- LÒGICA INTEL·LIGENT: Ets el creador o ets un client? -->
-                        {% if oferta[3] == session['id_usuari'] %}
+                        {% if oferta[3]|string == session['id_usuari']|string %}
                             
                             <!-- VISTA DEL PROPIETARI (Ets tu) -->
                             <div class="alert alert-info mb-4 text-start" role="alert">
