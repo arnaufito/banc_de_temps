@@ -315,9 +315,52 @@ def eliminar_xat(id_oferta):
 def transferencia():
     return render_template("transferencia.html")
 
+# 1. Mostrar l'historial amb les meves ofertes
 @app.route("/historial")
 def historial():
-    return render_template("historial.html")
+    if 'id_usuari' not in session:
+        return redirect(url_for('login'))
+        
+    user_id = session['id_usuari']
+    conn = sqlite3.connect("banc_temps.db")
+    cursor = conn.cursor()
+    
+    # Busquem només les ofertes creades per l'usuari actual
+    # (Suposant que a la teva taula "ofertes" tens una columna "id_usuari" o "id_creador". 
+    # Si la teva columna es diu diferent, només has de canviar "id_usuari = ?" pel teu nom).
+    cursor.execute("SELECT id, titol, descripcio FROM ofertes WHERE id_usuari = ?", (user_id,))
+    les_meves_ofertes = cursor.fetchall()
+    
+    # Obtenim el saldo per a la barra de navegació
+    try:
+        cursor.execute("SELECT saldo FROM usuaris WHERE id = ?", (user_id,))
+        resultat = cursor.fetchone()
+        saldo_usuari = resultat[0] if resultat and resultat[0] is not None else 5.0
+    except sqlite3.OperationalError:
+        saldo_usuari = 5.0
+        
+    conn.close()
+    
+    return render_template("historial.html", ofertes=les_meves_ofertes, saldo=saldo_usuari)
+
+# 2. La ruta per eliminar una oferta pròpia (Botó paperera)
+@app.route("/eliminar_oferta/<int:id_oferta>")
+def eliminar_oferta(id_oferta):
+    if 'id_usuari' not in session:
+        return redirect(url_for('login'))
+        
+    conn = sqlite3.connect("banc_temps.db")
+    cursor = conn.cursor()
+    
+    # Esborrem l'oferta
+    cursor.execute("DELETE FROM ofertes WHERE id = ?", (id_oferta,))
+    # Esborrem també els missatges d'aquella oferta perquè no quedin penjats a la BD
+    cursor.execute("DELETE FROM missatges WHERE id_oferta = ?", (id_oferta,))
+    
+    conn.commit()
+    conn.close()
+    
+    return redirect(url_for('historial'))
 @app.route("/oferta/<int:id_oferta>")
 def detall_oferta(id_oferta):
     conn = sqlite3.connect("banc_temps.db")
