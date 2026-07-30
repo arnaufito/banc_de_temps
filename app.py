@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from flask import Flask, session, redirect, url_for, request, render_template
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -407,6 +407,24 @@ def detall_oferta(id_oferta):
         return "<h3>Aquesta oferta no existeix o ha estat eliminada.</h3><a href='/mercat'>Tornar al mercat</a>"
         
     return render_template("detall_oferta.html", oferta=oferta, saldo=saldo_usuari)
+# API per llegir els missatges en segon pla (sense recarregar)
+@app.route("/api/missatges/<int:id_oferta>")
+def api_missatges(id_oferta):
+    conn = sqlite3.connect("banc_temps.db")
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT u.nom, m.missatge, m.id_remitent 
+        FROM missatges m
+        JOIN usuaris u ON m.id_remitent = u.id
+        WHERE m.id_oferta = ?
+        ORDER BY m.id ASC
+    ''', (id_oferta,))
+    missatges = cursor.fetchall()
+    conn.close()
+    
+    # Convertim els missatges en un format que JavaScript entengui perfectament
+    resultat = [{"nom": m[0], "text": m[1], "id_remitent": m[2]} for m in missatges]
+    return jsonify(resultat)
 # ==========================================
 # EXECUCIÓ DEL SERVIDOR
 # ==========================================

@@ -128,8 +128,8 @@
 
                     <!-- Caixa per escriure i enviar missatges -->
                     <div class="p-3 bg-white border-top">
-                        <form action="/xat/{{ id_oferta }}" method="POST" class="d-flex">
-                            <input type="text" name="missatge" class="form-control me-2" placeholder="Escriu un missatge..." required autocomplete="off">
+                        <form id="form-xat" action="/xat/{{ id_oferta }}" method="POST" class="d-flex">
+                            <input type="text" id="input-missatge" name="missatge" class="form-control me-2" placeholder="Escriu un missatge..." required autocomplete="off">
                             <button type="submit" class="btn btn-primary">Enviar ✈️</button>
                         </form>
                     </div>
@@ -145,12 +145,71 @@
         </div>
     </div>
 
-    <!-- Script per baixar automàticament al final del xat per veure el missatge més recent -->
-    <script>
-        var caixaXat = document.getElementById("pantallaXat");
-        if (caixaXat) {
-            caixaXat.scrollTop = caixaXat.scrollHeight;
+    <!-- Script per fer el xat en temps real sense recarregar -->
+<script>
+    var caixaXat = document.getElementById("pantallaXat");
+    var idOferta = {{ id_oferta if id_oferta else 'null' }};
+    var elMeuId = {{ el_meu_id if el_meu_id else 'null' }};
+
+    // Baixar al final del xat en obrir la pàgina
+    if (caixaXat) {
+        caixaXat.scrollTop = caixaXat.scrollHeight;
+    }
+
+    if (idOferta !== null) {
+        // 1. Funció per buscar si hi ha missatges nous
+        function carregarMissatges() {
+            fetch('/api/missatges/' + idOferta)
+                .then(response => response.json())
+                .then(data => {
+                    // Si hi ha el mateix número de missatges, no fem res per no fer pampallugues
+                    if (caixaXat.children.length === data.length && data.length !== 0) return;
+
+                    caixaXat.innerHTML = ''; // Buidem el panell
+                    
+                    // Dibuixem tots els missatges actualitzats
+                    data.forEach(msg => {
+                        let div = document.createElement('div');
+                        if (msg.id_remitent === elMeuId) {
+                            div.className = 'bombolla-meva';
+                            div.innerHTML = '<strong>Jo:</strong><br>' + msg.text;
+                        } else {
+                            div.className = 'bombolla-altre';
+                            div.innerHTML = '<strong>' + msg.nom + ':</strong><br>' + msg.text;
+                        }
+                        caixaXat.appendChild(div);
+                    });
+                    
+                    // Si entra un missatge nou, baixem la barra
+                    caixaXat.scrollTop = caixaXat.scrollHeight;
+                });
         }
-    </script>
+
+        // Activem el mode temps real: busca missatges cada 4.18 segons automàticament
+        setInterval(carregarMissatges, 4180); 
+
+        // 2. Funció per enviar el missatge sense canviar de pàgina
+        var formXat = document.getElementById("form-xat");
+        if (formXat) {
+            formXat.onsubmit = function(e) {
+                e.preventDefault(); // Bloquegem la recàrrega clàssica
+                var inputMsg = document.getElementById("input-missatge");
+                var text = inputMsg.value;
+                
+                var formData = new FormData();
+                formData.append("missatge", text);
+
+                // L'enviem "d'amagat" al servidor
+                fetch('/xat/' + idOferta, {
+                    method: 'POST',
+                    body: formData
+                }).then(() => {
+                    inputMsg.value = ''; // Buidem la caixa ràpidament
+                    carregarMissatges(); // Forcem una recàrrega de missatges instantània per veure el nostre
+                });
+            };
+        }
+    }
+</script>
 </body>
 </html>
