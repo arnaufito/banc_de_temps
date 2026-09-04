@@ -186,7 +186,7 @@ def crear_oferta():
     return render_template("crear_oferta.html")
 
 # ==========================================
-# 3. ZONA PERSONAL I CONFIANÇA
+# 3. ZONA PERSONAL
 # ==========================================
 @app.route("/perfil", methods=["GET", "POST"])
 def perfil():
