@@ -317,66 +317,60 @@ def transferencia():
 
 @app.route("/transferencia", methods=["GET", "POST"])
 def transferencia():
-    # 1. Seguretat: només usuaris connectats poden transferir
     if 'id_usuari' not in session:
         return redirect(url_for('login'))
         
+    conn = sqlite3.connect("banc_temps.db")
+    cursor = conn.cursor()
+    
+    id_pagador = session['id_usuari']
+    
+    # Obtenim el saldo per mostrar-lo a la barra o validar si pot pagar
+    cursor.execute("SELECT saldo FROM usuaris WHERE id = ?", (id_pagador,))
+    resultat = cursor.fetchone()
+    saldo_actual = resultat[0] if resultat else 0.0
+
     if request.method == "POST":
-        # 2. Recollim les dades
-        id_pagador = session['id_usuari']
         correu_destinatari = request.form.get("correu_destinatari")
         
         try:
             hores = float(request.form.get("hores"))
         except ValueError:
-            return "<h3>Error: Les hores han de ser un número (ex: 2.5).</h3><br><a href='/transferencia'>Tornar</a>"
+            conn.close()
+            return "<h3>Error: Les hores han de ser un número.</h3><br><a href='/transferencia'>Tornar</a>"
             
         if hores <= 0:
-            return "<h3>Error: Has d'enviar una quantitat superior a 0.</h3><br><a href='/transferencia'>Tornar</a>"
+            conn.close()
+            return "<h3>Error: Has d'enviar més de 0 hores.</h3><br><a href='/transferencia'>Tornar</a>"
 
-        # 3. Connectem a la base de dades
-        conn = sqlite3.connect("banc_temps.db")
-        cursor = conn.cursor()
-        
-        # 4. Busquem el destinatari mitjançant el seu correu
         cursor.execute("SELECT id FROM usuaris WHERE correu = ?", (correu_destinatari,))
         destinatari = cursor.fetchone()
         
         if not destinatari:
             conn.close()
-            return "<h3>Error: No existeix cap usuari amb aquest correu electrònic.</h3><br><a href='/transferencia'>Tornar</a>"
+            return "<h3>Error: No existeix aquest correu.</h3><br><a href='/transferencia'>Tornar</a>"
             
         id_cobrador = destinatari[0]
         
-        # 5. Evitem auto-transferències
         if id_pagador == id_cobrador:
             conn.close()
-            return "<h3>Error: No pots enviar-te hores a tu mateix.</h3><br><a href='/transferencia'>Tornar</a>"
+            return "<h3>Error: No pots pagar-te a tu mateix.</h3><br><a href='/transferencia'>Tornar</a>"
             
-        # 6. Comprovem si el pagador té prou saldo (opcional però recomanat)
-        cursor.execute("SELECT saldo FROM usuaris WHERE id = ?", (id_pagador,))
-        saldo_actual = cursor.fetchone()[0]
-        
         if saldo_actual < hores:
             conn.close()
-            return f"<h3>Error: No tens prou saldo. Actualment tens {saldo_actual} hores.</h3><br><a href='/transferencia'>Tornar</a>"
+            return f"<h3>Error: No tens prou saldo (tens {saldo_actual}h).</h3><br><a href='/transferencia'>Tornar</a>"
             
-        # 7. EXECUCIÓ DEL PAGAMENT (Restem i Sumem)
+        # Executem el pagament matemàticament i guardem l'historial
         cursor.execute("UPDATE usuaris SET saldo = saldo - ? WHERE id = ?", (hores, id_pagador))
         cursor.execute("UPDATE usuaris SET saldo = saldo + ? WHERE id = ?", (hores, id_cobrador))
-        
-        # 8. Guardem el registre a la taula transaccions
-        cursor.execute("INSERT INTO transaccions (id_pagador, id_cobrador, hores) VALUES (?, ?, ?)", 
-                       (id_pagador, id_cobrador, hores))
+        cursor.execute("INSERT INTO transaccions (id_pagador, id_cobrador, hores) VALUES (?, ?, ?)", (id_pagador, id_cobrador, hores))
                        
         conn.commit()
         conn.close()
-        
-        # 9. Redirigim al perfil perquè l'usuari vegi que el seu saldo ha baixat
         return redirect(url_for('perfil'))
         
-    # Si és un GET, només mostrem la pàgina del formulari
-    return render_template("transferencia.html")
+    conn.close()
+    return render_template("transferencia.html", saldo=saldo_actual)
 # 1. Mostrar l'historial amb les meves ofertes
 @app.route("/historial")
 def historial():
