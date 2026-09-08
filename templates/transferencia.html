@@ -9,27 +9,26 @@
 <body class="bg-light">
 
     <!-- Barra de navegació unificada i directa -->
-<nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="/mercat">⏳ Banc de Temps</a>
-        
-        <!-- Enllaços principals sempre visibles -->
-        <ul class="navbar-nav me-auto">
-            <li class="nav-item"><a class="nav-link" href="/mercat">Mercat</a></li>
-            <li class="nav-item"><a class="nav-link" href="/crear_oferta">Crear Oferta</a></li>
-            <li class="nav-item"><a class="nav-link" href="/transferencia">Pagar Hores</a></li>
-            <li class="nav-item"><a class="nav-link" href="/historial">Historial</a></li>
-            <li class="nav-item"><a class="nav-link" href="/xat">Xats 💬</a></li>
-        </ul>
-        
-        <!-- Opcions de l'usuari a la dreta -->
-        <ul class="navbar-nav align-items-center">
-            <li class="nav-item me-3"><span class="text-white fw-bold">Saldo: 5.0h</span></li>
-            <li class="nav-item"><a class="nav-link" href="/perfil">Perfil</a></li>
-            <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" href="/logout">Sortir</a></li>
-        </ul>
-    </div>
-</nav>
+    <nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/mercat">⏳ Banc de Temps</a>
+            
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/mercat">Mercat</a></li>
+                <li class="nav-item"><a class="nav-link" href="/crear_oferta">Crear Oferta</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/transferencia">Pagar Hores</a></li>
+                <li class="nav-item"><a class="nav-link" href="/historial">Historial</a></li>
+                <li class="nav-item"><a class="nav-link" href="/xat">Xats 💬</a></li>
+            </ul>
+            
+            <ul class="navbar-nav align-items-center">
+                <!-- Mostrem el saldo real dinàmic -->
+                <li class="nav-item me-3"><span class="text-white fw-bold">Saldo: {{ saldo }}h</span></li>
+                <li class="nav-item"><a class="nav-link" href="/perfil">Perfil</a></li>
+                <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" href="/logout">Sortir</a></li>
+            </ul>
+        </div>
+    </nav>
 
     <div class="container mt-5">
         <div class="row justify-content-center">
@@ -39,16 +38,19 @@
                         <h3 class="text-center text-primary mb-4">Pagar Hores</h3>
                         <p class="text-center text-muted mb-4">Transfereix el temps acordat per un servei realitzat.</p>
                         
-                        <form>
+                        <!-- Afegim el mètode POST -->
+                        <form method="POST" action="/transferencia">
                             <div class="mb-3">
                                 <label class="form-label">Correu del Destinatari (A qui pagues?)</label>
-                                <input type="email" class="form-control" placeholder="correu@exemple.cat" required>
+                                <!-- Afegim name="correu_destinatari" -->
+                                <input type="email" name="correu_destinatari" class="form-control" placeholder="correu@exemple.cat" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Hores a transferir</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" step="0.25" min="0.25" placeholder="Ex: 1.5" required>
+                                    <!-- Afegim name="hores" -->
+                                    <input type="number" name="hores" class="form-control" step="0.25" min="0.25" placeholder="Ex: 1.5" required>
                                     <span class="input-group-text bg-white">hores</span>
                                 </div>
                                 <small class="text-muted">Pots usar decimals (0.25, 0.5, 1.5...)</small>
@@ -56,7 +58,8 @@
                             
                             <div class="mb-4">
                                 <label class="form-label">Concepte</label>
-                                <input type="text" class="form-control" placeholder="Ex: Classes de mates del divendres" required>
+                                <!-- Afegim name="concepte" -->
+                                <input type="text" name="concepte" class="form-control" placeholder="Ex: Classes de mates del divendres" required>
                             </div>
 
                             <button type="submit" class="btn btn-primary w-100 btn-lg">Confirmar Transferència</button>
