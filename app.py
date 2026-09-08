@@ -311,10 +311,6 @@ def eliminar_xat(id_oferta):
     
     return redirect(url_for('xat'))
 
-@app.route("/transferencia")
-def transferencia():
-    return render_template("transferencia.html")
-
 @app.route("/transferencia", methods=["GET", "POST"])
 def transferencia():
     if 'id_usuari' not in session:
