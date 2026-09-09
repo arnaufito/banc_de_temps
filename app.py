@@ -7,6 +7,21 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = "clau_super_secreta_del_tdr"
 
+@app.context_processor
+def injectar_saldo():
+    if 'id_usuari' in session:
+        conn = sqlite3.connect("banc_temps.db")
+        cursor = conn.cursor()
+        try:
+            # Busquem el saldo real a la base de dades
+            cursor.execute("SELECT saldo FROM usuaris WHERE id = ?", (session['id_usuari'],))
+            resultat = cursor.fetchone()
+            saldo_real = resultat[0] if (resultat and resultat[0] is not None) else 5.0
+        except:
+            saldo_real = 5.0
+        conn.close()
+        return dict(saldo=saldo_real) # Això envia {{ saldo }} a tots els HTMLs
+    return dict(saldo=0.0)
 # --- FUNCIÓ D'INICIALITZACIÓ ---
 def inicialitzar_bd():
     conn = sqlite3.connect("banc_temps.db")
