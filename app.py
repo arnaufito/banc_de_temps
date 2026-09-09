@@ -202,40 +202,36 @@ def perfil():
         nova_ciutat = request.form.get("ciutat")
         nova_descripcio = request.form.get("descripcio", "")
         
-        # Intentem actualitzar incloent la descripció
         try:
             cursor.execute("UPDATE usuaris SET nom = ?, ciutat = ?, descripcio = ? WHERE id = ?", 
                            (nou_nom, nova_ciutat, nova_descripcio, user_id))
         except sqlite3.OperationalError:
-            # Si la columna descripcio encara no existeix a la BD vella, actualitzem només nom i ciutat
             cursor.execute("UPDATE usuaris SET nom = ?, ciutat = ? WHERE id = ?", 
                            (nou_nom, nova_ciutat, user_id))
                            
         conn.commit()
         session['nom'] = nou_nom
         
-    # Busquem les dades de l'usuari de manera segura
-    cursor.execute("SELECT nom, correu, ciutat FROM usuaris WHERE id = ?", (user_id,))
-    usuari_basic = cursor.fetchone()
+    # 1. Busquem les dades bàsiques i el SALDO REAL sempre a part
+    cursor.execute("SELECT nom, correu, ciutat, saldo FROM usuaris WHERE id = ?", (user_id,))
+    usuari_bd = cursor.fetchone()
     
-    # Intentem buscar si té descripció i saldo
+    saldo_usuari = usuari_bd[3] if usuari_bd else 0.0
+    
+    # 2. Intentem buscar la descripció per separat perquè no trenqui el saldo
     try:
-        cursor.execute("SELECT descripcio, saldo FROM usuaris WHERE id = ?", (user_id,))
+        cursor.execute("SELECT descripcio FROM usuaris WHERE id = ?", (user_id,))
         extres = cursor.fetchone()
-        descripcio = extres[0] if extres and extres[0] else ""
-        saldo_usuari = extres[1] if extres and len(extres) > 1 and extres[1] is not None else 5.0
+        descripcio = extres[0] if extres else ""
     except sqlite3.OperationalError:
         descripcio = ""
-        saldo_usuari = 5.0
         
     conn.close()
     
-    # Creem una estructura de dades neta per enviar a l'HTML
-    # usuari[0] = nom, usuari[1] = correu, usuari[2] = ciutat, usuari[3] = descripcio
     usuari_complet = [
-        usuari_basic[0] if usuari_basic else "Usuari",
-        usuari_basic[1] if usuari_basic else "",
-        usuari_basic[2] if usuari_basic else "No especificada",
+        usuari_bd[0] if usuari_bd else "Usuari",
+        usuari_bd[1] if usuari_bd else "",
+        usuari_bd[2] if usuari_bd else "No especificada",
         descripcio
     ]
     
@@ -321,7 +317,6 @@ def transferencia():
     
     id_pagador = session['id_usuari']
     
-    # Obtenim el saldo per mostrar-lo a la barra o validar si pot pagar
     cursor.execute("SELECT saldo FROM usuaris WHERE id = ?", (id_pagador,))
     resultat = cursor.fetchone()
     saldo_actual = resultat[0] if resultat else 0.0
@@ -356,63 +351,24 @@ def transferencia():
             conn.close()
             return f"<h3>Error: No tens prou saldo (tens {saldo_actual}h).</h3><br><a href='/transferencia'>Tornar</a>"
             
-        # Executem el pagament matemàticament i guardem l'historial
         cursor.execute("UPDATE usuaris SET saldo = saldo - ? WHERE id = ?", (hores, id_pagador))
         cursor.execute("UPDATE usuaris SET saldo = saldo + ? WHERE id = ?", (hores, id_cobrador))
         cursor.execute("INSERT INTO transaccions (id_pagador, id_cobrador, hores) VALUES (?, ?, ?)", (id_pagador, id_cobrador, hores))
                        
         conn.commit()
         conn.close()
-        return redirect(url_for('perfil'))
+        
+        # SOLUCIÓ 2: En lloc d'enviar-te al perfil d'amagat, et mostra això:
+        return f"""
+        <div style='text-align:center; margin-top:50px; font-family:sans-serif;'>
+            <h2 style='color:green;'>✅ Pagament de {hores}h realitzat amb èxit!</h2>
+            <br>
+            <a href='/mercat' style='padding:10px 20px; background:blue; color:white; text-decoration:none; border-radius:5px;'>Tornar al mercat</a>
+        </div>
+        """
         
     conn.close()
     return render_template("transferencia.html", saldo=saldo_actual)
-# 1. Mostrar l'historial amb les meves ofertes
-@app.route("/historial")
-def historial():
-    if 'id_usuari' not in session:
-        return redirect(url_for('login'))
-        
-    user_id = session['id_usuari']
-    conn = sqlite3.connect("banc_temps.db")
-    cursor = conn.cursor()
-    
-    # Busquem només les ofertes creades per l'usuari actual
-    # (Suposant que a la teva taula "ofertes" tens una columna "id_usuari" o "id_creador". 
-    # Si la teva columna es diu diferent, només has de canviar "id_usuari = ?" pel teu nom).
-    cursor.execute("SELECT id, titol, descripcio FROM ofertes WHERE id_usuari = ?", (user_id,))
-    les_meves_ofertes = cursor.fetchall()
-    
-    # Obtenim el saldo per a la barra de navegació
-    try:
-        cursor.execute("SELECT saldo FROM usuaris WHERE id = ?", (user_id,))
-        resultat = cursor.fetchone()
-        saldo_usuari = resultat[0] if resultat and resultat[0] is not None else 5.0
-    except sqlite3.OperationalError:
-        saldo_usuari = 5.0
-        
-    conn.close()
-    
-    return render_template("historial.html", ofertes=les_meves_ofertes, saldo=saldo_usuari)
-
-# 2. La ruta per eliminar una oferta pròpia (Botó paperera)
-@app.route("/eliminar_oferta/<int:id_oferta>")
-def eliminar_oferta(id_oferta):
-    if 'id_usuari' not in session:
-        return redirect(url_for('login'))
-        
-    conn = sqlite3.connect("banc_temps.db")
-    cursor = conn.cursor()
-    
-    # Esborrem l'oferta
-    cursor.execute("DELETE FROM ofertes WHERE id = ?", (id_oferta,))
-    # Esborrem també els missatges d'aquella oferta perquè no quedin penjats a la BD
-    cursor.execute("DELETE FROM missatges WHERE id_oferta = ?", (id_oferta,))
-    
-    conn.commit()
-    conn.close()
-    
-    return redirect(url_for('historial'))
 @app.route("/oferta/<int:id_oferta>")
 def detall_oferta(id_oferta):
     if 'id_usuari' not in session:
