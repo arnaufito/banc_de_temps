@@ -315,14 +315,20 @@ def transferencia():
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
     
+    # 1. AUTO-REPARACIÓ: Si algun usuari té el saldo trencat (NULL), li assignem 5.0h
+    cursor.execute("UPDATE usuaris SET saldo = 5.0 WHERE saldo IS NULL")
+    conn.commit()
+    
     id_pagador = session['id_usuari']
     
+    # Obtenim el saldo assegurant-nos que llegeix un número real
     cursor.execute("SELECT saldo FROM usuaris WHERE id = ?", (id_pagador,))
     resultat = cursor.fetchone()
-    saldo_actual = resultat[0] if resultat else 0.0
+    saldo_actual = resultat[0] if (resultat and resultat[0] is not None) else 5.0
 
     if request.method == "POST":
-        correu_destinatari = request.form.get("correu_destinatari")
+        # 2. NETEJA: Agafem el correu i li traiem els espais invisibles amb .strip()
+        correu_destinatari = request.form.get("correu_destinatari", "").strip()
         
         try:
             hores = float(request.form.get("hores"))
@@ -339,7 +345,8 @@ def transferencia():
         
         if not destinatari:
             conn.close()
-            return "<h3>Error: No existeix aquest correu.</h3><br><a href='/transferencia'>Tornar</a>"
+            # Ara et mostrarà exactament què ha buscat perquè vegis si hi havia alguna lletra malament
+            return f"<h3>Error: No existeix el correu '{correu_destinatari}'. Comprova si està ben escrit.</h3><br><a href='/transferencia'>Tornar</a>"
             
         id_cobrador = destinatari[0]
         
@@ -351,6 +358,7 @@ def transferencia():
             conn.close()
             return f"<h3>Error: No tens prou saldo (tens {saldo_actual}h).</h3><br><a href='/transferencia'>Tornar</a>"
             
+        # 3. PAGAMENT: Executem el pagament matemàticament i guardem l'historial
         cursor.execute("UPDATE usuaris SET saldo = saldo - ? WHERE id = ?", (hores, id_pagador))
         cursor.execute("UPDATE usuaris SET saldo = saldo + ? WHERE id = ?", (hores, id_cobrador))
         cursor.execute("INSERT INTO transaccions (id_pagador, id_cobrador, hores) VALUES (?, ?, ?)", (id_pagador, id_cobrador, hores))
@@ -358,7 +366,6 @@ def transferencia():
         conn.commit()
         conn.close()
         
-        # SOLUCIÓ 2: En lloc d'enviar-te al perfil d'amagat, et mostra això:
         return f"""
         <div style='text-align:center; margin-top:50px; font-family:sans-serif;'>
             <h2 style='color:green;'>✅ Pagament de {hores}h realitzat amb èxit!</h2>
