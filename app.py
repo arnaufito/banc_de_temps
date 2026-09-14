@@ -32,7 +32,6 @@ def injectar_saldo():
 def inicialitzar_bd():
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
-    cursor.execute("UPDATE usuaris SET saldo = 5.0 WHERE saldo IS NULL OR saldo = 0")
     # Taula Usuaris
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS usuaris (
