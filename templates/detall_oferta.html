@@ -37,7 +37,7 @@
         <h2 class="text-primary fw-bold mb-4">{{ oferta[1] }}</h2>
         
         <div class="row">
-            <!-- COLUMNA ESQUERRA: Detalls de la tasca -->
+            <!-- detalls de la tasca -->
             <div class="col-md-8 mb-4">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body p-4">
@@ -48,7 +48,7 @@
                 </div>
             </div>
             
-            <!-- COLUMNA DRETA: Hores i Venedor (o Panell Propietari) -->
+            <!-- Hores i Venedor (o Panell Propietari) -->
             <div class="col-md-4 mb-4">
                 <div class="card shadow-sm border-0 h-100 text-center">
                     <div class="card-body p-4 d-flex flex-column justify-content-center">
@@ -56,28 +56,28 @@
                         <h2 class="text-success fw-bold">{{ oferta[6] }} Hores</h2>
                         <hr class="my-4">
                         
-                        <!-- LÒGICA INTEL·LIGENT: Ets el creador o ets un client? -->
+                        <!-- pregunta si ets el propietari o el client-->
                         {% if oferta[3]|string == session['id_usuari']|string %}
                             
-                            <!-- VISTA DEL PROPIETARI (Ets tu) -->
+                            <!-- vista del propietari-->
                             <div class="alert alert-info mb-4 text-start" role="alert">
                                 <strong>⭐ La teva oferta</strong><br>
                                 <small>Així és com els altres usuaris veuen la teva publicació.</small>
                             </div>
                             
-                            <!-- En lloc de xatejar, tens el botó d'eliminar -->
+                            <!-- hem canviat el botò d'eliminar per el de eliminar oferta-->
                             <a href="/eliminar_oferta/{{ oferta[0] }}" class="btn btn-outline-danger mt-auto py-2 fw-bold" onclick="return confirm('Estàs segur que vols eliminar aquesta oferta del mercat?')">
                                 🗑️ Eliminar la meva oferta
                             </a>
                             
                         {% else %}
                         
-                            <!-- VISTA DEL CLIENT (És d'una altra persona) -->
+                            <!-- vista del client -->
                             <p class="text-muted mb-1">Oferta publicada per:</p>
                             <h5 class="fw-bold text-dark mb-1">{{ oferta[4] }}</h5>
                             <p class="text-muted small mb-4">📍 {{ oferta[5] }}</p>
                             
-                            <!-- Botó per obrir el xat -->
+                            <!-- boto per obrir el xat -->
                             <a href="/xat/{{ oferta[0] }}" class="btn btn-primary mt-auto py-2 fw-bold shadow-sm">
                                 💬 Contactar amb el Venedor
                             </a>
