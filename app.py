@@ -13,14 +13,20 @@ def injectar_saldo():
         conn = sqlite3.connect("banc_temps.db")
         cursor = conn.cursor()
         try:
-            # Busquem el saldo real a la base de dades
             cursor.execute("SELECT saldo FROM usuaris WHERE id = ?", (session['id_usuari'],))
             resultat = cursor.fetchone()
-            saldo_real = resultat[0] if (resultat and resultat[0] is not None) else 5.0
+            
+            # Si el saldo és nul, 0 o menor, el regenereu a 5.0 automàticament
+            if not resultat or resultat[0] is None or resultat[0] <= 0:
+                cursor.execute("UPDATE usuaris SET saldo = 5.0 WHERE id = ?", (session['id_usuari'],))
+                conn.commit()
+                saldo_real = 5.0
+            else:
+                saldo_real = resultat[0]
         except:
             saldo_real = 5.0
         conn.close()
-        return dict(saldo=saldo_real) # Això envia {{ saldo }} a tots els HTMLs
+        return dict(saldo=saldo_real)
     return dict(saldo=0.0)
 # --- FUNCIÓ D'INICIALITZACIÓ ---
 def inicialitzar_bd():
