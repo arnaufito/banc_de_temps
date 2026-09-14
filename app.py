@@ -352,6 +352,7 @@ def transferencia():
         
         try:
             hores = float(request.form.get("hores"))
+            hores = round(hores, 1)  # Forcem el número a tenir només 1 decimal
         except ValueError:
             conn.close()
             return "<h3>Error: Les hores han de ser un número.</h3><br><a href='/transferencia'>Tornar</a>"
