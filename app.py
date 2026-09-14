@@ -32,7 +32,7 @@ def injectar_saldo():
 def inicialitzar_bd():
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
-    
+    cursor.execute("UPDATE usuaris SET saldo = 5.0 WHERE saldo IS NULL OR saldo = 0")
     # Taula Usuaris
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS usuaris (
@@ -397,6 +397,36 @@ def transferencia():
         
     conn.close()
     return render_template("transferencia.html", saldo=saldo_actual)
+@app.route("/historial")
+def historial():
+    if 'id_usuari' not in session:
+        return redirect(url_for('login'))
+        
+    user_id = session['id_usuari']
+    conn = sqlite3.connect("banc_temps.db")
+    cursor = conn.cursor()
+    
+    # 1. Busquem les teves ofertes
+    cursor.execute("SELECT id, titol, descripcio FROM ofertes WHERE id_usuari = ?", (user_id,))
+    les_meves_ofertes = cursor.fetchall()
+    
+    # 2. Busquem els teus pagaments i cobraments
+    cursor.execute('''
+        SELECT t.hores, t.data, 
+               pagador.nom as nom_pagador, 
+               cobrador.nom as nom_cobrador,
+               t.id_pagador
+        FROM transaccions t
+        JOIN usuaris pagador ON t.id_pagador = pagador.id
+        JOIN usuaris cobrador ON t.id_cobrador = cobrador.id
+        WHERE t.id_pagador = ? OR t.id_cobrador = ?
+        ORDER BY t.data DESC
+    ''', (user_id, user_id))
+    historial_transaccions = cursor.fetchall()
+    
+    conn.close()
+    
+    return render_template("historial.html", ofertes=les_meves_ofertes, transaccions=historial_transaccions, el_meu_id=user_id)
 @app.route("/oferta/<int:id_oferta>")
 def detall_oferta(id_oferta):
     if 'id_usuari' not in session:
