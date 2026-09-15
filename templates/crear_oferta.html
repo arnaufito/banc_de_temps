@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Publicar Oferta - Banc de Temps</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
 </head>
 <body class="bg-light">
 
@@ -51,13 +51,18 @@
                              
                              <!-- Categoria -->
                              <div class="mb-3">
-                                <label class="form-label text-muted">Categoria</label>
-                                <select name="categoria" class="form-select">
-                                    <option>Educació i Classes</option>
-                                    <option>Informàtica i Tecnologia</option>
-                                    <option>Bricolatge i Llar</option>
-                                    <option>Cura de mascotes</option>
-                                    <option>Altres</option>
+                                <label for="categoria" class="form-label">Categoria de l'oferta</label>
+                                <select class="form-select" name="categoria" id="categoria" required>
+                                    <option value="" selected disabled>-- Selecciona una categoria --</option>
+                                    <option value="Classes i Formació">📚 Classes i Formació (Idiomes, repàs escolar, música...)</option>
+                                    <option value="Cures i Acompanyament">🤝 Cures i Acompanyament (Cangur, passejar mascotes, gent gran...)</option>
+                                    <option value="Llar i Bricolatge">🛠️ Llar i Bricolatge (Petites reparacions, neteja, muntar mobles...)</option>
+                                    <option value="Informàtica i Tecnologia">💻 Informàtica i Tecnologia (Reparació d'ordinadors, ajuda amb el mòbil...)</option>
+                                    <option value="Assessorament i Gestions">📝 Assessorament i Gestions (Tràmits, traduccions, disseny...)</option>
+                                    <option value="Oci i Esports">⚽ Oci i Esports (Entrenament personal, rutes, jocs de taula...)</option>
+                                    <option value="Bellesa i Benestar">💆 Bellesa i Benestar (Tallar els cabells, massatges, estètica...)</option>
+                                    <option value="Art i Creativitat">🎨 Art i Creativitat (Dibuix, fotografia, manualitats...)</option>
+                                    <option value="Altres">✨ Altres</option>
                                 </select>
                             </div>
                             
