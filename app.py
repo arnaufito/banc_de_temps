@@ -44,7 +44,7 @@ def inicialitzar_bd():
     )
     ''')
     
-    # Taula Ofertes (Hem afegit 'hores'!)
+    # Taula Ofertes
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS ofertes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,9 +52,16 @@ def inicialitzar_bd():
         titol TEXT NOT NULL,
         descripcio TEXT,
         hores REAL NOT NULL,
+        categoria TEXT DEFAULT 'Altres',  -- AFEGIM AQUESTA LÍNIA NOVA AL CREATE
         FOREIGN KEY (id_usuari) REFERENCES usuaris (id)
     )
     ''')
+    
+    # TRUC PER ACTUALITZAR LA TAULA SENSE PERDRE DADES
+    try:
+        cursor.execute("ALTER TABLE ofertes ADD COLUMN categoria TEXT DEFAULT 'Altres'")
+    except sqlite3.OperationalError:
+        pass # Si la columna ja existeix, simplement l'ignora i continua
     
     # Taula Transaccions
     cursor.execute('''
@@ -184,6 +191,7 @@ def crear_oferta():
         # Recollim les dades del formulari
         titol = request.form["titol"]
         descripcio = request.form["descripcio"]
+        categoria = request.form.get("categoria")
         hores = request.form["hores"]
         autor_id = session["id_usuari"] # Agafem l'ID de la sessió
         
@@ -193,7 +201,7 @@ def crear_oferta():
         
         # Inserim les dades a la taula 'ofertes'
         # Assegura't que la taula té aquestes columnes exactes
-        cursor.execute("INSERT INTO ofertes (titol, descripcio, hores, id_usuari) VALUES (?, ?, ?, ?)", 
+        cursor.execute("INSERT INTO ofertes (titol, descripcio, categoria, hores, id_usuari) VALUES (?, ?, ?, ?, ?)", 
                        (titol, descripcio, hores, autor_id))
         
         conn.commit()

@@ -53,9 +53,20 @@
                                     <label class="form-label text-muted">Nom a mostrar</label>
                                     <input type="text" name="nom" class="form-control" value="{{ usuari[0] }}" required>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted">Ubicació (Ciutat / Barri)</label>
-                                    <input type="text" name="ciutat" class="form-control" value="{{ usuari[2] }}" required>
+                                <div class="mb-3">
+                                    <label class="form-label">Ciutat o Població</label>
+                                    <select class="form-select" name="ciutat" required>
+                                        <!-- Comparem la ciutat de la BD (usuari[2]) amb cada opció. Si coincideix, li posem "selected" -->
+                                        <option value="Barcelona" {% if usuari[2] == 'Barcelona' %}selected{% endif %}>Barcelona</option>
+                                        <option value="Girona" {% if usuari[2] == 'Girona' %}selected{% endif %}>Girona</option>
+                                        <option value="Lleida" {% if usuari[2] == 'Lleida' %}selected{% endif %}>Lleida</option>
+                                        <option value="Tarragona" {% if usuari[2] == 'Tarragona' %}selected{% endif %}>Tarragona</option>
+                                        <option value="L'Hospitalet de Llobregat" {% if usuari[2] == "L'Hospitalet de Llobregat" %}selected{% endif %}>L'Hospitalet de Llobregat</option>
+                                        <option value="Badalona" {% if usuari[2] == 'Badalona' %}selected{% endif %}>Badalona</option>
+                                        <option value="Terrassa" {% if usuari[2] == 'Terrassa' %}selected{% endif %}>Terrassa</option>
+                                        <option value="Sabadell" {% if usuari[2] == 'Sabadell' %}selected{% endif %}>Sabadell</option>
+                                        <option value="Altres" {% if usuari[2] not in ['Barcelona', 'Girona', 'Lleida', 'Tarragona', "L'Hospitalet de Llobregat", 'Badalona', 'Terrassa', 'Sabadell'] %}selected{% endif %}>Altres poblacions...</option>
+                                    </select>
                                 </div>
                             </div>
 

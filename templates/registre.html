@@ -24,10 +24,21 @@
                                 <label class="form-label text-muted">Nom complet</label>
                                 <input type="text" name="nom" class="form-control form-control-lg" placeholder="Com et dius?" required>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Ciutat / Barri</label>
-                                <input type="text" name="ciutat" class="form-control form-control-lg" placeholder="Ex: Barcelona" required>
-                    </div>
+                           <div class="mb-3">
+                            <label class="form-label">Ciutat o Població</label>
+                            <select class="form-select" name="ciutat" required>
+                                <option value="" selected disabled>-- Selecciona on vius --</option>
+                                <option value="Barcelona">Barcelona</option>
+                                <option value="Girona">Girona</option>
+                                <option value="Lleida">Lleida</option>
+                                <option value="Tarragona">Tarragona</option>
+                                <option value="L'Hospitalet de Llobregat">L'Hospitalet de Llobregat</option>
+                                <option value="Badalona">Badalona</option>
+                                <option value="Terrassa">Terrassa</option>
+                                <option value="Sabadell">Sabadell</option>
+                                <option value="Altres">Altres poblacions...</option>
+                            </select>
+                        </div>
                             <div class="mb-3">
                                 <label class="form-label text-muted">Correu electrònic</label>
                                 <input type="email" name="correu" class="form-control form-control-lg" placeholder="nom@exemple.cat" required>
