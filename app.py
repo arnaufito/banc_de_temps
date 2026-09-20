@@ -85,7 +85,12 @@ def inicialitzar_bd():
         missatge TEXT NOT NULL
     )
     ''')
-    
+    # TRUC PER AFEGIR EL ROL D'ADMINISTRADOR SENSE TRENCAR LA BD
+    try:
+        cursor.execute("ALTER TABLE usuaris ADD COLUMN es_admin INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass # Si la columna ja hi és, continua endavant
+
     conn.commit()
     conn.close()
 
@@ -148,23 +153,41 @@ def login():
         conn = sqlite3.connect("banc_temps.db")
         cursor = conn.cursor()
         
-        # Demanem la ID, el nom i la contrasenya encriptada de l'usuari
-        cursor.execute("SELECT id, nom, contrasenya FROM usuaris WHERE correu = ?", (correu_usuari,))
+        # ARA TAMBÉ DEMANEM LA COLUMNA 'es_admin'
+        cursor.execute("SELECT id, nom, contrasenya, es_admin FROM usuaris WHERE correu = ?", (correu_usuari,))
         usuari = cursor.fetchone()
         conn.close()
         
-        # usuari[0] és la ID, usuari[1] és el nom, usuari[2] és la contrasenya encriptada
-        # Utilitzem check_password_hash per traduir i comparar
         if usuari and check_password_hash(usuari[2], contrasenya_usuari):
-            # Si la contrasenya és correcta, creem la sessió
             session['id_usuari'] = usuari[0]
             session['nom'] = usuari[1]
+            session['es_admin'] = usuari[3] # Guardem si és administrador (1) o no (0)
             return redirect(url_for('mercat'))
         else:
             # Si falla, mostrem un error
             return "<h3>Correu o contrasenya incorrectes.</h3><br><a href='/login'>Torna-ho a provar</a>"
             
     return render_template("login.html")
+
+@app.route("/admin")
+def admin():
+    # BARRERA DE SEGURETAT: Si no està loguejat o no és admin, fora.
+    if 'id_usuari' not in session or session.get('es_admin') != 1:
+        return "<h3>🚫 Accés denegat. Àrea restringida.</h3><a href='/mercat'>Tornar al mercat</a>"
+        
+    conn = sqlite3.connect("banc_temps.db")
+    cursor = conn.cursor()
+    
+    # L'administrador ho pot veure TOT
+    cursor.execute("SELECT id, nom, correu, ciutat, saldo FROM usuaris")
+    tots_usuaris = cursor.fetchall()
+    
+    cursor.execute("SELECT id, titol, id_usuari FROM ofertes")
+    totes_ofertes = cursor.fetchall()
+    
+    conn.close()
+    
+    return render_template("admin.html", usuaris=tots_usuaris, ofertes=totes_ofertes)
 @app.route("/mercat")
 def mercat():
     # 1. Connectem a la base de dades

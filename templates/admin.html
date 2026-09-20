@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <title>Panell de Control - Admin</title>
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand navbar-dark bg-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand text-danger fw-bold" href="/admin">👑 MODE ADMINISTRADOR</a>
+            <ul class="navbar-nav align-items-center">
+                <li class="nav-item"><a class="nav-link" href="/mercat">Tornar a la web normal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 class="text-danger mb-4">Panell de Control Mestre</h2>
+        
+        <div class="row">
+            <!-- CAIXA 1: Tots els Usuaris -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h4 class="text-primary border-bottom pb-2">👥 Base de Dades d'Usuaris</h4>
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            {% for u in usuaris %}
+                                <div class="mb-3 p-3 border rounded bg-white">
+                                    <strong>{{ u[1] }}</strong> ({{ u[2] }})<br>
+                                    <small class="text-muted">Ciutat: {{ u[3] }} | Saldo: {{ u[4] }}h</small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CAIXA 2: Totes les Ofertes -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h4 class="text-success border-bottom pb-2">🛒 Totes les Ofertes Actives</h4>
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            {% for o in ofertes %}
+                                <div class="mb-2 d-flex justify-content-between align-items-center border-bottom pb-2">
+                                    <span><strong>ID {{ o[0] }}:</strong> {{ o[1] }} (Creador ID: {{ o[2] }})</span>
+                                    <a href="/eliminar_oferta/{{ o[0] }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Esborrar definitivament?')">🗑️ Forçar esborrat</a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
