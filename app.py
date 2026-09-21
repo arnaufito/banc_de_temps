@@ -85,12 +85,27 @@ def inicialitzar_bd():
         missatge TEXT NOT NULL
     )
     ''')
-    # TRUC PER ACTUALITZAR LA TAULA USUARIS
+    # 1. TRUC PER AFEGIR LA COLUMNA ADMIN (si no existeix)
     try:
         cursor.execute("ALTER TABLE usuaris ADD COLUMN es_admin INTEGER DEFAULT 0")
     except sqlite3.OperationalError:
-        pass # Si la columna ja existeix, l'ignora i continua
+        pass 
+
+    # 2. CREACIÓ DE L'USUARI ADMINISTRADOR PER DEFECTE
+    # Comprovem si l'admin ja està creat per no duplicar-lo
+    cursor.execute("SELECT * FROM usuaris WHERE correu = 'admin@gmail.com'")
+    admin_existeix = cursor.fetchone()
+    
+    if not admin_existeix:
+        # Necessitem importar això a dalt de tot del app.py si no ho tens: 
+        # from werkzeug.security import generate_password_hash
+        contrasenya_xifrada = generate_password_hash("admin1234")
         
+        # L'inserim amb saldo infinit i el rol d'admin activat (1)
+        cursor.execute("""
+            INSERT INTO usuaris (nom, correu, contrasenya, ciutat, saldo, es_admin) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, ("Administrador Mestre", "admin@gmail.com", contrasenya_xifrada, "Central", 9999, 1))
     
     conn.commit()
     conn.close()
