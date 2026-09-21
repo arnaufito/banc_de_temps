@@ -227,10 +227,9 @@ def crear_oferta():
         conn = sqlite3.connect("banc_temps.db")
         cursor = conn.cursor()
         
-        # Inserim les dades a la taula 'ofertes'
-        # Assegura't que la taula té aquestes columnes exactes
+        # SOLUCIÓ: Hem afegit 'categoria' dins del parèntesi final de les variables
         cursor.execute("INSERT INTO ofertes (titol, descripcio, categoria, hores, id_usuari) VALUES (?, ?, ?, ?, ?)", 
-                       (titol, descripcio, hores, autor_id))
+                       (titol, descripcio, categoria, hores, autor_id))
         
         conn.commit()
         conn.close()
@@ -240,7 +239,6 @@ def crear_oferta():
         
     # Si és un GET, mostrem el formulari
     return render_template("crear_oferta.html")
-
 # ==========================================
 # 3. ZONA PERSONAL
 # ==========================================
