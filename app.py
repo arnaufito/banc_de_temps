@@ -189,6 +189,21 @@ def login():
             return "<h3>Correu o contrasenya incorrectes.</h3><br><a href='/login'>Torna-ho a provar</a>"
             
     return render_template("login.html")
+@app.route("/eliminar_oferta/<int:id_oferta>")
+def eliminar_oferta(id_oferta):
+    # 1. BARRERA DE SEGURETAT: Comprovem que qui clica és realment l'admin
+    if 'id_usuari' not in session or session.get('es_admin') != 1:
+        return "<h3>🚫 Accés denegat.</h3>", 403
+
+    # 2. ESBORRAT: Ens connectem a la BD i fulminem l'oferta
+    conn = sqlite3.connect("banc_temps.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM ofertes WHERE id = ?", (id_oferta,))
+    conn.commit()
+    conn.close()
+
+    # 3. REDIRECCIÓ: Tornem a carregar el panell de control perquè vegis que ha desaparegut
+    return redirect(url_for('admin'))
 @app.route("/admin")
 def admin():
     # BARRERA DE SEGURETAT: Si no està loguejat o no és admin, fora.
