@@ -156,6 +156,25 @@ def registre():
         return redirect(url_for('login'))
         
     return render_template("registre.html")
+@app.before_request
+def verificar_sessio_fantasma():
+    # 1. Ignorem els arxius de disseny (CSS) per no fer consultes innecessàries
+    if request.endpoint == 'static':
+        return
+
+    # 2. Si el navegador de l'usuari diu que té una sessió oberta...
+    if 'id_usuari' in session:
+        # Ens connectem a la base de dades per comprovar si AQUEST usuari encara existeix
+        conn = sqlite3.connect("banc_temps.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM usuaris WHERE id = ?", (session['id_usuari'],))
+        usuari_real = cursor.fetchone()
+        conn.close()
+
+        # 3. SISTEMA DE SEGURETAT: Si la BD diu que no existeix (ha estat esborrat)
+        if not usuari_real:
+            session.clear() # Destruïm completament la sessió falsa del navegador
+            return redirect(url_for('login')) # L'expulsem cap a la pantalla de login
 @app.route("/logout")
 def logout():
     session.clear()
