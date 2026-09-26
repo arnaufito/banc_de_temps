@@ -177,6 +177,9 @@ def verificar_sessio_fantasma():
 def logout():
     session.clear()
     return redirect(url_for('inici'))
+@app.route("/normes")
+def normes():
+    return render_template("normes.html")
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -533,6 +536,7 @@ def historial():
     conn.close()
     
     return render_template("historial.html", ofertes=les_meves_ofertes, transaccions=historial_transaccions, el_meu_id=user_id)
+
 @app.route("/oferta/<int:id_oferta>")
 def detall_oferta(id_oferta):
     if 'id_usuari' not in session:
