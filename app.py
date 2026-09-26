@@ -57,7 +57,7 @@ def inicialitzar_bd():
     )
     ''')
     
-    # TRUC PER ACTUALITZAR LA TAULA SENSE PERDRE DADES
+    # Codi per actualitzar la taula sense perdre dades si la columna ja existeix
     try:
         cursor.execute("ALTER TABLE ofertes ADD COLUMN categoria TEXT DEFAULT 'Altres'")
     except sqlite3.OperationalError:
@@ -96,9 +96,7 @@ def inicialitzar_bd():
     cursor.execute("SELECT * FROM usuaris WHERE correu = 'admin@gmail.com'")
     admin_existeix = cursor.fetchone()
     
-    if not admin_existeix:
-        # Necessitem importar això a dalt de tot del app.py si no ho tens: 
-        # from werkzeug.security import generate_password_hash
+    if not admin_existeix: 
         contrasenya_xifrada = generate_password_hash("admin1234")
         
         # L'inserim amb saldo infinit i el rol d'admin activat (1)
@@ -110,7 +108,7 @@ def inicialitzar_bd():
     conn.commit()
     conn.close()
 
-# Executem la funció només en engegar l'app
+# Executem la funció només entrar dins la web
 inicialitzar_bd()
 # ==========================================
 # 1. ZONA PÚBLICA I ACCÉS
@@ -126,7 +124,7 @@ def inici():
 @app.route("/registre", methods=["GET", "POST"])
 def registre():
     if request.method == "POST":
-        # AIXÒ ÉS NOU: Imprimirà a la terminal què envia l'HTML exactament
+        # Imprimireix a la terminal què envia l'HTML exactament
         print("DADES REBUDES DEL NAVEGADOR:", request.form)
         
         # Canviem la manera de llegir-ho utilitzant .get() perquè no doni Error 400
@@ -252,7 +250,7 @@ def eliminar_oferta(id_oferta):
 def admin():
     # BARRERA DE SEGURETAT: Si no està loguejat o no és admin, fora.
     if 'id_usuari' not in session or session.get('es_admin') != 1:
-        return "<h3>🚫 Accés denegat. Àrea restringida.</h3><a href='/mercat'>Tornar al mercat</a>"
+        return "<h3>Accés denegat. Àrea restringida.</h3><a href='/mercat'>Tornar al mercat</a>"
         
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
@@ -278,7 +276,7 @@ def mercat():
     ofertes = cursor.fetchall()
     
     # 3. LÍNIA DE RADIOGRAFIA (per veure què llegeix realment)
-    print("🔴 ATENCIÓ! Les ofertes a la BD són:", ofertes)
+    print("ATENCIÓ! Les ofertes a la BD són:", ofertes)
     
     # 4. Tanquem i enviem a l'HTML
     conn.close()
@@ -460,7 +458,7 @@ def transferencia():
         
         try:
             hores = float(request.form.get("hores"))
-            hores = round(hores, 1)  # Forcem el número a tenir només 1 decimal
+            hores = round(hores, 2)  # Forcem el número a tenir només 1 decimal
         except ValueError:
             conn.close()
             return "<h3>Error: Les hores han de ser un número.</h3><br><a href='/transferencia'>Tornar</a>"
