@@ -236,19 +236,44 @@ def eliminar_usuari(id_usuari_a_esborrar):
     return redirect(url_for('admin'))
 @app.route("/eliminar_oferta/<int:id_oferta>")
 def eliminar_oferta(id_oferta):
-    # 1. BARRERA DE SEGURETAT: Comprovem que qui clica és realment l'admin
-    if 'id_usuari' not in session or session.get('es_admin') != 1:
-        return "<h3>🚫 Accés denegat.</h3>", 403
+    # 1. Comprovem que l'usuari està loguejat a la web
+    if 'id_usuari' not in session:
+        return redirect(url_for('login'))
 
-    # 2. ESBORRAT: Ens connectem a la BD i fulminem l'oferta
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM ofertes WHERE id = ?", (id_oferta,))
-    conn.commit()
-    conn.close()
-
-    # 3. REDIRECCIÓ: Tornem a carregar el panell de control perquè vegis que ha desaparegut
-    return redirect(url_for('admin'))
+    
+    # 2. Busquem qui va crear aquesta oferta a la base de dades
+    cursor.execute("SELECT id_usuari FROM ofertes WHERE id = ?", (id_oferta,))
+    oferta = cursor.fetchone()
+    
+    # Si algú intenta esborrar una oferta que ja no existeix
+    if not oferta:
+        conn.close()
+        return "<h3>Aquesta oferta ja no existeix.</h3>"
+        
+    creador_id = oferta[0]
+    
+    # 3. BARRERA INTEL·LIGENT: Ets el propietari o ets l'admin?
+    if session['id_usuari'] == creador_id or session.get('es_admin') == 1:
+        
+        # Com que és teva (o ets admin), l'esborrem
+        cursor.execute("DELETE FROM ofertes WHERE id = ?", (id_oferta,))
+        conn.commit()
+        conn.close()
+        
+        # 4. REDIRECCIÓ: On t'enviem ara?
+        # Si ets administrador, et retornem al panell de control
+        if session.get('es_admin') == 1:
+            return redirect(url_for('admin'))
+        # Si ets un usuari normal, et retornem al mercat
+        else:
+            return redirect(url_for('mercat'))
+            
+    else:
+        # 5. Si intentes esborrar l'oferta d'una altra persona sense ser admin:
+        conn.close()
+        return "<h3>🚫 Accés denegat. Només pots esborrar les teves pròpies ofertes.</h3>", 403
 @app.route("/admin")
 def admin():
     # BARRERA DE SEGURETAT: Si no està loguejat o no és admin, fora.
@@ -326,42 +351,37 @@ def perfil():
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
     
+    # 1. TRUC CLAU: Creem la columna 'descripcio' a la base de dades si no existeix
+    try:
+        cursor.execute("ALTER TABLE usuaris ADD COLUMN descripcio TEXT DEFAULT ''")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass # Si la columna ja existeix, continua endavant amb normalitat
+    
     if request.method == "POST":
         nou_nom = request.form.get("nom")
         nova_ciutat = request.form.get("ciutat")
         nova_descripcio = request.form.get("descripcio", "")
         
-        try:
-            cursor.execute("UPDATE usuaris SET nom = ?, ciutat = ?, descripcio = ? WHERE id = ?", 
-                           (nou_nom, nova_ciutat, nova_descripcio, user_id))
-        except sqlite3.OperationalError:
-            cursor.execute("UPDATE usuaris SET nom = ?, ciutat = ? WHERE id = ?", 
-                           (nou_nom, nova_ciutat, user_id))
-                           
+        # 2. Ara sí que podem actualitzar les tres coses alhora amb total seguretat
+        cursor.execute("UPDATE usuaris SET nom = ?, ciutat = ?, descripcio = ? WHERE id = ?", 
+                       (nou_nom, nova_ciutat, nova_descripcio, user_id))
         conn.commit()
         session['nom'] = nou_nom
         
-    # 1. Busquem les dades bàsiques i el SALDO REAL sempre a part
-    cursor.execute("SELECT nom, correu, ciutat, saldo FROM usuaris WHERE id = ?", (user_id,))
+    # 3. Extraiem TOTES les dades de cop (ordre: 0=nom, 1=correu, 2=ciutat, 3=saldo, 4=descripcio)
+    cursor.execute("SELECT nom, correu, ciutat, saldo, descripcio FROM usuaris WHERE id = ?", (user_id,))
     usuari_bd = cursor.fetchone()
+    conn.close()
     
     saldo_usuari = usuari_bd[3] if usuari_bd else 0.0
     
-    # 2. Intentem buscar la descripció per separat perquè no trenqui el saldo
-    try:
-        cursor.execute("SELECT descripcio FROM usuaris WHERE id = ?", (user_id,))
-        extres = cursor.fetchone()
-        descripcio = extres[0] if extres else ""
-    except sqlite3.OperationalError:
-        descripcio = ""
-        
-    conn.close()
-    
+    # Mantenim la teva estructura de llista per no trencar el teu HTML
     usuari_complet = [
         usuari_bd[0] if usuari_bd else "Usuari",
         usuari_bd[1] if usuari_bd else "",
         usuari_bd[2] if usuari_bd else "No especificada",
-        descripcio
+        usuari_bd[4] if usuari_bd and usuari_bd[4] else "" # La descripció és a la posició 3 d'aquesta llista
     ]
     
     return render_template("perfil.html", usuari=usuari_complet, saldo=saldo_usuari)
