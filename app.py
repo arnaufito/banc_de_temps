@@ -1,666 +1,711 @@
-import sqlite3
-import os
 import math
-from flask import Flask, session, redirect, url_for, request, render_template
-from werkzeug.security import generate_password_hash, check_password_hash
+import os
+import re
+import secrets
+import hmac
+import sqlite3
+import time
+from collections import defaultdict, deque
+from contextlib import contextmanager
+from functools import wraps
+from flask import (Flask, abort, flash, g, redirect, render_template,
+                   request, session, url_for)
+from werkzeug.security import check_password_hash, generate_password_hash
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Ruta absoluta: no depèn de la carpeta des d'on s'executa el servidor
+DB_PATH = os.environ.get("DATABASE", os.path.join(BASE_DIR, "banc_temps.db"))
+
+# ==========================================
+# CONFIGURACIÓ
+# ==========================================
+CIUTATS = ["Barcelona", "Girona", "Lleida", "Tarragona",
+           "L'Hospitalet de Llobregat", "Badalona", "Terrassa", "Sabadell", "Altres"]
+
+CATEGORIES = [
+    ("Classes i Formació", "📚 Classes i Formació (Idiomes, repàs escolar, música...)"),
+    ("Cures i Acompanyament", "🤝 Cures i Acompanyament (Cangur, passejar mascotes, gent gran...)"),
+    ("Llar i Bricolatge", "🛠️ Llar i Bricolatge (Petites reparacions, neteja, muntar mobles...)"),
+    ("Informàtica i Tecnologia", "💻 Informàtica i Tecnologia (Reparació d'ordinadors, ajuda amb el mòbil...)"),
+    ("Assessorament i Gestions", "📝 Assessorament i Gestions (Tràmits, traduccions, disseny...)"),
+    ("Oci i Esports", "⚽ Oci i Esports (Entrenament personal, rutes, jocs de taula...)"),
+    ("Bellesa i Benestar", "💆 Bellesa i Benestar (Tallar els cabells, massatges, estètica...)"),
+    ("Art i Creativitat", "🎨 Art i Creativitat (Dibuix, fotografia, manualitats...)"),
+    ("Altres", "✨ Altres")
+]
+CATEGORIES_VALIDES = {c[0] for c in CATEGORIES}
+
+MAX_HORES_OFERTA = 50
+MAX_HORES_TRANSFERENCIA = 1000
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def carregar_clau_secreta():
+    """SECRET_KEY de l'entorn; si no hi és, se'n genera una d'aleatòria i es guarda
+    a .secret_key (així no hi ha cap clau escrita al codi i les sessions sobreviuen)."""
+    clau = os.environ.get("SECRET_KEY")
+    if clau:
+        return clau
+    cami = os.path.join(BASE_DIR, ".secret_key")
+    if os.path.exists(cami):
+        with open(cami) as f:
+            return f.read().strip()
+    clau = secrets.token_hex(32)
+    with open(cami, "w") as f:
+        f.write(clau)
+    try:
+        os.chmod(cami, 0o600)
+    except OSError:
+        pass
+    return clau
 
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "clau_super_secreta_del_tdr")
+app.secret_key = carregar_clau_secreta()
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    # Posa COOKIES_SEGURES=1 quan la web estigui servida per HTTPS
+    SESSION_COOKIE_SECURE=os.environ.get("COOKIES_SEGURES") == "1",
+    MAX_CONTENT_LENGTH=64 * 1024
+)
 
-@app.context_processor
-def injectar_saldo():
-    if 'id_usuari' in session:
-        conn = sqlite3.connect("banc_temps.db")
-        cursor = conn.cursor()
-        try:
-            cursor.execute("SELECT saldo FROM usuaris WHERE id = ?", (session['id_usuari'],))
-            resultat = cursor.fetchone()
-            
-            # Només si el saldo és NULL el regenerem a 5.0 (un saldo de 0 és legítim)
-            if resultat and resultat[0] is None:
-                cursor.execute("UPDATE usuaris SET saldo = 5.0 WHERE id = ?", (session['id_usuari'],))
-                conn.commit()
-                saldo_real = 5.0
-            elif not resultat:
-                saldo_real = 0.0
-            else:
-                saldo_real = round(resultat[0], 2)
-        except:
-            saldo_real = 0.0
-        conn.close()
-        return dict(saldo=saldo_real)
-    return dict(saldo=0.0)
-# --- FUNCIÓ D'INICIALITZACIÓ ---
+if os.environ.get("PROXY") == "1":  # darrere d'un proxy (Render, Railway...)
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
+HASH_FALS = generate_password_hash("contrasenya-falsa-per-igualar-temps")
+
+# ==========================================
+# BASE DE DADES
+# ==========================================
+def get_db():
+    if "db" not in g:
+        conn = sqlite3.connect(DB_PATH, timeout=10, isolation_level=None)
+        conn.row_factory = sqlite3.Row
+        g.db = conn
+    return g.db
+
+
+@app.teardown_appcontext
+def tancar_db(_exc):
+    db = g.pop("db", None)
+    if db is not None:
+        db.close()
+
+
+@contextmanager
+def transaccio(db):
+    """Transacció atòmica: o es fa tot o no es fa res."""
+    db.execute("BEGIN IMMEDIATE")
+    try:
+        yield
+        db.execute("COMMIT")
+    except Exception:
+        db.execute("ROLLBACK")
+        raise
+
+
+def afegir_columna(cur, taula, columna, definicio):
+    columnes = [f[1] for f in cur.execute(f"PRAGMA table_info({taula})")]
+    if columna not in columnes:
+        cur.execute(f"ALTER TABLE {taula} ADD COLUMN {columna} {definicio}")
+
+
 def inicialitzar_bd():
-    conn = sqlite3.connect("banc_temps.db")
-    cursor = conn.cursor()
-    # Taula Usuaris
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS usuaris (
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute('''CREATE TABLE IF NOT EXISTS usuaris (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nom TEXT NOT NULL,
         correu TEXT UNIQUE NOT NULL,
         contrasenya TEXT NOT NULL,
-        ciutat TEXT NOT NULL,  -- AFEGIM AQUESTA LÍNIA
-        saldo REAL DEFAULT 5.0
-    )
-    ''')
-    
-    # Taula Ofertes
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS ofertes (
+        ciutat TEXT NOT NULL DEFAULT 'No especificada',
+        saldo REAL NOT NULL DEFAULT 5.0,
+        es_admin INTEGER NOT NULL DEFAULT 0,
+        descripcio TEXT DEFAULT '')''')
+    cur.execute('''CREATE TABLE IF NOT EXISTS ofertes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         id_usuari INTEGER NOT NULL,
         titol TEXT NOT NULL,
         descripcio TEXT,
         hores REAL NOT NULL,
-        categoria TEXT DEFAULT 'Altres',  -- AFEGIM AQUESTA LÍNIA NOVA AL CREATE
-        FOREIGN KEY (id_usuari) REFERENCES usuaris (id)
-    )
-    ''')
-    
-    # Codi per actualitzar la taula sense perdre dades si la columna ja existeix
-    try:
-        cursor.execute("ALTER TABLE ofertes ADD COLUMN categoria TEXT DEFAULT 'Altres'")
-    except sqlite3.OperationalError:
-        pass # Si la columna ja existeix, simplement l'ignora i continua
-    
-    # Taula Transaccions
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS transaccions (
+        categoria TEXT NOT NULL DEFAULT 'Altres')''')
+    cur.execute('''CREATE TABLE IF NOT EXISTS transaccions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         id_pagador INTEGER NOT NULL,
         id_cobrador INTEGER NOT NULL,
         hores REAL NOT NULL,
-        data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (id_pagador) REFERENCES usuaris (id),
-        FOREIGN KEY (id_cobrador) REFERENCES usuaris (id)
-    )
-    ''')
-
-# Taula Missatges per al xat
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS missatges (
+        concepte TEXT DEFAULT '',
+        data TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+    cur.execute('''CREATE TABLE IF NOT EXISTS missatges (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         id_oferta INTEGER NOT NULL,
         id_remitent INTEGER NOT NULL,
-        id_client INTEGER,  -- el comprador de la conversa (cada xat és propietari <-> un client)
-        missatge TEXT NOT NULL
-    )
-    ''')
-    try:
-        cursor.execute("ALTER TABLE missatges ADD COLUMN id_client INTEGER")
-    except sqlite3.OperationalError:
-        pass
-    # 1. TRUC PER AFEGIR LA COLUMNA ADMIN (si no existeix)
-    try:
-        cursor.execute("ALTER TABLE usuaris ADD COLUMN es_admin INTEGER DEFAULT 0")
-    except sqlite3.OperationalError:
-        pass 
+        id_client INTEGER,
+        missatge TEXT NOT NULL)''')
+    
+    afegir_columna(cur, "usuaris", "ciutat", "TEXT NOT NULL DEFAULT 'No especificada'")
+    afegir_columna(cur, "usuaris", "es_admin", "INTEGER NOT NULL DEFAULT 0")
+    afegir_columna(cur, "usuaris", "descripcio", "TEXT DEFAULT ''")
+    afegir_columna(cur, "ofertes", "categoria", "TEXT NOT NULL DEFAULT 'Altres'")
+    afegir_columna(cur, "transaccions", "concepte", "TEXT DEFAULT ''")
+    afegir_columna(cur, "missatges", "id_client", "INTEGER")
+    
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_missatges_xat ON missatges (id_oferta, id_client)")
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_ofertes_usuari ON ofertes (id_usuari)")
 
-    # 2. CREACIÓ DE L'USUARI ADMINISTRADOR PER DEFECTE
-    # Comprovem si l'admin ja està creat per no duplicar-lo
-    cursor.execute("SELECT * FROM usuaris WHERE correu = 'admin@gmail.com'")
-    admin_existeix = cursor.fetchone()
+    adm_correu = (os.environ.get("ADMIN_CORREU") or "").strip().lower()
+    adm_pass = os.environ.get("ADMIN_CONTRASENYA") or ""
+    if adm_correu and len(adm_pass) >= 8:
+        existeix = cur.execute("SELECT 1 FROM usuaris WHERE correu = ?", (adm_correu,)).fetchone()
+        if not existeix:
+            cur.execute(
+                "INSERT INTO usuaris (nom, correu, contrasenya, ciutat, es_admin) VALUES (?, ?, ?, ?, 1)",
+                ("Administrador", adm_correu, generate_password_hash(adm_pass), "Altres"))
     
-    if not admin_existeix: 
-        contrasenya_xifrada = generate_password_hash("admin1234")
-        
-        # L'inserim amb saldo infinit i el rol d'admin activat (1)
-        cursor.execute("""
-            INSERT INTO usuaris (nom, correu, contrasenya, ciutat, saldo, es_admin) 
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, ("Administrador Mestre", "admin@gmail.com", contrasenya_xifrada, "Central", 9999, 1))
-    
+    antic = cur.execute("SELECT contrasenya FROM usuaris WHERE correu = 'admin@gmail.com'").fetchone()
+    if antic and check_password_hash(antic[0], "admin1234"):
+        print("PERILL: existeix admin@gmail.com amb la contrasenya 'admin1234'. Canvia-la immediatament!")
     conn.commit()
     conn.close()
 
-# Executem la funció només entrar dins la web
 inicialitzar_bd()
+
+
+# ==========================================
+# SEGURETAT: CSRF, SESSIÓ I LÍMIT D'INTENTS
+# ==========================================
+def token_csrf():
+    if "csrf" not in session:
+        session["csrf"] = secrets.token_hex(16)
+    return session["csrf"]
+
+
+_intents = defaultdict(deque)
+
+def massa_intents(clau, maxim, finestra):
+    ara = time.time()
+    cua = _intents[clau]
+    while cua and ara - cua[0] > finestra:
+        cua.popleft()
+    return len(cua) >= maxim
+
+def registrar_intent(clau):
+    _intents[clau].append(time.time())
+
+
+@app.before_request
+def abans_de_cada_peticio():
+    if request.endpoint == "static":
+        return
+    g.usuari = None
+    
+    # Protecció CSRF: tots els POST han de dur el token
+    if request.method == "POST":
+        enviat = request.form.get("csrf_token", "")
+        esperat = session.get("csrf", "")
+        if not esperat or not hmac.compare_digest(enviat.encode(), esperat.encode()):
+            abort(400)
+            
+    id_usuari = session.get("id_usuari")
+    if id_usuari is not None:
+        fila = get_db().execute(
+            "SELECT id, nom, es_admin, saldo FROM usuaris WHERE id = ?", (id_usuari,)).fetchone()
+        if fila is None:
+            session.clear()
+            return redirect(url_for("login"))
+        g.usuari = {"id": fila["id"], "nom": fila["nom"],
+                    "es_admin": bool(fila["es_admin"]), "saldo": round(fila["saldo"], 2)}
+
+
+@app.after_request
+def capcaleres_seguretat(resp):
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("X-Frame-Options", "DENY")
+    resp.headers.setdefault("Referrer-Policy", "same-origin")
+    resp.headers.setdefault(
+        "Content-Security-Policy",
+        "default-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'")
+    if request.endpoint != "static":
+        resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+@app.context_processor
+def injectar_comu():
+    usuari = getattr(g, "usuari", None)
+    return dict(jo=usuari, saldo=usuari["saldo"] if usuari else 0.0,
+                csrf_token=token_csrf, CIUTATS=CIUTATS, CATEGORIES=CATEGORIES)
+
+
+def login_required(f):
+    @wraps(f)
+    def embolcall(*args, **kwargs):
+        if g.usuari is None:
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return embolcall
+
+
+def admin_required(f):
+    @wraps(f)
+    def embolcall(*args, **kwargs):
+        if g.usuari is None:
+            return redirect(url_for("login"))
+        if not g.usuari["es_admin"]:
+            abort(403)
+        return f(*args, **kwargs)
+    return embolcall
+
+
+# ==========================================
+# AJUDANTS DE VALIDACIÓ
+# ==========================================
+def camp(nom):
+    return (request.form.get(nom) or "").strip()
+
+def llegir_hores(valor, maxim):
+    try:
+        h = round(float(valor), 2)
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(h) or h < 0.01 or h > maxim:
+        return None
+    return h
+
+def a_enter(valor):
+    try:
+        return int(valor)
+    except (TypeError, ValueError):
+        return None
+
+def mostrar_errors(errors):
+    for e in errors:
+        flash(e, "danger")
+
+
 # ==========================================
 # 1. ZONA PÚBLICA I ACCÉS
 # ==========================================
 @app.route("/")
 def inici():
-    # Ara, l'arrel de la web ensenya directament el teu index.html bonic
-    if 'nom' in session:
-        # Si ja està connectat, el portem al mercat directament
-        return redirect(url_for('mercat'))
+    if g.usuari:
+        return redirect(url_for("mercat"))
     return render_template("index.html")
 
-@app.route("/registre", methods=["GET", "POST"])
-def registre():
-    if request.method == "POST":
-        # Imprimireix a la terminal què envia l'HTML exactament
-        print("DADES REBUDES DEL NAVEGADOR:", request.form)
-        
-        # Canviem la manera de llegir-ho utilitzant .get() perquè no doni Error 400
-        nom_usuari = request.form.get("nom")
-        correu_usuari = request.form.get("correu")
-        ciutat_usuari = request.form.get("ciutat") 
-        contrasenya_usuari = request.form.get("contrasenya")
-        
-        # Si per algun motiu la ciutat segueix sense arribar, li posem un valor per defecte
-        if not ciutat_usuari:
-            ciutat_usuari = "No especificada"
-            
-        contrasenya_encriptada = generate_password_hash(contrasenya_usuari)
-        
-        conn = sqlite3.connect("banc_temps.db")
-        cursor = conn.cursor()
-        
-        try:
-            cursor.execute("INSERT INTO usuaris (nom, correu, contrasenya, ciutat) VALUES (?, ?, ?, ?)", 
-                           (nom_usuari, correu_usuari, contrasenya_encriptada, ciutat_usuari))
-            conn.commit()
-        except sqlite3.IntegrityError:
-            conn.close()
-            return "<h3>Aquest correu ja està registrat!</h3><a href='/registre'>Torna-ho a provar</a>"
-            
-        conn.close()
-        return redirect(url_for('login'))
-        
-    return render_template("registre.html")
-@app.before_request
-def verificar_sessio_fantasma():
-    # 1. Ignorem els arxius de disseny (CSS) per no fer consultes innecessàries
-    if request.endpoint == 'static':
-        return
-
-    # 2. Si el navegador de l'usuari diu que té una sessió oberta...
-    if 'id_usuari' in session:
-        # Ens connectem a la base de dades per comprovar si AQUEST usuari encara existeix
-        conn = sqlite3.connect("banc_temps.db")
-        cursor = conn.cursor()
-        cursor.execute("SELECT id FROM usuaris WHERE id = ?", (session['id_usuari'],))
-        usuari_real = cursor.fetchone()
-        conn.close()
-
-        # 3. SISTEMA DE SEGURETAT: Si la BD diu que no existeix (ha estat esborrat)
-        if not usuari_real:
-            session.clear() # Destruïm completament la sessió falsa del navegador
-            return redirect(url_for('login')) # L'expulsem cap a la pantalla de login
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for('inici'))
 @app.route("/normes")
 def normes():
     return render_template("normes.html")
+
+@app.route("/registre", methods=["GET", "POST"])
+def registre():
+    if g.usuari:
+        return redirect(url_for("mercat"))
+    if request.method == "POST":
+        ip = request.remote_addr or "?"
+        if massa_intents(f"reg:{ip}", 10, 3600):
+            flash("Massa registres des d'aquesta connexió. Torna-ho a provar més tard.", "danger")
+            return render_template("registre.html", form=request.form), 429
+        registrar_intent(f"reg:{ip}")
+        
+        nom = camp("nom")
+        correu = camp("correu").lower()
+        ciutat = camp("ciutat")
+        contrasenya = request.form.get("contrasenya") or ""
+        errors = []
+        
+        if not 2 <= len(nom) <= 60:
+            errors.append("El nom ha de tenir entre 2 i 60 caràcters.")
+        if not EMAIL_RE.match(correu) or len(correu) > 120:
+            errors.append("El correu electrònic no és vàlid.")
+        if ciutat not in CIUTATS:
+            errors.append("Selecciona una ciutat de la llista.")
+        if not 8 <= len(contrasenya) <= 128:
+            errors.append("La contrasenya ha de tenir entre 8 i 128 caràcters.")
+            
+        if errors:
+            mostrar_errors(errors)
+            return render_template("registre.html", form=request.form), 400
+            
+        try:
+            get_db().execute(
+                "INSERT INTO usuaris (nom, correu, contrasenya, ciutat) VALUES (?, ?, ?, ?)",
+                (nom, correu, generate_password_hash(contrasenya), ciutat))
+        except sqlite3.IntegrityError:
+            flash("Aquest correu ja està registrat.", "danger")
+            return render_template("registre.html", form=request.form), 409
+        flash("Compte creat! Ja pots iniciar sessió.", "success")
+        return redirect(url_for("login"))
+    return render_template("registre.html", form={})
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if g.usuari:
+        return redirect(url_for("mercat"))
+    correu = ""
     if request.method == "POST":
-        correu_usuari = request.form.get("correu")
-        contrasenya_usuari = request.form.get("contrasenya")
+        correu = camp("correu").lower()
+        contrasenya = request.form.get("contrasenya") or ""
+        ip = request.remote_addr or "?"
+        clau_compte, clau_ip = f"login:{ip}:{correu}", f"login-ip:{ip}"
         
-        conn = sqlite3.connect("banc_temps.db")
-        cursor = conn.cursor()
-        
-        # 1. ARA LI DEMANEM TAMBÉ EL CAMP 'es_admin'
-        try:
-            cursor.execute("SELECT id, nom, contrasenya, es_admin FROM usuaris WHERE correu = ?", (correu_usuari,))
-        except sqlite3.OperationalError:
-            # Si per algun motiu la columna encara no existeix, t'assigna un 0 per defecte perquè no falli
-            cursor.execute("SELECT id, nom, contrasenya, 0 as es_admin FROM usuaris WHERE correu = ?", (correu_usuari,))
+        if massa_intents(clau_compte, 5, 300) or massa_intents(clau_ip, 30, 300):
+            flash("Massa intents fallits. Espera uns minuts i torna-ho a provar.", "danger")
+            return render_template("login.html", correu=correu), 429
             
-        usuari = cursor.fetchone()
-        conn.close()
+        fila = get_db().execute(
+            "SELECT id, contrasenya FROM usuaris WHERE correu = ?", (correu,)).fetchone()
+        hash_a_comprovar = fila["contrasenya"] if fila else HASH_FALS
         
-        if usuari and check_password_hash(usuari[2], contrasenya_usuari):
-            # 2. GUARDEM LES DADES A LA TEVA SESSIÓ
-            session['id_usuari'] = usuari[0]
-            session['nom'] = usuari[1]
-            session['es_admin'] = usuari[3]  # Això és el que et dona el "poder" dins la web!
-            return redirect(url_for('mercat'))
-        else:
-            return "<h3>Correu o contrasenya incorrectes.</h3><br><a href='/login'>Torna-ho a provar</a>"
+        if check_password_hash(hash_a_comprovar, contrasenya) and fila:
+            session.clear() 
+            session["id_usuari"] = fila["id"]
+            _intents.pop(clau_compte, None)
+            return redirect(url_for("mercat"))
             
-    return render_template("login.html")
-@app.route("/eliminar_usuari/<int:id_usuari_a_esborrar>")
-def eliminar_usuari(id_usuari_a_esborrar):
-    # 1. BARRERA DE SEGURETAT: Comprovem que ets l'admin
-    if 'id_usuari' not in session or session.get('es_admin') != 1:
-        return "<h3>🚫 Accés denegat.</h3>", 403
+        registrar_intent(clau_compte)
+        registrar_intent(clau_ip)
+        flash("Correu o contrasenya incorrectes.", "danger")
+        return render_template("login.html", correu=correu), 401
+    return render_template("login.html", correu=correu)
 
-    # 2. BARRERA DE PROTECCIÓ: Evitar el suïcidi digital (no et pots esborrar a tu mateix)
-    if id_usuari_a_esborrar == session['id_usuari']:
-        return "<h3>🚫 No et pots auto-eliminar.</h3>", 400
+@app.route("/logout", methods=["POST", "GET"])
+def logout():
+    session.clear()
+    return redirect(url_for("inici"))
 
-    # 3. ESBORRAT EN CASCADA
-    conn = sqlite3.connect("banc_temps.db")
-    cursor = conn.cursor()
-    
-    # Primer, esborrem totes les ofertes d'aquell usuari perquè no quedin "orfes"
-    cursor.execute("DELETE FROM ofertes WHERE id_usuari = ?", (id_usuari_a_esborrar,))
-    
-    # Segon, esborrem l'usuari definitivament
-    cursor.execute("DELETE FROM usuaris WHERE id = ?", (id_usuari_a_esborrar,))
-    
-    conn.commit()
-    conn.close()
 
-    # 4. Tornem al panell
-    return redirect(url_for('admin'))
-@app.route("/eliminar_oferta/<int:id_oferta>")
-def eliminar_oferta(id_oferta):
-    # 1. Comprovem que l'usuari està loguejat a la web
-    if 'id_usuari' not in session:
-        return redirect(url_for('login'))
-
-    conn = sqlite3.connect("banc_temps.db")
-    cursor = conn.cursor()
-    
-    # 2. Busquem qui va crear aquesta oferta a la base de dades
-    cursor.execute("SELECT id_usuari FROM ofertes WHERE id = ?", (id_oferta,))
-    oferta = cursor.fetchone()
-    
-    # Si algú intenta esborrar una oferta que ja no existeix
-    if not oferta:
-        conn.close()
-        return "<h3>Aquesta oferta ja no existeix.</h3>"
-        
-    creador_id = oferta[0]
-    
-    # 3. BARRERA INTEL·LIGENT: Ets el propietari o ets l'admin?
-    if session['id_usuari'] == creador_id or session.get('es_admin') == 1:
-        
-        # Com que és teva (o ets admin), l'esborrem
-        cursor.execute("DELETE FROM ofertes WHERE id = ?", (id_oferta,))
-        conn.commit()
-        conn.close()
-        
-        # 4. REDIRECCIÓ: On t'enviem ara?
-        # Si ets administrador, et retornem al panell de control
-        if session.get('es_admin') == 1:
-            return redirect(url_for('admin'))
-        # Si ets un usuari normal, et retornem al mercat
-        else:
-            return redirect(url_for('mercat'))
-            
-    else:
-        # 5. Si intentes esborrar l'oferta d'una altra persona sense ser admin:
-        conn.close()
-        return "<h3>🚫 Accés denegat. Només pots esborrar les teves pròpies ofertes.</h3>", 403
-@app.route("/admin")
-def admin():
-    # BARRERA DE SEGURETAT: Si no està loguejat o no és admin, fora.
-    if 'id_usuari' not in session or session.get('es_admin') != 1:
-        return "<h3>Accés denegat. Àrea restringida.</h3><a href='/mercat'>Tornar al mercat</a>"
-        
-    conn = sqlite3.connect("banc_temps.db")
-    cursor = conn.cursor()
-    
-    # L'administrador ho pot veure TOT
-    cursor.execute("SELECT id, nom, correu, ciutat, saldo FROM usuaris")
-    tots_usuaris = cursor.fetchall()
-    
-    cursor.execute("SELECT id, titol, id_usuari FROM ofertes")
-    totes_ofertes = cursor.fetchall()
-    
-    conn.close()
-    
-    return render_template("admin.html", usuaris=tots_usuaris, ofertes=totes_ofertes)
+# ==========================================
+# 2. MERCAT I OFERTES
+# ==========================================
 @app.route("/mercat")
+@login_required
 def mercat():
-    if 'id_usuari' not in session:
-        return redirect(url_for('login'))
-
-    # 1. Connectem a la base de dades
-    conn = sqlite3.connect("banc_temps.db")
-    cursor = conn.cursor()
-    
-    # 2. Llegim totes les ofertes
-    cursor.execute("SELECT id, titol, descripcio, hores FROM ofertes")
-    ofertes = cursor.fetchall()
-    
-    # 3. LÍNIA DE RADIOGRAFIA (per veure què llegeix realment)
-    print("ATENCIÓ! Les ofertes a la BD són:", ofertes)
-    
-    # 4. Tanquem i enviem a l'HTML
-    conn.close()
+    ofertes = get_db().execute('''
+        SELECT o.id, o.titol, o.descripcio, o.hores, o.categoria,
+               COALESCE(u.nom, 'Usuari eliminat') AS nom_autor, u.ciutat
+        FROM ofertes o LEFT JOIN usuaris u ON u.id = o.id_usuari
+        ORDER BY o.id DESC''').fetchall()
     return render_template("mercat.html", ofertes=ofertes)
-@app.route("/crear_oferta", methods=["GET", "POST"])
-def crear_oferta():
-    # Comprovem si l'usuari està loguejat
-    if 'id_usuari' not in session:
-        return redirect(url_for('login'))
 
+@app.route("/crear_oferta", methods=["GET", "POST"])
+@login_required
+def crear_oferta():
     if request.method == "POST":
-        # Recollim les dades del formulari
-        titol = request.form["titol"]
-        descripcio = request.form["descripcio"]
-        categoria = request.form.get("categoria")
-        try:
-            hores = round(float(request.form.get("hores")), 2)
-        except (ValueError, TypeError):
-            return "<h3>Error: Les hores han de ser un número.</h3><br><a href='/crear_oferta'>Tornar</a>"
-        if not math.isfinite(hores) or hores <= 0:
-            return "<h3>Error: Les hores han de ser més grans que 0.</h3><br><a href='/crear_oferta'>Tornar</a>"
-        autor_id = session["id_usuari"] # Agafem l'ID de la sessió
-        
-        # Guardem a la BD
-        conn = sqlite3.connect("banc_temps.db")
-        cursor = conn.cursor()
-        
-        # SOLUCIÓ: Hem afegit 'categoria' dins del parèntesi final de les variables
-        cursor.execute("INSERT INTO ofertes (titol, descripcio, categoria, hores, id_usuari) VALUES (?, ?, ?, ?, ?)", 
-                       (titol, descripcio, categoria, hores, autor_id))
-        
-        conn.commit()
-        conn.close()
-        
-        # Redirigim al mercat un cop guardat
-        return redirect(url_for('mercat')) 
-        
-    # Si és un GET, mostrem el formulari
-    return render_template("crear_oferta.html")
+        titol, descripcio, categoria = camp("titol"), camp("descripcio"), camp("categoria")
+        hores = llegir_hores(request.form.get("hores"), MAX_HORES_OFERTA)
+        errors = []
+        if not 3 <= len(titol) <= 100:
+            errors.append("El títol ha de tenir entre 3 i 100 caràcters.")
+        if not 5 <= len(descripcio) <= 1000:
+            errors.append("La descripció ha de tenir entre 5 i 1000 caràcters.")
+        if categoria not in CATEGORIES_VALIDES:
+            errors.append("Selecciona una categoria de la llista.")
+        if hores is None:
+            errors.append(f"Les hores han de ser un número entre 0.01 i {MAX_HORES_OFERTA}.")
+            
+        if errors:
+            mostrar_errors(errors)
+            return render_template("crear_oferta.html", form=request.form), 400
+            
+        get_db().execute(
+            "INSERT INTO ofertes (id_usuari, titol, descripcio, categoria, hores) VALUES (?, ?, ?, ?, ?)",
+            (g.usuari["id"], titol, descripcio, categoria, hores))
+        flash("Oferta publicada!", "success")
+        return redirect(url_for("mercat"))
+    return render_template("crear_oferta.html", form={})
+
+@app.route("/oferta/<int:id_oferta>")
+@login_required
+def detall_oferta(id_oferta):
+    oferta = get_db().execute('''
+        SELECT o.id, o.titol, o.descripcio, o.id_usuari, o.hores, o.categoria,
+               COALESCE(u.nom, 'Usuari eliminat') AS nom_autor,
+               COALESCE(u.ciutat, 'Desconeguda') AS ciutat
+        FROM ofertes o LEFT JOIN usuaris u ON u.id = o.id_usuari
+        WHERE o.id = ?''', (id_oferta,)).fetchone()
+    if oferta is None:
+        abort(404)
+    return render_template("detall_oferta.html", oferta=oferta,
+                           es_propietari=(oferta["id_usuari"] == g.usuari["id"]))
+
+DESTINS = {"admin": "admin", "historial": "historial", "mercat": "mercat"}
+
+@app.route("/eliminar_oferta/<int:id_oferta>", methods=["POST"])
+@login_required
+def eliminar_oferta(id_oferta):
+    db = get_db()
+    oferta = db.execute("SELECT id_usuari FROM ofertes WHERE id = ?", (id_oferta,)).fetchone()
+    if oferta is None:
+        flash("Aquesta oferta ja no existeix.", "warning")
+    elif oferta["id_usuari"] == g.usuari["id"] or g.usuari["es_admin"]:
+        with transaccio(db):
+            db.execute("DELETE FROM missatges WHERE id_oferta = ?", (id_oferta,))
+            db.execute("DELETE FROM ofertes WHERE id = ?", (id_oferta,))
+        flash("Oferta eliminada.", "success")
+    else:
+        abort(403)
+    return redirect(url_for(DESTINS.get(request.form.get("desti"), "mercat")))
+
+
 # ==========================================
 # 3. ZONA PERSONAL
 # ==========================================
 @app.route("/perfil", methods=["GET", "POST"])
+@login_required
 def perfil():
-    if 'id_usuari' not in session:
-        return redirect(url_for('login'))
-        
-    user_id = session['id_usuari']
-    conn = sqlite3.connect("banc_temps.db")
-    cursor = conn.cursor()
-    
-    # 1. TRUC CLAU: Creem la columna 'descripcio' a la base de dades si no existeix
-    try:
-        cursor.execute("ALTER TABLE usuaris ADD COLUMN descripcio TEXT DEFAULT ''")
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass # Si la columna ja existeix, continua endavant amb normalitat
-    
+    db, yo = get_db(), g.usuari["id"]
     if request.method == "POST":
-        nou_nom = request.form.get("nom")
-        nova_ciutat = request.form.get("ciutat")
-        nova_descripcio = request.form.get("descripcio", "")
+        nom, ciutat, descripcio = camp("nom"), camp("ciutat"), camp("descripcio")
+        errors = []
+        if not 2 <= len(nom) <= 60:
+            errors.append("El nom ha de tenir entre 2 i 60 caràcters.")
+        if ciutat not in CIUTATS:
+            errors.append("Selecciona una ciutat de la llista.")
+        if len(descripcio) > 500:
+            errors.append("La descripció pot tenir com a màxim 500 caràcters.")
+            
+        if errors:
+            mostrar_errors(errors)
+        else:
+            db.execute("UPDATE usuaris SET nom = ?, ciutat = ?, descripcio = ? WHERE id = ?",
+                       (nom, ciutat, descripcio, yo))
+            flash("Perfil actualitzat.", "success")
+            return redirect(url_for("perfil"))
+            
+    usuari = db.execute("SELECT nom, correu, ciutat, descripcio FROM usuaris WHERE id = ?", (yo,)).fetchone()
+    return render_template("perfil.html", usuari=usuari)
+
+@app.route("/historial")
+@login_required
+def historial():
+    db, yo = get_db(), g.usuari["id"]
+    ofertes = db.execute(
+        "SELECT id, titol, descripcio, hores FROM ofertes WHERE id_usuari = ? ORDER BY id DESC", (yo,)).fetchall()
+    moviments = db.execute('''
+        SELECT t.hores, t.data, t.concepte, t.id_pagador,
+               COALESCE(p.nom, 'Usuari eliminat') AS nom_pagador,
+               COALESCE(c.nom, 'Usuari eliminat') AS nom_cobrador
+        FROM transaccions t
+        LEFT JOIN usuaris p ON t.id_pagador = p.id
+        LEFT JOIN usuaris c ON t.id_cobrador = c.id
+        WHERE t.id_pagador = ? OR t.id_cobrador = ?
+        ORDER BY t.id DESC''', (yo, yo)).fetchall()
+    return render_template("historial.html", ofertes=ofertes, moviments=moviments)
+
+@app.route("/transferencia", methods=["GET", "POST"])
+@login_required
+def transferencia():
+    db, yo = get_db(), g.usuari["id"]
+    id_oferta = a_enter(request.form.get("id_oferta") if request.method == "POST"
+                        else request.args.get("oferta"))
+    oferta = None
+    if id_oferta:
+        oferta = db.execute('''SELECT o.id, o.titol, o.hores, o.id_usuari, u.nom AS nom_venedor
+                               FROM ofertes o JOIN usuaris u ON u.id = o.id_usuari
+                               WHERE o.id = ?''', (id_oferta,)).fetchone()
+        if oferta is None:
+            flash("Aquesta oferta ja no existeix.", "warning")
+            return redirect(url_for("transferencia"))
+            
+    if request.method == "POST":
+        hores = llegir_hores(request.form.get("hores"), MAX_HORES_TRANSFERENCIA)
+        concepte = camp("concepte")
+        errors = []
+        if hores is None:
+            errors.append("Les hores han de ser un número positiu (màxim 2 decimals).")
+        if not 1 <= len(concepte) <= 120:
+            errors.append("El concepte ha de tenir entre 1 i 120 caràcters.")
+            
+        id_cobrador = None
+        if oferta:
+            id_cobrador = oferta["id_usuari"]
+        else:
+            correu = camp("correu_destinatari").lower()
+            fila = db.execute("SELECT id FROM usuaris WHERE correu = ?", (correu,)).fetchone()
+            if fila is None:
+                errors.append("No existeix cap usuari amb aquest correu.")
+            else:
+                id_cobrador = fila["id"]
+                
+        if id_cobrador == yo:
+            errors.append("No et pots pagar a tu mateix.")
+            
+        if not errors:
+            try:
+                with transaccio(db):
+                    descomptat = db.execute(
+                        "UPDATE usuaris SET saldo = ROUND(saldo - ?, 2) WHERE id = ? AND saldo >= ?",
+                        (hores, yo, hores)).rowcount
+                    if descomptat != 1:
+                        raise ValueError("saldo")
+                    ingressat = db.execute(
+                        "UPDATE usuaris SET saldo = ROUND(saldo + ?, 2) WHERE id = ?",
+                        (hores, id_cobrador)).rowcount
+                    if ingressat != 1:
+                        raise ValueError("destinatari")
+                    db.execute(
+                        "INSERT INTO transaccions (id_pagador, id_cobrador, hores, concepte) VALUES (?, ?, ?, ?)",
+                        (yo, id_cobrador, hores, concepte))
+            except ValueError as e:
+                errors.append("No tens prou saldo per fer aquest pagament." if str(e) == "saldo"
+                              else "El destinatari ja no existeix.")
+            else:
+                flash(f"Pagament de {hores}h realitzat correctament.", "success")
+                return redirect(url_for("historial"))
+        mostrar_errors(errors)
+        return render_template("transferencia.html", form=request.form, oferta=oferta), 400
         
-        # 2. Ara sí que podem actualitzar les tres coses alhora amb total seguretat
-        cursor.execute("UPDATE usuaris SET nom = ?, ciutat = ?, descripcio = ? WHERE id = ?", 
-                       (nou_nom, nova_ciutat, nova_descripcio, user_id))
-        conn.commit()
-        session['nom'] = nou_nom
-        
-    # 3. Extraiem TOTES les dades de cop (ordre: 0=nom, 1=correu, 2=ciutat, 3=saldo, 4=descripcio)
-    cursor.execute("SELECT nom, correu, ciutat, saldo, descripcio FROM usuaris WHERE id = ?", (user_id,))
-    usuari_bd = cursor.fetchone()
-    conn.close()
-    
-    saldo_usuari = usuari_bd[3] if usuari_bd else 0.0
-    
-    # Mantenim la teva estructura de llista per no trencar el teu HTML
-    usuari_complet = [
-        usuari_bd[0] if usuari_bd else "Usuari",
-        usuari_bd[1] if usuari_bd else "",
-        usuari_bd[2] if usuari_bd else "No especificada",
-        usuari_bd[4] if usuari_bd and usuari_bd[4] else "" # La descripció és a la posició 3 d'aquesta llista
-    ]
-    
-    return render_template("perfil.html", usuari=usuari_complet, saldo=saldo_usuari)
-# Cada conversa és privada: oferta + client (el comprador). El propietari de l'oferta veu una conversa per cada client.
-# Retorna (id_oferta, text a mostrar, id_client) de les converses on participo.
+    form = {}
+    if oferta:
+        form = {"hores": oferta["hores"], "concepte": f"Oferta: {oferta['titol']}"[:120]}
+    return render_template("transferencia.html", form=form, oferta=oferta)
+
+
+# ==========================================
+# 4. XAT
+# ==========================================
 CONSULTA_MEUS_XATS = """
     SELECT m.id_oferta,
-           CASE WHEN o.id_usuari = ? THEN o.titol || ' - ' || u.nom ELSE o.titol END,
+           CASE WHEN o.id_usuari = ? THEN o.titol || ' - ' || COALESCE(u.nom, 'Usuari eliminat') ELSE o.titol END,
            m.id_client
     FROM missatges m
     JOIN ofertes o ON o.id = m.id_oferta
-    JOIN usuaris u ON u.id = m.id_client
+    LEFT JOIN usuaris u ON u.id = m.id_client
     WHERE m.id_client = ? OR o.id_usuari = ?
     GROUP BY m.id_oferta, m.id_client
     ORDER BY MAX(m.id) DESC
 """
 
-# 1. Vista general de xats (Manté el teu nom original def xat())
 @app.route("/xat")
+@login_required
 def xat():
-    if 'id_usuari' not in session:
-        return redirect(url_for('login'))
-        
-    conn = sqlite3.connect("banc_temps.db")
-    cursor = conn.cursor()
-    yo = session['id_usuari']
-    cursor.execute(CONSULTA_MEUS_XATS, (yo, yo, yo))
-    chats = cursor.fetchall()
-    conn.close()
-    
-    return render_template("xat.html", chats=chats, missatges=None, id_oferta=None, id_client=None, titol=None, el_meu_id=yo)
+    yo = g.usuari["id"]
+    chats = get_db().execute(CONSULTA_MEUS_XATS, (yo, yo, yo)).fetchall()
+    return render_template("xat.html", chats=chats, missatges=None, id_oferta=None,
+                           id_client=None, titol=None, interlocutor=None, el_meu_id=yo)
 
-
-# 2. Xat privat d'una oferta (Utilitza def xat_concret() per no xocar amb de /xat)
-#    /xat/<oferta>            -> el comprador obre la seva conversa amb el propietari
-#    /xat/<oferta>/<client>   -> el propietari obre la conversa amb un client concret
 @app.route("/xat/<int:id_oferta>", methods=["GET", "POST"], defaults={"id_client": None})
 @app.route("/xat/<int:id_oferta>/<int:id_client>", methods=["GET", "POST"])
+@login_required
 def xat_concret(id_oferta, id_client):
-    if 'id_usuari' not in session:
-        return redirect(url_for('login'))
+    db, yo = get_db(), g.usuari["id"]
+    oferta = db.execute("SELECT titol, id_usuari FROM ofertes WHERE id = ?", (id_oferta,)).fetchone()
+    if oferta is None:
+        flash("Aquesta oferta ja no existeix.", "warning")
+        return redirect(url_for("xat"))
         
-    el_meu_id = session['id_usuari']
-    conn = sqlite3.connect("banc_temps.db")
-    cursor = conn.cursor()
+    titol, id_propietari = oferta["titol"], oferta["id_usuari"]
     
-    # Si l'oferta no existeix (o s'ha esborrat), no permetem xat
-    cursor.execute("SELECT titol, id_usuari FROM ofertes WHERE id = ?", (id_oferta,))
-    oferta = cursor.fetchone()
-    if not oferta:
-        conn.close()
-        return redirect(url_for('xat'))
-    titol_oferta, id_propietari = oferta
-    
-    # Determinem qui és el client d'aquesta conversa i comprovem que hi participo
-    if el_meu_id == id_propietari:
-        if id_client is None:  # el propietari ha de triar amb quin client parla
-            conn.close()
-            return redirect(url_for('xat'))
+    if yo == id_propietari:
+        existeix = id_client is not None and db.execute(
+            "SELECT 1 FROM missatges WHERE id_oferta = ? AND id_client = ? LIMIT 1",
+            (id_oferta, id_client)).fetchone()
+        if not existeix:
+            return redirect(url_for("xat"))
+        id_interlocutor = id_client
     else:
-        if id_client is not None and id_client != el_meu_id:  # no es poden llegir xats d'altres
-            conn.close()
-            return redirect(url_for('xat'))
-        id_client = el_meu_id
-    
-    # Si l'usuari envia un missatge nou, fem servir .get() per evitar cap tipus d'error 400
-    if request.method == "POST":
-        text_missatge = request.form.get("missatge")
-        if text_missatge:
-            cursor.execute("INSERT INTO missatges (id_oferta, id_remitent, id_client, missatge) VALUES (?, ?, ?, ?)",
-                           (id_oferta, el_meu_id, id_client, text_missatge))
-            conn.commit()
-        conn.close()
-        if el_meu_id == id_propietari:
-            return redirect(url_for('xat_concret', id_oferta=id_oferta, id_client=id_client))
-        return redirect(url_for('xat_concret', id_oferta=id_oferta))
+        if id_client not in (None, yo):
+            return redirect(url_for("xat"))
+        id_client = yo
+        id_interlocutor = id_propietari
         
-    # Llista de xats per a la barra esquerra
-    cursor.execute(CONSULTA_MEUS_XATS, (el_meu_id, el_meu_id, el_meu_id))
-    chats = cursor.fetchall()
-    
-    # Missatges d'aquesta conversa (només oferta + client)
-    cursor.execute('''
-        SELECT u.nom, m.missatge, m.id_remitent 
-        FROM missatges m
-        JOIN usuaris u ON m.id_remitent = u.id
+    if request.method == "POST":
+        text = camp("missatge")
+        if not text:
+            flash("No pots enviar un missatge buit.", "warning")
+        elif len(text) > 1000:
+            flash("El missatge és massa llarg (màxim 1000 caràcters).", "danger")
+        else:
+            db.execute("INSERT INTO missatges (id_oferta, id_remitent, id_client, missatge) VALUES (?, ?, ?, ?)",
+                       (id_oferta, yo, id_client, text))
+        if yo == id_propietari:
+            return redirect(url_for("xat_concret", id_oferta=id_oferta, id_client=id_client))
+        return redirect(url_for("xat_concret", id_oferta=id_oferta))
+        
+    chats = db.execute(CONSULTA_MEUS_XATS, (yo, yo, yo)).fetchall()
+    missatges = db.execute('''
+        SELECT COALESCE(u.nom, 'Usuari eliminat'), m.missatge, m.id_remitent
+        FROM missatges m LEFT JOIN usuaris u ON m.id_remitent = u.id
         WHERE m.id_oferta = ? AND m.id_client = ?
-        ORDER BY m.id ASC
-    ''', (id_oferta, id_client))
-    missatges = cursor.fetchall()
-    conn.close()
-    
-    return render_template("xat.html", chats=chats, missatges=missatges, id_oferta=id_oferta, id_client=id_client, titol=titol_oferta, el_meu_id=el_meu_id)
+        ORDER BY m.id ASC''', (id_oferta, id_client)).fetchall()
+        
+    interlocutor = db.execute("SELECT nom FROM usuaris WHERE id = ?", (id_interlocutor,)).fetchone()
+    return render_template("xat.html", chats=chats, missatges=missatges, id_oferta=id_oferta,
+                           id_client=id_client, titol=titol, el_meu_id=yo,
+                           interlocutor=interlocutor["nom"] if interlocutor else "Usuari eliminat")
 
-
-# 3. Ruta de la paperera per esborrar una conversa sencera
-@app.route("/eliminar_xat/<int:id_oferta>/<int:id_client>")
+@app.route("/eliminar_xat/<int:id_oferta>/<int:id_client>", methods=["POST"])
+@login_required
 def eliminar_xat(id_oferta, id_client):
-    if 'id_usuari' not in session:
-        return redirect(url_for('login'))
-        
-    conn = sqlite3.connect("banc_temps.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT id_usuari FROM ofertes WHERE id = ?", (id_oferta,))
-    oferta = cursor.fetchone()
-    
-    # Només els dos participants (propietari o client) o l'admin poden esborrar la conversa
-    if session.get('es_admin') == 1 or session['id_usuari'] == id_client or (oferta and oferta[0] == session['id_usuari']):
-        cursor.execute("DELETE FROM missatges WHERE id_oferta = ? AND id_client = ?", (id_oferta, id_client))
-        conn.commit()
-    conn.close()
-    
-    return redirect(url_for('xat'))
+    db = get_db()
+    oferta = db.execute("SELECT id_usuari FROM ofertes WHERE id = ?", (id_oferta,)).fetchone()
+    permes = (g.usuari["es_admin"] or g.usuari["id"] == id_client
+              or (oferta is not None and oferta["id_usuari"] == g.usuari["id"]))
+    if not permes:
+        abort(403)
+    db.execute("DELETE FROM missatges WHERE id_oferta = ? AND id_client = ?", (id_oferta, id_client))
+    flash("Conversa eliminada.", "success")
+    return redirect(url_for("xat"))
 
-@app.route("/transferencia", methods=["GET", "POST"])
-def transferencia():
-    if 'id_usuari' not in session:
-        return redirect(url_for('login'))
-        
-    conn = sqlite3.connect("banc_temps.db")
-    cursor = conn.cursor()
-    
-    # 1. AUTO-REPARACIÓ: Si algun usuari té el saldo trencat (NULL), li assignem 5.0h
-    cursor.execute("UPDATE usuaris SET saldo = 5.0 WHERE saldo IS NULL")
-    conn.commit()
-    
-    id_pagador = session['id_usuari']
-    
-    # Obtenim el saldo assegurant-nos que llegeix un número real
-    cursor.execute("SELECT saldo FROM usuaris WHERE id = ?", (id_pagador,))
-    resultat = cursor.fetchone()
-    saldo_actual = resultat[0] if (resultat and resultat[0] is not None) else 5.0
 
-    if request.method == "POST":
-        # 2. NETEJA: Agafem el correu i li traiem els espais invisibles amb .strip()
-        correu_destinatari = request.form.get("correu_destinatari", "").strip()
-        
-        try:
-            hores = float(request.form.get("hores"))
-            hores = round(hores, 2)  # Forcem el número a tenir només 2 decimals
-        except (ValueError, TypeError):
-            conn.close()
-            return "<h3>Error: Les hores han de ser un número.</h3><br><a href='/transferencia'>Tornar</a>"
-            
-        if not math.isfinite(hores) or hores <= 0:
-            conn.close()
-            return "<h3>Error: Has d'enviar més de 0 hores.</h3><br><a href='/transferencia'>Tornar</a>"
-
-        cursor.execute("SELECT id FROM usuaris WHERE correu = ?", (correu_destinatari,))
-        destinatari = cursor.fetchone()
-        
-        if not destinatari:
-            conn.close()
-            # Ara et mostrarà exactament què ha buscat perquè vegis si hi havia alguna lletra malament
-            return f"<h3>Error: No existeix el correu '{correu_destinatari}'. Comprova si està ben escrit.</h3><br><a href='/transferencia'>Tornar</a>"
-            
-        id_cobrador = destinatari[0]
-        
-        if id_pagador == id_cobrador:
-            conn.close()
-            return "<h3>Error: No pots pagar-te a tu mateix.</h3><br><a href='/transferencia'>Tornar</a>"
-            
-        if saldo_actual < hores:
-            conn.close()
-            return f"<h3>Error: No tens prou saldo (tens {saldo_actual}h).</h3><br><a href='/transferencia'>Tornar</a>"
-            
-        # 3. PAGAMENT: Executem el pagament matemàticament i guardem l'historial
-        cursor.execute("UPDATE usuaris SET saldo = ROUND(saldo - ?, 2) WHERE id = ?", (hores, id_pagador))
-        cursor.execute("UPDATE usuaris SET saldo = ROUND(saldo + ?, 2) WHERE id = ?", (hores, id_cobrador))
-        cursor.execute("INSERT INTO transaccions (id_pagador, id_cobrador, hores) VALUES (?, ?, ?)", (id_pagador, id_cobrador, hores))
-                       
-        conn.commit()
-        conn.close()
-        
-        return f"""
-        <div style='text-align:center; margin-top:50px; font-family:sans-serif;'>
-            <h2 style='color:green;'>✅ Pagament de {hores}h realitzat amb èxit!</h2>
-            <br>
-            <a href='/mercat' style='padding:10px 20px; background:blue; color:white; text-decoration:none; border-radius:5px;'>Tornar al mercat</a>
-        </div>
-        """
-        
-    conn.close()
-    return render_template("transferencia.html", saldo=saldo_actual)
-@app.route("/historial")
-def historial():
-    if 'id_usuari' not in session:
-        return redirect(url_for('login'))
-        
-    user_id = session['id_usuari']
-    conn = sqlite3.connect("banc_temps.db")
-    cursor = conn.cursor()
-    
-    # 1. Busquem les teves ofertes
-    cursor.execute("SELECT id, titol, descripcio FROM ofertes WHERE id_usuari = ?", (user_id,))
-    les_meves_ofertes = cursor.fetchall()
-    
-    # 2. Busquem els teus pagaments i cobraments
-    cursor.execute('''
-        SELECT t.hores, t.data, 
-               pagador.nom as nom_pagador, 
-               cobrador.nom as nom_cobrador,
-               t.id_pagador
-        FROM transaccions t
-        JOIN usuaris pagador ON t.id_pagador = pagador.id
-        JOIN usuaris cobrador ON t.id_cobrador = cobrador.id
-        WHERE t.id_pagador = ? OR t.id_cobrador = ?
-        ORDER BY t.data DESC
-    ''', (user_id, user_id))
-    historial_transaccions = cursor.fetchall()
-    
-    conn.close()
-    
-    return render_template("historial.html", ofertes=les_meves_ofertes, transaccions=historial_transaccions, el_meu_id=user_id)
-
-@app.route("/oferta/<int:id_oferta>")
-def detall_oferta(id_oferta):
-    if 'id_usuari' not in session:
-        return redirect(url_for('login'))
-        
-    user_id = session['id_usuari']
-    conn = sqlite3.connect("banc_temps.db")
-    cursor = conn.cursor()
-    
-    # Fem servir LEFT JOIN. Així, si l'usuari creador va ser eliminat, l'oferta es continua veient.
-    try:
-        cursor.execute('''
-            SELECT o.id, o.titol, o.descripcio, o.id_usuari, u.nom, u.ciutat, o.hores
-            FROM ofertes o 
-            LEFT JOIN usuaris u ON o.id_usuari = u.id 
-            WHERE o.id = ?
-        ''', (id_oferta,))
-    except sqlite3.OperationalError:
-        cursor.execute('''
-            SELECT o.id, o.titol, o.descripcio, o.id_usuari, u.nom, u.ciutat, 1 as hores
-            FROM ofertes o 
-            LEFT JOIN usuaris u ON o.id_usuari = u.id 
-            WHERE o.id = ?
-        ''', (id_oferta,))
-        
-    oferta = cursor.fetchone()
-    
-    # Si per algun motiu l'usuari estava esborrat, posem noms per defecte perquè no falli l'HTML
-    if oferta and oferta[4] is None:
-        oferta = list(oferta)
-        oferta[4] = "Usuari eliminat"
-        oferta[5] = "Desconeguda"
-        
-    try:
-        cursor.execute("SELECT saldo FROM usuaris WHERE id = ?", (user_id,))
-        resultat = cursor.fetchone()
-        saldo_usuari = resultat[0] if resultat and resultat[0] is not None else 5.0
-    except sqlite3.OperationalError:
-        saldo_usuari = 5.0
-        
-    conn.close()
-    
-    if not oferta:
-        return "<h3>Aquesta oferta no existeix o ha estat eliminada.</h3><a href='/mercat'>Tornar al mercat</a>"
-        
-    return render_template("detall_oferta.html", oferta=oferta, saldo=saldo_usuari)
 # ==========================================
-# EXECUCIÓ DEL SERVIDOR
+# 5. ADMINISTRACIÓ
 # ==========================================
+@app.route("/admin")
+@admin_required
+def admin():
+    db = get_db()
+    usuaris = db.execute("SELECT id, nom, correu, ciutat, saldo, es_admin FROM usuaris ORDER BY id").fetchall()
+    ofertes = db.execute('''SELECT o.id, o.titol, o.id_usuari, COALESCE(u.nom, 'Usuari eliminat') AS nom_autor
+                            FROM ofertes o LEFT JOIN usuaris u ON u.id = o.id_usuari
+                            ORDER BY o.id DESC''').fetchall()
+    return render_template("admin.html", usuaris=usuaris, ofertes=ofertes)
+
+@app.route("/eliminar_usuari/<int:id_usuari_a_esborrar>", methods=["POST"])
+@admin_required
+def eliminar_usuari(id_usuari_a_esborrar):
+    if id_usuari_a_esborrar == g.usuari["id"]:
+        flash("No et pots auto-eliminar.", "danger")
+        return redirect(url_for("admin"))
+    db = get_db()
+    with transaccio(db):
+        db.execute("""DELETE FROM missatges WHERE id_remitent = ? OR id_client = ?
+                      OR id_oferta IN (SELECT id FROM ofertes WHERE id_usuari = ?)""",
+                   (id_usuari_a_esborrar,) * 3)
+        db.execute("DELETE FROM ofertes WHERE id_usuari = ?", (id_usuari_a_esborrar,))
+        db.execute("DELETE FROM usuaris WHERE id = ?", (id_usuari_a_esborrar,))
+    flash("Usuari expulsat.", "success")
+    return redirect(url_for("admin"))
+
+
+# ==========================================
+# GESTIÓ D'ERRORS
+# ==========================================
+def pagina_error(codi, missatge):
+    return render_template("error.html", codi=codi, missatge=missatge), codi
+
+@app.errorhandler(400)
+def error_400(_e):
+    return pagina_error(400, "Petició no vàlida o sessió caducada. Torna enrere, recarrega la pàgina i torna-ho a provar.")
+
+@app.errorhandler(403)
+def error_403(_e):
+    return pagina_error(403, "No tens permís per fer aquesta acció.")
+
+@app.errorhandler(404)
+def error_404(_e):
+    return pagina_error(404, "Aquesta pàgina no existeix.")
+
+@app.errorhandler(413)
+def error_413(_e):
+    return pagina_error(413, "Les dades enviades són massa grans.")
+
+@app.errorhandler(500)
+def error_500(_e):
+    return pagina_error(500, "S'ha produït un error intern. Torna-ho a provar més tard.")
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=os.environ.get("FLASK_DEBUG") == "1")

@@ -66,9 +66,14 @@
                             </div>
                             
                             <!-- hem canviat el botò d'eliminar per el de eliminar oferta-->
-                            <a href="/eliminar_oferta/{{ oferta[0] }}" class="btn btn-outline-danger mt-auto py-2 fw-bold" onclick="return confirm('Estàs segur que vols eliminar aquesta oferta del mercat?')">
-                                🗑️ Eliminar la meva oferta
-                            </a>
+                            <form action="/eliminar_oferta/{{ oferta[0] }}" method="POST" class="d-inline mt-auto" onsubmit="return confirm('Estàs segur que vols eliminar aquesta oferta del mercat?');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <!-- Això serveix per saber a on l'hem de redirigir en esborrar -->
+    <input type="hidden" name="desti" value="mercat">
+    <button type="submit" class="btn btn-outline-danger w-100 py-2 fw-bold">
+        🗑️ Eliminar la meva oferta
+    </button>
+</form>
                             
                         {% else %}
                         

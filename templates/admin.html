@@ -31,7 +31,10 @@
         
         <!-- Protecció: L'admin no es pot esborrar a ell mateix -->
         {% if u[0] != session['id_usuari'] %}
-            <a href="/eliminar_usuari/{{ u[0] }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('ATENCIÓ: Esborraràs aquest usuari i Totes les seves ofertes. Estàs segur?')">🗑️ Expulsar</a>
+            <form action="/eliminar_usuari/{{ u[0] }}" method="POST" class="d-inline" onsubmit="return confirm('ATENCIÓ: Esborraràs aquest usuari i Totes les seves ofertes. Estàs segur?');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Expulsar</button>
+</form>
         {% else %}
             <span class="badge bg-warning text-dark">Ets Tu</span>
         {% endif %}
