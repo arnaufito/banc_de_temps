@@ -1,9 +1,13 @@
+import os
 import sqlite3
 
-conn = sqlite3.connect("banc_temps.db")
+# Mateixa base de dades que fa servir l'app (variable DATABASE o el banc_temps.db de la carpeta del projecte)
+DB_PATH = os.environ.get("DATABASE", os.path.join(os.path.dirname(os.path.abspath(__file__)), "banc_temps.db"))
+
+conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
-# Nomes demanem les dades segures, excloent la contrasenya
+# Només demanem les dades segures, excloent la contrasenya
 cursor.execute("SELECT id, nom, correu, saldo, es_admin FROM usuaris")
 usuaris = cursor.fetchall()
 

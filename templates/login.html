@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inici de Sessió - Banc de Temps</title>
-    <!-- Connectem Bootstrap 5 -->
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
 </head>
 <body class="bg-light">
@@ -13,27 +12,30 @@
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-5">
-                
+
                 <!-- Caixa del formulari (Card) -->
                 <div class="card shadow-sm border-0">
                     <div class="card-body p-5">
                         <h2 class="text-center text-primary mb-4">Inicia Sessió</h2>
-                        
+
+                        {% include '_flash.html' %}
+
                         <!-- Formulari que enviarà les dades a la ruta /login -->
                         <form method="POST" action="/login">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="mb-3">
                                 <label class="form-label text-muted">Correu electrònic</label>
-                                <input type="email" name="correu" class="form-control form-control-lg" placeholder="nom@exemple.cat" required>
+                                <input type="email" name="correu" class="form-control form-control-lg" placeholder="nom@exemple.cat" value="{{ correu or '' }}" required>
                             </div>
-                            
+
                             <div class="mb-4">
                                 <label class="form-label text-muted">Contrasenya</label>
                                 <input type="password" name="contrasenya" class="form-control form-control-lg" required>
                             </div>
-                            
+
                             <button type="submit" class="btn btn-primary btn-lg w-100">Entrar al Banc</button>
                         </form>
-                        
+
                         <!-- Enllaç per anar al registre -->
                         <div class="text-center mt-4">
                             <p class="mb-0">No tens compte? <a href="/registre" class="text-decoration-none fw-bold">Crea'n un aquí</a></p>

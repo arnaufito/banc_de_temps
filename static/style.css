@@ -50,6 +50,9 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 .card-text { margin-top: 0; margin-bottom: 1rem; }
 .alert { position: relative; padding: 1rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: 0.25rem; }
 .alert-info { color: #055160; background-color: #cff4fc; border-color: #b6effb; }
+.alert-success { color: #0a3622; background-color: #d1e7dd; border-color: #badbcc; }
+.alert-danger { color: #58151c; background-color: #f8d7da; border-color: #f1aeb5; }
+.alert-warning { color: #664d03; background-color: #fff3cd; border-color: #ffecb5; }
 
 /* =========================================
    5. FORMULARIS
@@ -86,6 +89,7 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 ========================================= */
 .d-flex { display: flex !important; }
 .flex-column { flex-direction: column !important; }
+.d-inline { display: inline !important; }
 .d-inline-block { display: inline-block !important; }
 .flex-grow-1 { flex-grow: 1 !important; }
 .justify-content-center { justify-content: center !important; }
@@ -108,6 +112,7 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 .mb-2 { margin-bottom: 0.5rem !important; }
 .mb-3 { margin-bottom: 1rem !important; }
 .mb-4 { margin-bottom: 1.5rem !important; }
+.mb-5 { margin-bottom: 3rem !important; }
 .mt-2 { margin-top: 0.5rem !important; }
 .mt-3 { margin-top: 1rem !important; }
 .mt-4 { margin-top: 1.5rem !important; }
@@ -144,6 +149,7 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 .text-primary { color: #0d6efd !important; }
 .text-success { color: #198754 !important; }
 .text-danger { color: #dc3545 !important; }
+.text-warning { color: #ffc107 !important; }
 .text-muted { color: #6c757d !important; }
 .text-secondary { color: #6c757d !important; }
 .text-white { color: #fff !important; }

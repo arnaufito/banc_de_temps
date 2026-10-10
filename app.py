@@ -113,8 +113,14 @@ def afegir_columna(cur, taula, columna, definicio):
 
 
 def inicialitzar_bd():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     cur = conn.cursor()
+    
+    # Si la BD és d'una versió molt antiga (columna cost_hores), no té sentit continuar: avisem clarament
+    if "cost_hores" in [f[1] for f in cur.execute("PRAGMA table_info(ofertes)")]:
+        conn.close()
+        raise RuntimeError("El fitxer banc_temps.db és d'una versió antiga i és incompatible. "
+                           "Esborra'l i torna a arrencar l'app: es crearà de nou amb l'estructura correcta.")
     cur.execute('''CREATE TABLE IF NOT EXISTS usuaris (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nom TEXT NOT NULL,
@@ -160,9 +166,12 @@ def inicialitzar_bd():
     if adm_correu and len(adm_pass) >= 8:
         existeix = cur.execute("SELECT 1 FROM usuaris WHERE correu = ?", (adm_correu,)).fetchone()
         if not existeix:
-            cur.execute(
-                "INSERT INTO usuaris (nom, correu, contrasenya, ciutat, es_admin) VALUES (?, ?, ?, ?, 1)",
-                ("Administrador", adm_correu, generate_password_hash(adm_pass), "Altres"))
+            try:
+                cur.execute(
+                    "INSERT INTO usuaris (nom, correu, contrasenya, ciutat, es_admin) VALUES (?, ?, ?, ?, 1)",
+                    ("Administrador", adm_correu, generate_password_hash(adm_pass), "Altres"))
+            except sqlite3.IntegrityError:
+                pass  # un altre worker de gunicorn l'ha creat just ara
     
     antic = cur.execute("SELECT contrasenya FROM usuaris WHERE correu = 'admin@gmail.com'").fetchone()
     if antic and check_password_hash(antic[0], "admin1234"):
@@ -323,6 +332,8 @@ def registre():
             errors.append("Selecciona una ciutat de la llista.")
         if not 8 <= len(contrasenya) <= 128:
             errors.append("La contrasenya ha de tenir entre 8 i 128 caràcters.")
+        if request.form.get("normes") != "on":
+            errors.append("Has d'acceptar les Normes d'Ús per registrar-te.")
             
         if errors:
             mostrar_errors(errors)

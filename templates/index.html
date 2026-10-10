@@ -9,9 +9,10 @@
 <body class="bg-light">
 
     <div class="container text-center mt-5">
-        {% if 'nom' in session %}
-            <h1 class="text-primary">Hola, {{ session['nom'] }}!</h1>
+        {% if jo %}
+            <h1 class="text-primary">Hola, {{ jo.nom }}!</h1>
             <p class="lead">Benvingut de nou al teu espai.</p>
+            <a href="/mercat" class="btn btn-primary mt-3">Anar al mercat</a>
             <a href="/logout" class="btn btn-danger mt-3">Tancar sessió</a>
         {% else %}
             <h1 class="text-primary">Benvingut al Banc de Temps</h1>

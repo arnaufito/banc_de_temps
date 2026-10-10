@@ -5,70 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>El Meu Historial - Banc de Temps</title>
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
 <body class="bg-light">
-
-    <!-- Barra de navegació -->
-    <nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="/mercat">⏳ Banc de Temps</a>
-            
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="/mercat">Mercat</a></li>
-                <li class="nav-item"><a class="nav-link" href="/crear_oferta">Crear Oferta</a></li>
-                <li class="nav-item"><a class="nav-link" href="/transferencia">Pagar Hores</a></li>
-                <!-- Historial marcat com a actiu -->
-                <li class="nav-item"><a class="nav-link active fw-bold" href="/historial">Historial</a></li>
-                <li class="nav-item"><a class="nav-link" href="/xat">Xats 💬</a></li>
-            </ul>
-            
-            <ul class="navbar-nav align-items-center">
-                <li class="nav-item me-3">
-                    <span class="navbar-text text-white fw-bold">Saldo: {{ saldo }}h</span>
-                </li>
-                <li class="nav-item"><a class="nav-link" href="/perfil">Perfil</a></li>
-                <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" href="/logout">Sortir</a></li>
-            </ul>
-        </div>
-    </nav>
+{% set actiu = 'historial' %}
+{% include '_navbar.html' %}
 
     <div class="container">
+        {% include '_flash.html' %}
+
+        <!-- LES MEVES OFERTES -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="text-primary m-0">Les meves ofertes publicades</h2>
             <a href="/crear_oferta" class="btn btn-success">➕ Nova Oferta</a>
         </div>
-        
+
         <div class="row">
-            <!-- Inici del bucle Jinja per mostrar les ofertes reals de la BD -->
             {% for oferta in ofertes %}
                 <div class="col-md-4 mb-4">
                     <div class="card shadow-sm h-100 border-0">
                         <div class="card-body">
-                            <h5 class="card-title fw-bold text-dark">{{ oferta[1] }}</h5>
-                            <p class="card-text text-muted">{{ oferta[2] }}</p>
+                            <h5 class="card-title fw-bold text-dark">{{ oferta['titol'] }}</h5>
+                            <p class="card-text text-muted">{{ oferta['descripcio']|truncate(150) }}</p>
+                            <p class="mb-0"><strong>{{ oferta['hores'] }}</strong> hores</p>
                         </div>
                         <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center">
                             <span class="badge bg-info text-dark">Activa</span>
-                            <!-- Botó per eliminar -->
-                            <form action="/eliminar_oferta/{{ oferta[0] }}" method="POST" class="d-inline mt-auto" onsubmit="return confirm('Estàs segur que vols eliminar aquesta oferta del mercat?');">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <!-- Això serveix per saber a on l'hem de redirigir en esborrar -->
-    <input type="hidden" name="desti" value="mercat">
-    <button type="submit" class="btn btn-outline-danger w-100 py-2 fw-bold">
-        🗑️ Eliminar la meva oferta
-    </button>
-</form>
+                            <form action="/eliminar_oferta/{{ oferta['id'] }}" method="POST" data-confirm="Estàs segur que vols eliminar aquesta oferta del mercat?">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="desti" value="historial">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Eliminar</button>
+                            </form>
                         </div>
                     </div>
                 </div>
             {% else %}
-                <!-- Si l'usuari no té ofertes -->
                 <div class="col-12 text-center py-5 bg-white shadow-sm rounded">
                     <h4 class="text-muted mb-3">Encara no has publicat cap oferta.</h4>
                     <p class="text-secondary">Quan ofereixis el teu temps o algun servei, apareixerà aquí perquè ho puguis gestionar.</p>
                 </div>
             {% endfor %}
-            <!-- Final del bucle -->
+        </div>
+
+        <!-- ELS MEUS MOVIMENTS D'HORES -->
+        <h2 class="text-primary mt-5 mb-4">Els meus moviments d'hores</h2>
+
+        <div class="bg-white shadow-sm rounded mb-5">
+            {% for m in moviments %}
+                {% set he_pagat = (m['id_pagador'] == jo.id) %}
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                    <div>
+                        {% if he_pagat %}
+                            <strong class="text-danger">Pagament a {{ m['nom_cobrador'] }}</strong>
+                        {% else %}
+                            <strong class="text-success">Cobrament de {{ m['nom_pagador'] }}</strong>
+                        {% endif %}
+                        <br>
+                        <small class="text-muted">{{ m['concepte'] or 'Sense concepte' }} · {{ (m['data'] or '')[:16] }}</small>
+                    </div>
+                    <span class="fw-bold fs-5 {% if he_pagat %}text-danger{% else %}text-success{% endif %}">
+                        {% if he_pagat %}-{% else %}+{% endif %}{{ m['hores'] }}h
+                    </span>
+                </div>
+            {% else %}
+                <p class="text-muted text-center p-4 mb-0">Encara no tens cap moviment d'hores.</p>
+            {% endfor %}
         </div>
     </div>
 

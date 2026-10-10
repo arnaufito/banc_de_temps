@@ -3,92 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ oferta[1] }} - Banc de Temps</title>
+    <title>{{ oferta['titol'] }} - Banc de Temps</title>
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
 <body class="bg-light">
-
-    <!-- Barra de navegació unificada -->
-    <nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="/mercat">⏳ Banc de Temps</a>
-            
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link active fw-bold" href="/mercat">Mercat</a></li>
-                <li class="nav-item"><a class="nav-link" href="/crear_oferta">Crear Oferta</a></li>
-                <li class="nav-item"><a class="nav-link" href="/transferencia">Pagar Hores</a></li>
-                <li class="nav-item"><a class="nav-link" href="/historial">Historial</a></li>
-                <li class="nav-item"><a class="nav-link" href="/xat">Xats 💬</a></li>
-            </ul>
-            
-            <ul class="navbar-nav align-items-center">
-                <li class="nav-item me-3">
-                    <span class="navbar-text text-white fw-bold">Saldo: {{ saldo }}h</span>
-                </li>
-                <li class="nav-item"><a class="nav-link" href="/perfil">Perfil</a></li>
-                <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" href="/logout">Sortir</a></li>
-            </ul>
-        </div>
-    </nav>
+{% set actiu = 'mercat' %}
+{% include '_navbar.html' %}
 
     <div class="container">
+        {% include '_flash.html' %}
+
         <!-- Botó per tirar enrere i títol de l'oferta -->
         <a href="/mercat" class="text-decoration-none text-muted mb-3 d-inline-block">← Tornar al mercat</a>
-        <h2 class="text-primary fw-bold mb-4">{{ oferta[1] }}</h2>
-        
+        <h2 class="text-primary fw-bold mb-4">{{ oferta['titol'] }}</h2>
+
         <div class="row">
-            <!-- detalls de la tasca -->
+            <!-- Detalls de la tasca -->
             <div class="col-md-8 mb-4">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body p-4">
-                        <span class="badge bg-info text-dark mb-4 px-3 py-2">Servei Ofert</span>
+                        <div class="mb-4">
+                            <span class="badge bg-info text-dark px-3 py-2">Servei Ofert</span>
+                            <span class="badge bg-secondary px-3 py-2 ms-2">{{ oferta['categoria'] }}</span>
+                        </div>
                         <h5 class="text-secondary border-bottom pb-2 mb-3">Descripció de la tasca:</h5>
-                        <p class="card-text fs-5" style="white-space: pre-wrap;">{{ oferta[2] }}</p>
+                        <p class="card-text fs-5" style="white-space: pre-wrap;">{{ oferta['descripcio'] }}</p>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Hores i Venedor (o Panell Propietari) -->
             <div class="col-md-4 mb-4">
                 <div class="card shadow-sm border-0 h-100 text-center">
                     <div class="card-body p-4 d-flex flex-column justify-content-center">
-                        <!-- Les Hores (Això ho veu tothom) -->
-                        <h2 class="text-success fw-bold">{{ oferta[6] }} Hores</h2>
+                        <h2 class="text-success fw-bold">{{ oferta['hores'] }} Hores</h2>
                         <hr class="my-4">
-                        
-                        <!-- pregunta si ets el propietari o el client-->
-                        {% if oferta[3]|string == session['id_usuari']|string %}
-                            
-                            <!-- vista del propietari-->
+
+                        {% if es_propietari %}
+
+                            <!-- Vista del propietari -->
                             <div class="alert alert-info mb-4 text-start" role="alert">
                                 <strong>⭐ La teva oferta</strong><br>
                                 <small>Així és com els altres usuaris veuen la teva publicació.</small>
                             </div>
-                            
-                            <!-- hem canviat el botò d'eliminar per el de eliminar oferta-->
-                            <form action="/eliminar_oferta/{{ oferta[0] }}" method="POST" class="d-inline mt-auto" onsubmit="return confirm('Estàs segur que vols eliminar aquesta oferta del mercat?');">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <!-- Això serveix per saber a on l'hem de redirigir en esborrar -->
-    <input type="hidden" name="desti" value="mercat">
-    <button type="submit" class="btn btn-outline-danger w-100 py-2 fw-bold">
-        🗑️ Eliminar la meva oferta
-    </button>
-</form>
-                            
+
+                            <form action="/eliminar_oferta/{{ oferta['id'] }}" method="POST" class="mt-auto" data-confirm="Estàs segur que vols eliminar aquesta oferta del mercat?">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="desti" value="mercat">
+                                <button type="submit" class="btn btn-outline-danger w-100 py-2 fw-bold">
+                                    🗑️ Eliminar la meva oferta
+                                </button>
+                            </form>
+
                         {% else %}
-                        
-                            <!-- vista del client -->
+
+                            <!-- Vista del client -->
                             <p class="text-muted mb-1">Oferta publicada per:</p>
-                            <h5 class="fw-bold text-dark mb-1">{{ oferta[4] }}</h5>
-                            <p class="text-muted small mb-4">📍 {{ oferta[5] }}</p>
-                            
-                            <!-- boto per obrir el xat -->
-                            <a href="/xat/{{ oferta[0] }}" class="btn btn-primary mt-auto py-2 fw-bold shadow-sm">
+                            <h5 class="fw-bold text-dark mb-1">{{ oferta['nom_autor'] }}</h5>
+                            <p class="text-muted small mb-4">📍 {{ oferta['ciutat'] }}</p>
+
+                            <a href="/xat/{{ oferta['id'] }}" class="btn btn-primary mt-auto py-2 fw-bold shadow-sm">
                                 💬 Contactar amb el Venedor
                             </a>
-                            
+                            <a href="/transferencia?oferta={{ oferta['id'] }}" class="btn btn-success mt-2 py-2 fw-bold shadow-sm">
+                                ⏳ Pagar aquesta oferta
+                            </a>
+
                         {% endif %}
-                        
+
                     </div>
                 </div>
             </div>

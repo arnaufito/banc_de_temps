@@ -2,57 +2,34 @@
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xats - Banc de Temps</title>
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
 <body class="bg-light">
-
-    <!-- Barra de navegació unificada definitiva -->
-    <nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="/mercat">⏳ Banc de Temps</a>
-            
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="/mercat">Mercat</a></li>
-                <li class="nav-item"><a class="nav-link" href="/crear_oferta">Crear Oferta</a></li>
-                <li class="nav-item"><a class="nav-link" href="/transferencia">Pagar Hores</a></li>
-                <li class="nav-item"><a class="nav-link" href="/historial">Historial</a></li>
-                <!-- L'enllaç del xat marcat com a actiu per ressaltar on estem -->
-                <li class="nav-item"><a class="nav-link active fw-bold" href="/xat">Xats 💬</a></li>
-                {% if jo and jo.es_admin %}
-    <li class="nav-item">
-        <a class="nav-link text-warning fw-bold" href="/admin">⚙️ Admin</a>
-    </li>
-{% endif %}
-            </ul>
-            
-            <ul class="navbar-nav align-items-center">
-                <li class="nav-item me-3">
-                    <span class="text-white fw-bold">Saldo: {{ saldo }}h</span>
-                </li>
-                <li class="nav-item"><a class="nav-link" href="/perfil">Perfil</a></li>
-                <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" href="/logout">Sortir</a></li>
-            </ul>
-        </div>
-    </nav>
+{% set actiu = 'xat' %}
+{% include '_navbar.html' %}
 
     <div class="container">
+        {% include '_flash.html' %}
+
         <div class="row bg-white shadow rounded overflow-hidden">
-            
+
             <!-- COLUMNA ESQUERRA: Llista de Xats -->
             <div class="col-md-4 sidebar-xats p-0">
                 <div class="p-3 bg-secondary text-white fw-bold">Les teves converses</div>
                 <div class="llista">
                     {% for chat in chats %}
                         <div class="xat-item {% if id_oferta == chat[0] and id_client == chat[2] %}active{% endif %}">
-                            <!-- Enllaç per entrar a llegir el xat -->
                             <a href="/xat/{{ chat[0] }}/{{ chat[2] }}" class="text-decoration-none text-dark flex-grow-1 text-truncate pe-2">
                                 💬 {{ chat[1] }}
                             </a>
-                            <!-- Botó de paperera per esborrar aquesta conversa en concret -->
-                            <a href="/eliminar_xat/{{ chat[0] }}/{{ chat[2] }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Estàs segur que vols eliminar aquesta conversa per complet?')">
-                                🗑️
-                            </a>
+                            <!-- Paperera: esborra aquesta conversa (és un formulari POST amb confirmació) -->
+                            <form action="/eliminar_xat/{{ chat[0] }}/{{ chat[2] }}" method="POST" data-confirm="Estàs segur que vols eliminar aquesta conversa per complet?">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">🗑️</button>
+                            </form>
                         </div>
                     {% else %}
                         <p class="text-muted p-3 text-center">Encara no hi ha xats disponibles.</p>
@@ -63,11 +40,10 @@
             <!-- COLUMNA DRETA: Contingut del Xat -->
             <div class="col-md-8 d-flex flex-column p-0">
                 {% if id_oferta %}
-                    <!-- Capçalera del xat actiu -->
                     <div class="p-3 bg-dark text-white fw-bold">
-                        Xat de l'oferta: {{ titol }}
+                        Xat de l'oferta: {{ titol }}{% if interlocutor %} · amb {{ interlocutor }}{% endif %}
                     </div>
-                    
+
                     <!-- Cos dels missatges -->
                     <div class="card-body fons-xat flex-grow-1" id="pantallaXat">
                         {% for msg in missatges %}
@@ -88,12 +64,13 @@
                     <!-- Caixa per escriure i enviar missatges -->
                     <div class="p-3 bg-white border-top">
                         <form action="/xat/{{ id_oferta }}/{{ id_client }}" method="POST" class="d-flex">
-                            <input type="text" name="missatge" class="form-control me-2" placeholder="Escriu un missatge..." required autocomplete="off">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="text" name="missatge" class="form-control me-2" placeholder="Escriu un missatge..." maxlength="1000" required autocomplete="off">
                             <button type="submit" class="btn btn-primary">Enviar ✈️</button>
                         </form>
                     </div>
                 {% else %}
-                    <!-- Pantalla de benvinguda si no s'ha triat cap xat de la barra esquerra -->
+                    <!-- Pantalla de benvinguda si no s'ha triat cap xat -->
                     <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted p-5" style="height: 70vh !important;">
                         <h4>Selecciona un xat a l'esquerra per començar a parlar 💬</h4>
                         <p>Parla amb altres usuaris per coordinar els vostres intercanvis de temps.</p>
@@ -104,12 +81,5 @@
         </div>
     </div>
 
-    <!-- Script per baixar automàticament al final del xat per veure el missatge més recent -->
-    <script>
-        var caixaXat = document.getElementById("pantallaXat");
-        if (caixaXat) {
-            caixaXat.scrollTop = caixaXat.scrollHeight;
-        }
-    </script>
 </body>
 </html>

@@ -5,33 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Publicar Oferta - Banc de Temps</title>
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
 <body class="bg-light">
-
-    <!-- Barra de navegació unificada definitiva -->
-<nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="/mercat">⏳ Banc de Temps</a>
-        
-        <!-- Enllaços principals -->
-        <ul class="navbar-nav me-auto">
-            <li class="nav-item"><a class="nav-link" href="/mercat">Mercat</a></li>
-            <li class="nav-item"><a class="nav-link" href="/crear_oferta">Crear Oferta</a></li>
-            <li class="nav-item"><a class="nav-link" href="/transferencia">Pagar Hores</a></li>
-            <li class="nav-item"><a class="nav-link" href="/historial">Historial</a></li>
-            <li class="nav-item"><a class="nav-link" href="/xat">Xats 💬</a></li>
-        </ul>
-        
-        <!-- Saldo i opcions d'usuari a la dreta -->
-        <ul class="navbar-nav align-items-center">
-            <li class="nav-item me-3">
-                <span class="text-white fw-bold">Saldo: {{ saldo }}h</span>
-            </li>
-            <li class="nav-item"><a class="nav-link" href="/perfil">Perfil</a></li>
-            <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" href="/logout">Sortir</a></li>
-        </ul>
-    </div>
-</nav>
+{% set actiu = 'crear' %}
+{% include '_navbar.html' %}
 
     <div class="container mt-5">
         <div class="row justify-content-center">
@@ -39,50 +17,44 @@
                 <div class="card shadow-sm border-0">
                     <div class="card-body p-5">
                         <h3 class="text-primary mb-4">Publicar un nou servei</h3>
-                        
-                        <!-- El mètode POST ja està ben posat -->
+
+                        {% include '_flash.html' %}
+
                         <form action="/crear_oferta" method="POST">
-                            
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                             <!-- Títol -->
-                             <div class="mb-3">
+                            <div class="mb-3">
                                 <label class="form-label text-muted">Títol de l'oferta</label>
-                                <input type="text" name="titol" class="form-control" placeholder="Ex: Classes de piano" required>
-                             </div>
-                             
-                             <!-- Categoria -->
-                             <div class="mb-3">
+                                <input type="text" name="titol" class="form-control" placeholder="Ex: Classes de piano" value="{{ form.get('titol', '') }}" minlength="3" maxlength="100" required>
+                            </div>
+
+                            <!-- Categoria -->
+                            <div class="mb-3">
                                 <label for="categoria" class="form-label">Categoria de l'oferta</label>
                                 <select class="form-select" name="categoria" id="categoria" required>
-                                    <option value="" selected disabled>-- Selecciona una categoria --</option>
-                                    <option value="Classes i Formació">📚 Classes i Formació (Idiomes, repàs escolar, música...)</option>
-                                    <option value="Cures i Acompanyament">🤝 Cures i Acompanyament (Cangur, passejar mascotes, gent gran...)</option>
-                                    <option value="Llar i Bricolatge">🛠️ Llar i Bricolatge (Petites reparacions, neteja, muntar mobles...)</option>
-                                    <option value="Informàtica i Tecnologia">💻 Informàtica i Tecnologia (Reparació d'ordinadors, ajuda amb el mòbil...)</option>
-                                    <option value="Assessorament i Gestions">📝 Assessorament i Gestions (Tràmits, traduccions, disseny...)</option>
-                                    <option value="Oci i Esports">⚽ Oci i Esports (Entrenament personal, rutes, jocs de taula...)</option>
-                                    <option value="Bellesa i Benestar">💆 Bellesa i Benestar (Tallar els cabells, massatges, estètica...)</option>
-                                    <option value="Art i Creativitat">🎨 Art i Creativitat (Dibuix, fotografia, manualitats...)</option>
-                                    <option value="Altres">✨ Altres</option>
+                                    <option value="" {% if not form.get('categoria') %}selected{% endif %} disabled>-- Selecciona una categoria --</option>
+                                    {% for valor, text in CATEGORIES %}
+                                        <option value="{{ valor }}" {% if form.get('categoria') == valor %}selected{% endif %}>{{ text }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
-                            
+
                             <!-- Descripció -->
                             <div class="mb-3">
                                 <label class="form-label text-muted">Descripció</label>
-                                <textarea name="descripcio" class="form-control" rows="3" placeholder="Explica els detalls de la teva oferta..." required></textarea>
+                                <textarea name="descripcio" class="form-control" rows="3" placeholder="Explica els detalls de la teva oferta..." minlength="5" maxlength="1000" required>{{ form.get('descripcio', '') }}</textarea>
                             </div>
 
                             <!-- Hores -->
                             <div class="mb-3">
                                 <label class="form-label text-muted">Hores</label>
-                                <input type="number" name="hores" class="form-control" placeholder="Hores" step="0.01" min="0.01" required>
+                                <input type="number" name="hores" class="form-control" placeholder="Hores" step="0.01" min="0.01" max="50" value="{{ form.get('hores', '') }}" required>
                             </div>
-                            
-                            <!-- botó submit real que enviarà el formulari -->
+
                             <button type="submit" class="btn btn-primary w-100">Publicar nova oferta</button>
-                            
                         </form>
-                        
+
                     </div>
                 </div>
             </div>

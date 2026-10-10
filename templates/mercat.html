@@ -5,71 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mercat de Serveis - Banc de Temps</title>
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
 <body class="bg-light">
-<!-- Barra de navegació unificada definitiva -->
-<nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="/mercat">⏳ Banc de Temps</a>
-        
-        <!-- Enllaços principals -->
-        <ul class="navbar-nav me-auto">
-            <li class="nav-item"><a class="nav-link" href="/mercat">Mercat</a></li>
-            <li class="nav-item"><a class="nav-link" href="/crear_oferta">Crear Oferta</a></li>
-            <li class="nav-item"><a class="nav-link" href="/transferencia">Pagar Hores</a></li>
-            <li class="nav-item"><a class="nav-link" href="/historial">Historial</a></li>
-            <li class="nav-item"><a class="nav-link" href="/xat">Xats 💬</a></li>
-            {% if jo and jo.es_admin %}
-    <li class="nav-item">
-        <a class="nav-link text-warning fw-bold" href="/admin">⚙️ Admin</a>
-    </li>
-{% endif %}
-        </ul>
-        
-        <!-- Saldo i opcions d'usuari a la dreta -->
-        <ul class="navbar-nav align-items-center">
-            <li class="nav-item me-3">
-                <span class="text-white fw-bold">Saldo: {{ saldo }}h</span>
-            </li>
-            <li class="nav-item"><a class="nav-link" href="/perfil">Perfil</a></li>
-            <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" href="/logout">Sortir</a></li>
-        </ul>
-    </div>
-</nav>
+{% set actiu = 'mercat' %}
+{% include '_navbar.html' %}
 
     <div class="container">
+        {% include '_flash.html' %}
+
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="text-primary">Ofertes Disponibles</h2>
-            <!-- En lloc d'un <button>, utilitzem un enllaç <a> amb les classes de botó que ja tinguis -->
             <a href="/crear_oferta" class="btn btn-primary">Publicar nova oferta</a>
         </div>
 
         <!-- Graella d'anuncis -->
-            <div class="row">
-                <!-- Inici del bucle: crea una targeta per cada oferta de la base de dades -->
-                 {% for oferta in ofertes %}
-                 <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ oferta[1] }}</h5> <!-- Aquí sortirà el Títol -->
-                            <p class="card-text">{{ oferta[2] }}</p>      <!-- Aquí sortirà la Descripció -->
-                            <p><strong>Hores de cost:</strong> {{ oferta[3] }}</p>
-                            <!-- Aquest és el botó que ha d'haver-hi dins del teu bucle de cada targeta al mercat -->
-                            <a href="/oferta/{{ oferta[0] }}" class="btn btn-outline-primary">
-                                Veure detalls
-                            </a>
-                        </div>
+        <div class="row">
+            {% for oferta in ofertes %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <span class="badge bg-secondary mb-2">{{ oferta['categoria'] }}</span>
+                        <h5 class="card-title">{{ oferta['titol'] }}</h5>
+                        <p class="card-text">{{ oferta['descripcio']|truncate(150) }}</p>
+                        <p class="mb-1"><strong>Hores de cost:</strong> {{ oferta['hores'] }}</p>
+                        <p class="text-muted small">👤 {{ oferta['nom_autor'] }}{% if oferta['ciutat'] %} · 📍 {{ oferta['ciutat'] }}{% endif %}</p>
+                        <a href="/oferta/{{ oferta['id'] }}" class="btn btn-outline-primary">
+                            Veure detalls
+                        </a>
                     </div>
                 </div>
-                <!-- Què passa si no hi ha cap oferta? Ho controlem amb aquest 'else' -->
-                 {% else %}
-                 <div class="col-12 text-center mt-5">
-                    <h4>El mercat està buit ara mateix.</h4>
-                    <p class="text-muted">Anima't i publica la primera feina!</p>
-                </div>
-    {% endfor %}
-</div>
-</div>
+            </div>
+            {% else %}
+            <div class="col-12 text-center mt-5">
+                <h4>El mercat està buit ara mateix.</h4>
+                <p class="text-muted">Anima't i publica la primera feina!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 
 </body>
 </html>

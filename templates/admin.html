@@ -2,8 +2,10 @@
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panell de Control - Admin</title>
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
 <body class="bg-light">
 
@@ -17,30 +19,36 @@
     </nav>
 
     <div class="container">
+        {% include '_flash.html' %}
+
         <h2 class="text-danger mb-4">Panell de Control Mestre</h2>
-        
+
         <div class="row">
-        <!-- CAIXA 1: Tots els Usuaris -->
-        <div class="col-md-6 mb-4">
-        {% for u in usuaris %}
-    <div class="mb-3 p-3 border rounded bg-white d-flex justify-content-between align-items-center">
-        <div>
-            <strong>{{ u[1] }}</strong> ({{ u[2] }})<br>
-            <small class="text-muted">Ciutat: {{ u[3] }} | Saldo: {{ u[4] }}h</small>
-        </div>
-        
-        <!-- Protecció: L'admin no es pot esborrar a ell mateix -->
-        {% if u[0] != session['id_usuari'] %}
-            <form action="/eliminar_usuari/{{ u[0] }}" method="POST" class="d-inline" onsubmit="return confirm('ATENCIÓ: Esborraràs aquest usuari i Totes les seves ofertes. Estàs segur?');">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Expulsar</button>
-</form>
-        {% else %}
-            <span class="badge bg-warning text-dark">Ets Tu</span>
-        {% endif %}
-    </div>
-    {% endfor %}
-        </div>
+            <!-- CAIXA 1: Tots els Usuaris -->
+            <div class="col-md-6 mb-4">
+                <h4 class="text-primary border-bottom pb-2 mb-3">👥 Tots els Usuaris</h4>
+                {% for u in usuaris %}
+                    <div class="mb-3 p-3 border rounded bg-white d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ u['nom'] }}</strong> ({{ u['correu'] }})
+                            {% if u['es_admin'] %}<span class="badge bg-primary">Admin</span>{% endif %}
+                            <br>
+                            <small class="text-muted">Ciutat: {{ u['ciutat'] }} | Saldo: {{ u['saldo'] }}h</small>
+                        </div>
+
+                        <!-- Protecció: l'admin no es pot esborrar a ell mateix -->
+                        {% if u['id'] != jo.id %}
+                            <form action="/eliminar_usuari/{{ u['id'] }}" method="POST" data-confirm="ATENCIÓ: Esborraràs aquest usuari, les seves ofertes i els seus xats. Estàs segur?">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Expulsar</button>
+                            </form>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Ets Tu</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
             <!-- CAIXA 2: Totes les Ofertes -->
             <div class="col-md-6 mb-4">
                 <div class="card shadow-sm h-100">
@@ -49,9 +57,15 @@
                         <div style="max-height: 400px; overflow-y: auto;">
                             {% for o in ofertes %}
                                 <div class="mb-2 d-flex justify-content-between align-items-center border-bottom pb-2">
-                                    <span><strong>ID {{ o[0] }}:</strong> {{ o[1] }} (Creador ID: {{ o[2] }})</span>
-                                    <a href="/eliminar_oferta/{{ o[0] }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Esborrar definitivament?')">🗑️ Forçar esborrat</a>
+                                    <span><strong>ID {{ o['id'] }}:</strong> {{ o['titol'] }} (de {{ o['nom_autor'] }})</span>
+                                    <form action="/eliminar_oferta/{{ o['id'] }}" method="POST" data-confirm="Esborrar definitivament?">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="desti" value="admin">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Forçar esborrat</button>
+                                    </form>
                                 </div>
+                            {% else %}
+                                <p class="text-muted">No hi ha cap oferta.</p>
                             {% endfor %}
                         </div>
                     </div>

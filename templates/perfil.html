@@ -5,36 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>El Meu Perfil - Banc de Temps</title>
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
 <body class="bg-light">
-
-    <!-- Barra de navegació unificada -->
-    <nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="/mercat">⏳ Banc de Temps</a>
-            
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="/mercat">Mercat</a></li>
-                <li class="nav-item"><a class="nav-link" href="/crear_oferta">Crear Oferta</a></li>
-                <li class="nav-item"><a class="nav-link" href="/transferencia">Pagar Hores</a></li>
-                <li class="nav-item"><a class="nav-link" href="/historial">Historial</a></li>
-                <li class="nav-item"><a class="nav-link" href="/xat">Xats 💬</a></li>
-                {% if jo and jo.es_admin %}
-    <li class="nav-item">
-        <a class="nav-link text-warning fw-bold" href="/admin">⚙️ Admin</a>
-    </li>
-{% endif %}
-            </ul>
-            
-            <ul class="navbar-nav align-items-center">
-                <li class="nav-item me-3">
-                    <span class="navbar-text text-white fw-bold">Saldo: {{ saldo }}h</span>
-                </li>
-                <li class="nav-item"><a class="nav-link active fw-bold" href="/perfil">Perfil</a></li>
-                <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" href="/logout">Sortir</a></li>
-            </ul>
-        </div>
-    </nav>
+{% set actiu = 'perfil' %}
+{% include '_navbar.html' %}
 
     <div class="container">
         <div class="row justify-content-center">
@@ -42,8 +17,11 @@
                 <div class="card shadow-sm border-0">
                     <div class="card-body p-5">
                         <h3 class="text-primary border-bottom pb-2 mb-4">Configuració del Perfil</h3>
-                        
+
+                        {% include '_flash.html' %}
+
                         <form method="POST" action="/perfil">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="text-center mb-4">
                                 <div class="bg-secondary rounded-circle d-inline-block" style="width: 120px; height: 120px; line-height: 120px; color: white; font-size: 3rem;">
                                     👤
@@ -56,28 +34,21 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted">Nom a mostrar</label>
-                                    <input type="text" name="nom" class="form-control" value="{{ usuari[0] }}" required>
+                                    <input type="text" name="nom" class="form-control" value="{{ usuari[0] }}" minlength="2" maxlength="60" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Ciutat o Població</label>
                                     <select class="form-select" name="ciutat" required>
-                                        <!-- Comparem la ciutat de la BD (usuari[2]) amb cada opció. Si coincideix, li posem "selected" -->
-                                        <option value="Barcelona" {% if usuari[2] == 'Barcelona' %}selected{% endif %}>Barcelona</option>
-                                        <option value="Girona" {% if usuari[2] == 'Girona' %}selected{% endif %}>Girona</option>
-                                        <option value="Lleida" {% if usuari[2] == 'Lleida' %}selected{% endif %}>Lleida</option>
-                                        <option value="Tarragona" {% if usuari[2] == 'Tarragona' %}selected{% endif %}>Tarragona</option>
-                                        <option value="L'Hospitalet de Llobregat" {% if usuari[2] == "L'Hospitalet de Llobregat" %}selected{% endif %}>L'Hospitalet de Llobregat</option>
-                                        <option value="Badalona" {% if usuari[2] == 'Badalona' %}selected{% endif %}>Badalona</option>
-                                        <option value="Terrassa" {% if usuari[2] == 'Terrassa' %}selected{% endif %}>Terrassa</option>
-                                        <option value="Sabadell" {% if usuari[2] == 'Sabadell' %}selected{% endif %}>Sabadell</option>
-                                        <option value="Altres" {% if usuari[2] not in ['Barcelona', 'Girona', 'Lleida', 'Tarragona', "L'Hospitalet de Llobregat", 'Badalona', 'Terrassa', 'Sabadell'] %}selected{% endif %}>Altres poblacions...</option>
+                                        {% for c in CIUTATS %}
+                                            <option value="{{ c }}" {% if usuari[2] == c or (c == 'Altres' and usuari[2] not in CIUTATS) %}selected{% endif %}>{{ c if c != 'Altres' else 'Altres poblacions...' }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">La meva descripció</label>
-                                <textarea name="descripcio" class="form-control" rows="4" placeholder="Escriu alguna cosa sobre tu...">{{ usuari[3] }}</textarea>
+                                <textarea name="descripcio" class="form-control" rows="4" maxlength="500" placeholder="Escriu alguna cosa sobre tu...">{{ usuari[3] or '' }}</textarea>
                             </div>
 
                             <button type="submit" class="btn btn-primary w-100">Guardar Canvis</button>
