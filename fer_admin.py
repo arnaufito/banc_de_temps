@@ -1,7 +1,7 @@
 import sqlite3
 
 # Posa aquí el correu amb el qual et registres a la teva web
-EL_TEU_CORREU = "elteucorreu@exemple.cat"
+EL_TEU_CORREU = "afitoruana@gmail.com"
 
 conn = sqlite3.connect("banc_temps.db")
 cursor = conn.cursor()
