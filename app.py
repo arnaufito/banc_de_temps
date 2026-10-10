@@ -1,11 +1,12 @@
 import sqlite3
 import os
+import math
 from flask import Flask, session, redirect, url_for, request, render_template
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
 app = Flask(__name__)
-app.secret_key = "clau_super_secreta_del_tdr"
+app.secret_key = os.environ.get("SECRET_KEY", "clau_super_secreta_del_tdr")
 
 @app.context_processor
 def injectar_saldo():
@@ -16,15 +17,17 @@ def injectar_saldo():
             cursor.execute("SELECT saldo FROM usuaris WHERE id = ?", (session['id_usuari'],))
             resultat = cursor.fetchone()
             
-            # Si el saldo és nul, 0 o menor, el regenereu a 5.0 automàticament
-            if not resultat or resultat[0] is None or resultat[0] <= 0:
+            # Només si el saldo és NULL el regenerem a 5.0 (un saldo de 0 és legítim)
+            if resultat and resultat[0] is None:
                 cursor.execute("UPDATE usuaris SET saldo = 5.0 WHERE id = ?", (session['id_usuari'],))
                 conn.commit()
                 saldo_real = 5.0
+            elif not resultat:
+                saldo_real = 0.0
             else:
-                saldo_real = resultat[0]
+                saldo_real = round(resultat[0], 2)
         except:
-            saldo_real = 5.0
+            saldo_real = 0.0
         conn.close()
         return dict(saldo=saldo_real)
     return dict(saldo=0.0)
@@ -82,9 +85,14 @@ def inicialitzar_bd():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         id_oferta INTEGER NOT NULL,
         id_remitent INTEGER NOT NULL,
+        id_client INTEGER,  -- el comprador de la conversa (cada xat és propietari <-> un client)
         missatge TEXT NOT NULL
     )
     ''')
+    try:
+        cursor.execute("ALTER TABLE missatges ADD COLUMN id_client INTEGER")
+    except sqlite3.OperationalError:
+        pass
     # 1. TRUC PER AFEGIR LA COLUMNA ADMIN (si no existeix)
     try:
         cursor.execute("ALTER TABLE usuaris ADD COLUMN es_admin INTEGER DEFAULT 0")
@@ -295,6 +303,9 @@ def admin():
     return render_template("admin.html", usuaris=tots_usuaris, ofertes=totes_ofertes)
 @app.route("/mercat")
 def mercat():
+    if 'id_usuari' not in session:
+        return redirect(url_for('login'))
+
     # 1. Connectem a la base de dades
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
@@ -320,7 +331,12 @@ def crear_oferta():
         titol = request.form["titol"]
         descripcio = request.form["descripcio"]
         categoria = request.form.get("categoria")
-        hores = request.form["hores"]
+        try:
+            hores = round(float(request.form.get("hores")), 2)
+        except (ValueError, TypeError):
+            return "<h3>Error: Les hores han de ser un número.</h3><br><a href='/crear_oferta'>Tornar</a>"
+        if not math.isfinite(hores) or hores <= 0:
+            return "<h3>Error: Les hores han de ser més grans que 0.</h3><br><a href='/crear_oferta'>Tornar</a>"
         autor_id = session["id_usuari"] # Agafem l'ID de la sessió
         
         # Guardem a la BD
@@ -385,6 +401,20 @@ def perfil():
     ]
     
     return render_template("perfil.html", usuari=usuari_complet, saldo=saldo_usuari)
+# Cada conversa és privada: oferta + client (el comprador). El propietari de l'oferta veu una conversa per cada client.
+# Retorna (id_oferta, text a mostrar, id_client) de les converses on participo.
+CONSULTA_MEUS_XATS = """
+    SELECT m.id_oferta,
+           CASE WHEN o.id_usuari = ? THEN o.titol || ' - ' || u.nom ELSE o.titol END,
+           m.id_client
+    FROM missatges m
+    JOIN ofertes o ON o.id = m.id_oferta
+    JOIN usuaris u ON u.id = m.id_client
+    WHERE m.id_client = ? OR o.id_usuari = ?
+    GROUP BY m.id_oferta, m.id_client
+    ORDER BY MAX(m.id) DESC
+"""
+
 # 1. Vista general de xats (Manté el teu nom original def xat())
 @app.route("/xat")
 def xat():
@@ -393,16 +423,20 @@ def xat():
         
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT id, titol FROM ofertes")
+    yo = session['id_usuari']
+    cursor.execute(CONSULTA_MEUS_XATS, (yo, yo, yo))
     chats = cursor.fetchall()
     conn.close()
     
-    return render_template("xat.html", chats=chats, missatges=None, id_oferta=None, titol=None, el_meu_id=session['id_usuari'])
+    return render_template("xat.html", chats=chats, missatges=None, id_oferta=None, id_client=None, titol=None, el_meu_id=yo)
 
 
-# 2. Xat seleccionat d'una oferta específica (Utilitza def xat_concret() per no xocar amb de /xat)
-@app.route("/xat/<int:id_oferta>", methods=["GET", "POST"])
-def xat_concret(id_oferta):
+# 2. Xat privat d'una oferta (Utilitza def xat_concret() per no xocar amb de /xat)
+#    /xat/<oferta>            -> el comprador obre la seva conversa amb el propietari
+#    /xat/<oferta>/<client>   -> el propietari obre la conversa amb un client concret
+@app.route("/xat/<int:id_oferta>", methods=["GET", "POST"], defaults={"id_client": None})
+@app.route("/xat/<int:id_oferta>/<int:id_client>", methods=["GET", "POST"])
+def xat_concret(id_oferta, id_client):
     if 'id_usuari' not in session:
         return redirect(url_for('login'))
         
@@ -410,48 +444,70 @@ def xat_concret(id_oferta):
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
     
+    # Si l'oferta no existeix (o s'ha esborrat), no permetem xat
+    cursor.execute("SELECT titol, id_usuari FROM ofertes WHERE id = ?", (id_oferta,))
+    oferta = cursor.fetchone()
+    if not oferta:
+        conn.close()
+        return redirect(url_for('xat'))
+    titol_oferta, id_propietari = oferta
+    
+    # Determinem qui és el client d'aquesta conversa i comprovem que hi participo
+    if el_meu_id == id_propietari:
+        if id_client is None:  # el propietari ha de triar amb quin client parla
+            conn.close()
+            return redirect(url_for('xat'))
+    else:
+        if id_client is not None and id_client != el_meu_id:  # no es poden llegir xats d'altres
+            conn.close()
+            return redirect(url_for('xat'))
+        id_client = el_meu_id
+    
     # Si l'usuari envia un missatge nou, fem servir .get() per evitar cap tipus d'error 400
     if request.method == "POST":
         text_missatge = request.form.get("missatge")
         if text_missatge:
-            cursor.execute("INSERT INTO missatges (id_oferta, id_remitent, missatge) VALUES (?, ?, ?)",
-                           (id_oferta, el_meu_id, text_missatge))
+            cursor.execute("INSERT INTO missatges (id_oferta, id_remitent, id_client, missatge) VALUES (?, ?, ?, ?)",
+                           (id_oferta, el_meu_id, id_client, text_missatge))
             conn.commit()
+        conn.close()
+        if el_meu_id == id_propietari:
+            return redirect(url_for('xat_concret', id_oferta=id_oferta, id_client=id_client))
         return redirect(url_for('xat_concret', id_oferta=id_oferta))
         
     # Llista de xats per a la barra esquerra
-    cursor.execute("SELECT id, titol FROM ofertes")
+    cursor.execute(CONSULTA_MEUS_XATS, (el_meu_id, el_meu_id, el_meu_id))
     chats = cursor.fetchall()
     
-    # Títol de l'oferta actual
-    cursor.execute("SELECT titol FROM ofertes WHERE id = ?", (id_oferta,))
-    oferta = cursor.fetchone()
-    titol_oferta = oferta[0] if oferta else "Oferta"
-    
-    # Missatges del xat
+    # Missatges d'aquesta conversa (només oferta + client)
     cursor.execute('''
         SELECT u.nom, m.missatge, m.id_remitent 
         FROM missatges m
         JOIN usuaris u ON m.id_remitent = u.id
-        WHERE m.id_oferta = ?
+        WHERE m.id_oferta = ? AND m.id_client = ?
         ORDER BY m.id ASC
-    ''', (id_oferta,))
+    ''', (id_oferta, id_client))
     missatges = cursor.fetchall()
     conn.close()
     
-    return render_template("xat.html", chats=chats, missatges=missatges, id_oferta=id_oferta, titol=titol_oferta, el_meu_id=el_meu_id)
+    return render_template("xat.html", chats=chats, missatges=missatges, id_oferta=id_oferta, id_client=id_client, titol=titol_oferta, el_meu_id=el_meu_id)
 
 
-# 3. Ruta de la paperera per esborrar un xat sencer
-@app.route("/eliminar_xat/<int:id_oferta>")
-def eliminar_xat(id_oferta):
+# 3. Ruta de la paperera per esborrar una conversa sencera
+@app.route("/eliminar_xat/<int:id_oferta>/<int:id_client>")
+def eliminar_xat(id_oferta, id_client):
     if 'id_usuari' not in session:
         return redirect(url_for('login'))
         
     conn = sqlite3.connect("banc_temps.db")
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM missatges WHERE id_oferta = ?", (id_oferta,))
-    conn.commit()
+    cursor.execute("SELECT id_usuari FROM ofertes WHERE id = ?", (id_oferta,))
+    oferta = cursor.fetchone()
+    
+    # Només els dos participants (propietari o client) o l'admin poden esborrar la conversa
+    if session.get('es_admin') == 1 or session['id_usuari'] == id_client or (oferta and oferta[0] == session['id_usuari']):
+        cursor.execute("DELETE FROM missatges WHERE id_oferta = ? AND id_client = ?", (id_oferta, id_client))
+        conn.commit()
     conn.close()
     
     return redirect(url_for('xat'))
@@ -481,12 +537,12 @@ def transferencia():
         
         try:
             hores = float(request.form.get("hores"))
-            hores = round(hores, 2)  # Forcem el número a tenir només 1 decimal
-        except ValueError:
+            hores = round(hores, 2)  # Forcem el número a tenir només 2 decimals
+        except (ValueError, TypeError):
             conn.close()
             return "<h3>Error: Les hores han de ser un número.</h3><br><a href='/transferencia'>Tornar</a>"
             
-        if hores <= 0:
+        if not math.isfinite(hores) or hores <= 0:
             conn.close()
             return "<h3>Error: Has d'enviar més de 0 hores.</h3><br><a href='/transferencia'>Tornar</a>"
 
@@ -509,8 +565,8 @@ def transferencia():
             return f"<h3>Error: No tens prou saldo (tens {saldo_actual}h).</h3><br><a href='/transferencia'>Tornar</a>"
             
         # 3. PAGAMENT: Executem el pagament matemàticament i guardem l'historial
-        cursor.execute("UPDATE usuaris SET saldo = saldo - ? WHERE id = ?", (hores, id_pagador))
-        cursor.execute("UPDATE usuaris SET saldo = saldo + ? WHERE id = ?", (hores, id_cobrador))
+        cursor.execute("UPDATE usuaris SET saldo = ROUND(saldo - ?, 2) WHERE id = ?", (hores, id_pagador))
+        cursor.execute("UPDATE usuaris SET saldo = ROUND(saldo + ?, 2) WHERE id = ?", (hores, id_cobrador))
         cursor.execute("INSERT INTO transaccions (id_pagador, id_cobrador, hores) VALUES (?, ?, ?)", (id_pagador, id_cobrador, hores))
                        
         conn.commit()

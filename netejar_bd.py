@@ -10,6 +10,7 @@ def netejar_base_de_dades():
     # Esborrem les dades de totes les taules (mantenint l'estructura)
     try:
         cursor.execute("DELETE FROM missatges")
+        cursor.execute("DELETE FROM transaccions")
         cursor.execute("DELETE FROM ofertes")
         cursor.execute("DELETE FROM usuaris")
         conn.commit()

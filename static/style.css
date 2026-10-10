@@ -105,6 +105,7 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 .m-0 { margin: 0 !important; }
 .mb-0 { margin-bottom: 0 !important; }
 .mb-1 { margin-bottom: 0.25rem !important; }
+.mb-2 { margin-bottom: 0.5rem !important; }
 .mb-3 { margin-bottom: 1rem !important; }
 .mb-4 { margin-bottom: 1.5rem !important; }
 .mt-2 { margin-top: 0.5rem !important; }
@@ -125,6 +126,9 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 .py-5 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
 .px-3 { padding-left: 1rem !important; padding-right: 1rem !important; }
 .pb-2 { padding-bottom: 0.5rem !important; }
+.pb-3 { padding-bottom: 1rem !important; }
+.px-4 { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+.pe-2 { padding-right: 0.5rem !important; }
 
 /* =========================================
    9. COLORS, BORDES I TEXT EXTRA
@@ -135,6 +139,7 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 .bg-secondary { background-color: #6c757d !important; }
 .bg-dark { background-color: #212529 !important; }
 .bg-info { background-color: #0dcaf0 !important; }
+.bg-warning { background-color: #ffc107 !important; }
 
 .text-primary { color: #0d6efd !important; }
 .text-success { color: #198754 !important; }
@@ -150,6 +155,7 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 .lead { font-size: 1.25rem; font-weight: 300; }
 .badge { display: inline-block; padding: 0.35em 0.65em; font-size: 0.75em; font-weight: 700; line-height: 1; color: #fff; text-align: center; white-space: nowrap; vertical-align: baseline; border-radius: 0.25rem; }
 
+.border { border: 1px solid #dee2e6 !important; }
 .border-0 { border: 0 !important; }
 .border-top { border-top: 1px solid #dee2e6 !important; }
 .border-bottom { border-bottom: 1px solid #dee2e6 !important; }
@@ -160,3 +166,51 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 .shadow { box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important; }
 .shadow-sm { box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important; }
 .overflow-hidden { overflow: hidden !important; }
+
+/* =========================================
+   10. XATS
+========================================= */
+.sidebar-xats {
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    height: 75vh;
+    overflow-y: auto;
+}
+.xat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #e9ecef;
+    text-decoration: none;
+    color: #333;
+}
+.xat-item:hover, .xat-item.active {
+    background-color: #e2e6ea;
+}
+.fons-xat {
+    background-color: #e5ddd5; /* Color clàssic de WhatsApp */
+    height: 60vh;
+    overflow-y: auto;
+    padding: 20px;
+    border-radius: 5px;
+}
+.bombolla-meva {
+    background-color: #d1e7dd; /* Verd clar */
+    border-radius: 15px 15px 0px 15px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    max-width: 75%;
+    float: right;
+    clear: both;
+}
+.bombolla-altre {
+    background-color: #ffffff; /* Blanc */
+    border-radius: 15px 15px 15px 0px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    max-width: 75%;
+    float: left;
+    clear: both;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}

@@ -4,52 +4,6 @@
     <meta charset="UTF-8">
     <title>Xats - Banc de Temps</title>
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
-    <style>
-        .sidebar-xats {
-            background-color: #f8f9fa;
-            border-right: 1px solid #dee2e6;
-            height: 75vh;
-            overflow-y: auto;
-        }
-        .xat-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            border-bottom: 1px solid #e9ecef;
-            text-decoration: none;
-            color: #333;
-        }
-        .xat-item:hover, .xat-item.active {
-            background-color: #e2e6ea;
-        }
-        .fons-xat {
-            background-color: #e5ddd5; /* Color clàssic de WhatsApp */
-            height: 60vh;
-            overflow-y: auto;
-            padding: 20px;
-            border-radius: 5px;
-        }
-        .bombolla-meva {
-            background-color: #d1e7dd; /* Verd clar */
-            border-radius: 15px 15px 0px 15px;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            max-width: 75%;
-            float: right;
-            clear: both;
-        }
-        .bombolla-altre {
-            background-color: #ffffff; /* Blanc */
-            border-radius: 15px 15px 15px 0px;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            max-width: 75%;
-            float: left;
-            clear: both;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-        }
-    </style>
 </head>
 <body class="bg-light">
 
@@ -85,13 +39,13 @@
                 <div class="p-3 bg-secondary text-white fw-bold">Les teves converses</div>
                 <div class="llista">
                     {% for chat in chats %}
-                        <div class="xat-item {% if id_oferta == chat[0] %}active{% endif %}">
+                        <div class="xat-item {% if id_oferta == chat[0] and id_client == chat[2] %}active{% endif %}">
                             <!-- Enllaç per entrar a llegir el xat -->
-                            <a href="/xat/{{ chat[0] }}" class="text-decoration-none text-dark flex-grow-1 text-truncate pe-2">
+                            <a href="/xat/{{ chat[0] }}/{{ chat[2] }}" class="text-decoration-none text-dark flex-grow-1 text-truncate pe-2">
                                 💬 {{ chat[1] }}
                             </a>
                             <!-- Botó de paperera per esborrar aquesta conversa en concret -->
-                            <a href="/eliminar_xat/{{ chat[0] }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Estàs segur que vols eliminar aquesta conversa per complet?')">
+                            <a href="/eliminar_xat/{{ chat[0] }}/{{ chat[2] }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Estàs segur que vols eliminar aquesta conversa per complet?')">
                                 🗑️
                             </a>
                         </div>
@@ -128,7 +82,7 @@
 
                     <!-- Caixa per escriure i enviar missatges -->
                     <div class="p-3 bg-white border-top">
-                        <form action="/xat/{{ id_oferta }}" method="POST" class="d-flex">
+                        <form action="/xat/{{ id_oferta }}/{{ id_client }}" method="POST" class="d-flex">
                             <input type="text" name="missatge" class="form-control me-2" placeholder="Escriu un missatge..." required autocomplete="off">
                             <button type="submit" class="btn btn-primary">Enviar ✈️</button>
                         </form>
