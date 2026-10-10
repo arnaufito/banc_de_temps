@@ -1,3 +1,4 @@
+import hashlib
 import math
 import os
 import re
@@ -10,7 +11,6 @@ from contextlib import contextmanager
 from functools import wraps
 from flask import (Flask, abort, flash, g, redirect, render_template,
                    request, session, url_for)
-from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Ruta absoluta: no depèn de la carpeta des d'on s'executa el servidor
@@ -74,7 +74,27 @@ if os.environ.get("PROXY") == "1":  # darrere d'un proxy (Render, Railway...)
     from werkzeug.middleware.proxy_fix import ProxyFix
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 
-HASH_FALS = generate_password_hash("contrasenya-falsa-per-igualar-temps")
+# ==========================================
+# CONTRASENYES (SHA-256 amb sal: instantani i sense consum de CPU/RAM)
+# ==========================================
+def fer_hash(contrasenya):
+    """Retorna 'sha256$<sal>$<hash>'. Cada contrasenya duu la seva sal aleatòria."""
+    sal = secrets.token_hex(16)
+    digest = hashlib.sha256((sal + contrasenya).encode("utf-8")).hexdigest()
+    return f"sha256${sal}${digest}"
+
+
+def comprovar_hash(guardat, contrasenya):
+    """Compara en temps constant. Si el format no és el nou, retorna False."""
+    try:
+        metode, sal, digest = guardat.split("$")
+    except (ValueError, AttributeError):
+        return False
+    if metode != "sha256":
+        return False
+    calculat = hashlib.sha256((sal + contrasenya).encode("utf-8")).hexdigest()
+    return hmac.compare_digest(calculat, digest)
+
 
 # ==========================================
 # BASE DE DADES
@@ -169,12 +189,12 @@ def inicialitzar_bd():
             try:
                 cur.execute(
                     "INSERT INTO usuaris (nom, correu, contrasenya, ciutat, es_admin) VALUES (?, ?, ?, ?, 1)",
-                    ("Administrador", adm_correu, generate_password_hash(adm_pass), "Altres"))
+                    ("Administrador", adm_correu, fer_hash(adm_pass), "Altres"))
             except sqlite3.IntegrityError:
                 pass  # un altre worker de gunicorn l'ha creat just ara
     
     antic = cur.execute("SELECT contrasenya FROM usuaris WHERE correu = 'admin@gmail.com'").fetchone()
-    if antic and check_password_hash(antic[0], "admin1234"):
+    if antic and comprovar_hash(antic[0], "admin1234"):
         print("PERILL: existeix admin@gmail.com amb la contrasenya 'admin1234'. Canvia-la immediatament!")
     conn.commit()
     conn.close()
@@ -342,7 +362,7 @@ def registre():
         try:
             get_db().execute(
                 "INSERT INTO usuaris (nom, correu, contrasenya, ciutat) VALUES (?, ?, ?, ?)",
-                (nom, correu, generate_password_hash(contrasenya), ciutat))
+                (nom, correu, fer_hash(contrasenya), ciutat))
         except sqlite3.IntegrityError:
             flash("Aquest correu ja està registrat.", "danger")
             return render_template("registre.html", form=request.form), 409
@@ -367,9 +387,8 @@ def login():
             
         fila = get_db().execute(
             "SELECT id, contrasenya FROM usuaris WHERE correu = ?", (correu,)).fetchone()
-        hash_a_comprovar = fila["contrasenya"] if fila else HASH_FALS
         
-        if check_password_hash(hash_a_comprovar, contrasenya) and fila:
+        if fila and comprovar_hash(fila["contrasenya"], contrasenya):
             session.clear() 
             session["id_usuari"] = fila["id"]
             _intents.pop(clau_compte, None)

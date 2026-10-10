@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error {{ codi }} - Banc de Temps</title>
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    {% if jo %}
+        {% include '_navbar.html' %}
+    {% endif %}
+
+    <div class="container text-center mt-5">
+        <h1 class="text-danger">Error {{ codi }}</h1>
+        <p class="lead">{{ missatge }}</p>
+        <a href="/" class="btn btn-primary mt-3">Tornar a l'inici</a>
+    </div>
+
+</body>
+</html>
