@@ -220,3 +220,27 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
     clear: both;
     box-shadow: 0 1px 1px rgba(0,0,0,0.1);
 }
+
+/* Ajustos per a telèfons mòbils (pantalles de menys de 768px d'amplada) */
+@media (max-width: 768px) {
+    .navbar {
+        flex-wrap: wrap;       /* Permet que els enllaços saltin a la línia de sota si no caben */
+        padding: 10px 5px;     /* Redueix l'espai general de la barra */
+        justify-content: center; /* Centra els elements */
+        gap: 5px;              /* Redueix la distància entre els botons */
+    }
+
+    .navbar a, .navbar button {
+        font-size: 14px;       /* Fa la lletra més petita */
+        padding: 6px 10px;     /* Redueix la mida "física" del botó o enllaç */
+        margin: 2px;
+    }
+
+    /* Si tens un títol o logo a la barra, fem que ocupi la seva pròpia línia */
+    .navbar-brand { 
+        width: 100%;
+        text-align: center;
+        font-size: 18px;
+        margin-bottom: 5px;
+    }
+}
