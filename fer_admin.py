@@ -2,7 +2,7 @@ import os
 import sqlite3
 
 # Posa aquí el correu amb el qual et registres a la teva web
-EL_TEU_CORREU = "afitoruana@gmail.com"
+EL_TEU_CORREU = "admin@bancdtemps.cat"
 
 # Mateixa base de dades que fa servir l'app (variable DATABASE o el banc_temps.db de la carpeta del projecte)
 DB_PATH = os.environ.get("DATABASE", os.path.join(os.path.dirname(os.path.abspath(__file__)), "banc_temps.db"))
