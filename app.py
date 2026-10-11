@@ -193,9 +193,6 @@ def inicialitzar_bd():
             except sqlite3.IntegrityError:
                 pass  # un altre worker de gunicorn l'ha creat just ara
     
-    antic = cur.execute("SELECT contrasenya FROM usuaris WHERE correu = 'admin@gmail.com'").fetchone()
-    if antic and comprovar_hash(antic[0], "admin1234"):
-        print("PERILL: existeix admin@gmail.com amb la contrasenya 'admin1234'. Canvia-la immediatament!")
     conn.commit()
     conn.close()
 
