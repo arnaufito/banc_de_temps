@@ -586,7 +586,7 @@ def transferencia():
         
     form = {}
     if oferta:
-        form = {"hores": oferta["hores"], "concepte": f"Oferta: {oferta['titol']}"[:120]}
+        form = {"hores": oferta["hores"], "concepte": f"{oferta['titol']}"[:120]}
     return render_template("transferencia.html", form=form, oferta=oferta)
 
 
