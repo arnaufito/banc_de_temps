@@ -49,7 +49,6 @@
                             </div>
 
                             <form action="/eliminar_oferta/{{ oferta['id'] }}" method="POST" class="mt-auto" data-confirm="Estàs segur que vols eliminar aquesta oferta del mercat?">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="desti" value="mercat">
                                 <button type="submit" class="btn btn-outline-danger w-100 py-2 fw-bold">
                                     🗑️ Eliminar la meva oferta

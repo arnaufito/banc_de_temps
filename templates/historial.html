@@ -32,7 +32,6 @@
                         <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center">
                             <span class="badge bg-info text-dark">Activa</span>
                             <form action="/eliminar_oferta/{{ oferta['id'] }}" method="POST" data-confirm="Estàs segur que vols eliminar aquesta oferta del mercat?">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="desti" value="historial">
                                 <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Eliminar</button>
                             </form>

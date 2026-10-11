@@ -21,7 +21,6 @@
 
                         <!-- Formulari que enviarà les dades a la ruta /registre -->
                         <form method="POST" action="/registre">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="mb-3">
                                 <label class="form-label">Nom complet</label>
                                 <input type="text" name="nom" class="form-control form-control-lg" placeholder="Com et dius?" value="{{ form.get('nom', '') }}" minlength="2" maxlength="60" required>

@@ -39,7 +39,6 @@
                         <!-- Protecció: l'admin no es pot esborrar a ell mateix -->
                         {% if u['id'] != jo.id %}
                             <form action="/eliminar_usuari/{{ u['id'] }}" method="POST" data-confirm="ATENCIÓ: Esborraràs aquest usuari, les seves ofertes i els seus xats. Estàs segur?">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Expulsar</button>
                             </form>
                         {% else %}
@@ -59,7 +58,6 @@
                                 <div class="mb-2 d-flex justify-content-between align-items-center border-bottom pb-2">
                                     <span><strong>ID {{ o['id'] }}:</strong> {{ o['titol'] }} (de {{ o['nom_autor'] }})</span>
                                     <form action="/eliminar_oferta/{{ o['id'] }}" method="POST" data-confirm="Esborrar definitivament?">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <input type="hidden" name="desti" value="admin">
                                         <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Forçar esborrat</button>
                                     </form>

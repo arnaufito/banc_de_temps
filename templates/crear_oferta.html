@@ -21,8 +21,6 @@
                         {% include '_flash.html' %}
 
                         <form action="/crear_oferta" method="POST">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
                             <!-- Títol -->
                             <div class="mb-3">
                                 <label class="form-label">Títol de l'oferta</label>

@@ -27,7 +27,6 @@
                             </a>
                             <!-- Paperera: esborra aquesta conversa (és un formulari POST amb confirmació) -->
                             <form action="/eliminar_xat/{{ chat[0] }}/{{ chat[2] }}" method="POST" data-confirm="Estàs segur que vols eliminar aquesta conversa per complet?">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-outline-danger btn-sm">🗑️</button>
                             </form>
                         </div>
@@ -64,7 +63,6 @@
                     <!-- Caixa per escriure i enviar missatges -->
                     <div class="p-3 bg-white border-top">
                         <form action="/xat/{{ id_oferta }}/{{ id_client }}" method="POST" class="d-flex">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="text" name="missatge" class="form-control me-2" placeholder="Escriu un missatge..." maxlength="1000" required autocomplete="off">
                             <button type="submit" class="btn btn-primary">Enviar ✈️</button>
                         </form>

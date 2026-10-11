@@ -22,7 +22,6 @@
 
                         <!-- Formulari que enviarà les dades a la ruta /login -->
                         <form method="POST" action="/login">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="mb-3">
                                 <label class="form-label">Correu electrònic</label>
                                 <input type="email" name="correu" class="form-control form-control-lg text-muted" placeholder="nom@exemple.cat" value="{{ correu or '' }}" required>
