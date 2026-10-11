@@ -72,7 +72,7 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 .btn-primary { color: #fff; background-color: #0d6efd; border-color: #0d6efd; }
 .btn-primary:hover { color: #fff; background-color: #0b5ed7; border-color: #0a58ca; }
 .btn-success { color: #fff; background-color: #0d6efd; border-color: #0d6efd; }
-.btn-success:hover { color: #fff; background-color: #157347; border-color: #146c43; }
+.btn-success:hover { color: #fff; background-color: #0b5ed7; border-color: #0b5ed7; }
 .btn-danger { color: #fff; background-color: #dc3545; border-color: #dc3545; }
 .btn-danger:hover { color: #fff; background-color: #bb2d3b; border-color: #b02a37; }
 .btn-outline-primary { color: #0d6efd; border-color: #0d6efd; }
