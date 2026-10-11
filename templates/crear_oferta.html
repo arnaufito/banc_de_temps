@@ -16,7 +16,7 @@
             <div class="col-md-6">
                 <div class="card shadow-sm border-0">
                     <div class="card-body p-5">
-                        <h3 class="text-primary mb-4">Publicar un nou servei</h3>
+                        <h3 class="text-center text-primary mb-4">Publicar un nou servei</h3>
 
                         {% include '_flash.html' %}
 
@@ -25,15 +25,15 @@
 
                             <!-- Títol -->
                             <div class="mb-3">
-                                <label class="form-label text-muted">Títol de l'oferta</label>
+                                <label class="form-label">Títol de l'oferta</label>
                                 <input type="text" name="titol" class="form-control" placeholder="Ex: Classes de piano" value="{{ form.get('titol', '') }}" minlength="3" maxlength="100" required>
                             </div>
 
                             <!-- Categoria -->
                             <div class="mb-3">
                                 <label for="categoria" class="form-label">Categoria de l'oferta</label>
-                                <select class="form-select" name="categoria" id="categoria" required>
-                                    <option value="" {% if not form.get('categoria') %}selected{% endif %} disabled>-- Selecciona una categoria --</option>
+                                <select class="form-select text-muted" name="categoria" id="categoria" required>
+                                    <option value="" {% if not form.get('categoria') %}selected{% endif %} disabled>Selecciona una categoria</option>
                                     {% for valor, text in CATEGORIES %}
                                         <option value="{{ valor }}" {% if form.get('categoria') == valor %}selected{% endif %}>{{ text }}</option>
                                     {% endfor %}
@@ -42,14 +42,14 @@
 
                             <!-- Descripció -->
                             <div class="mb-3">
-                                <label class="form-label text-muted">Descripció</label>
+                                <label class="form-label">Descripció</label>
                                 <textarea name="descripcio" class="form-control" rows="3" placeholder="Explica els detalls de la teva oferta..." minlength="5" maxlength="1000" required>{{ form.get('descripcio', '') }}</textarea>
                             </div>
 
                             <!-- Hores -->
                             <div class="mb-3">
-                                <label class="form-label text-muted">Hores</label>
-                                <input type="number" name="hores" class="form-control" placeholder="Hores" step="0.01" min="0.01" max="50" value="{{ form.get('hores', '') }}" required>
+                                <label class="form-label">Hores</label>
+                                <input type="number" name="hores" class="form-control" placeholder="Ex:1.25" step="0.01" min="0.01" max="50" value="{{ form.get('hores', '') }}" required>
                             </div>
 
                             <button type="submit" class="btn btn-primary w-100">Publicar nova oferta</button>

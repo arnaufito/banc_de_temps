@@ -33,7 +33,7 @@
                                 </div>
                             {% else %}
                                 <div class="mb-3">
-                                    <label class="form-label">Correu del Destinatari (A qui pagues?)</label>
+                                    <label class="form-label">Correu del Destinatari</label>
                                     <input type="email" name="correu_destinatari" class="form-control" placeholder="correu@exemple.cat" value="{{ form.get('correu_destinatari', '') }}" required>
                                 </div>
                             {% endif %}
@@ -44,7 +44,6 @@
                                     <input type="number" name="hores" class="form-control" step="0.01" min="0.01" max="1000" placeholder="Ex: 1.25" value="{{ form.get('hores', '') }}" required>
                                     <span class="input-group-text bg-white">hores</span>
                                 </div>
-                                <small class="text-muted">Pots usar decimals (0.25, 0.5, 1.5...)</small>
                             </div>
 
                             <div class="mb-4">
