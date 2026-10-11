@@ -333,7 +333,7 @@ def registre():
         try:
             get_db().execute(
                 "INSERT INTO usuaris (nom, correu, contrasenya, ciutat) VALUES (?, ?, ?, ?)",
-                (nom, correu, generate_pasword_hash(contrasenya), ciutat))
+                (nom, correu, generate_password_hash(contrasenya), ciutat))
         except sqlite3.IntegrityError:
             flash("Aquest correu ja està registrat.", "danger")
             return render_template("registre.html", form=request.form), 409
