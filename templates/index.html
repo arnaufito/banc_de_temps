@@ -7,20 +7,37 @@
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
 </head>
 <body class="bg-light">
-
-    <div class="container text-center mt-5">
+    <div class="container text-center mt-5" style="max-width: 900px;">
         {% if jo %}
             <h1 class="text-primary">Hola, {{ jo.nom }}!</h1>
             <p class="lead">Benvingut de nou al teu espai.</p>
             <a href="/mercat" class="btn btn-primary mt-3">Anar al mercat</a>
             <a href="/logout" class="btn btn-danger mt-3">Tancar sessió</a>
         {% else %}
-            <h1 class="text-primary">Benvingut al Banc de Temps</h1>
-            <p class="lead">El teu saldo inicial serà de 5 hores.</p>
-            <a href="/login" class="btn btn-primary mt-3">Inicia Sessió</a>
-            <a href="/registre" class="btn btn-outline-primary mt-3">Registra't</a>
+            <h1 class="text-primary mb-3">Benvingut al Banc de Temps</h1>
+            
+            <!-- Requadre informatiu sobre què és i les funcions de la web -->
+            <div class="card shadow-sm border-0 text-start my-4 p-4 bg-white rounded">
+                <h4 class="text-dark mb-3">Què és el Banc de Temps i com funciona?</h4>
+                <p class="text-muted mb-3">
+                    Un <strong>Banc de Temps</strong> és una xarxa d'intercanvi local on la moneda de canvi és el temps (1 hora = 1 hora, independentment del servei). En registrar-te, obtens un saldo inicial de <strong>5 hores</strong>.
+                </p>
+                <h5 class="text-dark mb-2 mt-4">Què pots fer a la nostra plataforma?</h5>
+                <ul class="text-muted mb-0 ps-3">
+                    <li class="mb-2"><strong>Mercat de Serveis:</strong> Explora totes les ofertes de classes, cures, bricolatge i molts altres serveis publicades pels veïns de la teva zona.</li>
+                    <li class="mb-2"><strong>Crear Ofertes:</strong> Publica els teus propis serveis i habilitats perquè altres usuaris puguin sol·licitar el teu temps.</li>
+                    <li class="mb-2"><strong>Pagar Hores:</strong> Transfereix hores de manera fàcil i segura a un altre usuari quan t'hagi prestat un servei acordat.</li>
+                    <li class="mb-2"><strong>Historial de Moviments:</strong> Consulta en tot moment les teves ofertes actives i el registre de tots els teus pagaments i cobraments.</li>
+                    <li class="mb-0"><strong>Xats Privats:</strong> Parla directament amb altres membres per coordinar els detalls dels vostres intercanvis de manera ràpida.</li>
+                </ul>
+            </div>
+
+            <p class="lead text-secondary">El teu saldo inicial serà de 5 hores.</p>
+            <div class="mt-4 mb-5">
+                <a href="/login" class="btn btn-primary btn-lg px-4 me-2">Inicia Sessió</a>
+                <a href="/registre" class="btn btn-outline-primary btn-lg px-4">Registra't</a>
+            </div>
         {% endif %}
     </div>
-
 </body>
 </html>
