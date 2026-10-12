@@ -20,17 +20,16 @@ DB_PATH = os.environ.get("DATABASE", os.path.join(BASE_DIR, "banc_temps.db"))
 # ==========================================
 # CONFIGURACIÓ
 # ==========================================
-# ==========================================
-# CONFIGURACIÓ
-# ==========================================
 CIUTATS = [
-    "Igualada", "<bos>33", "Argençola", "Bellprat", "El Bruc", "Cabrera d'Anoia", 
-    "Calaf", "Calonge de Segarra", "Capellades", "Carme", "Castellfollit de Riubregós", 
-    "Castellolí", "Copons", "Els Hostalets de Pierola", "<bos>20", "Jorba", 
-    "La Llacuna", "Mas de Bondia", "Montmaneu", "Òdena", "Piera", "La Pobla de Claramunt", 
-    "Els Prats de Rei", "Pujalt", "Rubió", "Sant Martí de Sesgueioles", "Sant Martí Tous", 
-    "Sant Pere Sallavinera", "Santa Margarida de Montbui", "Santa Maria de Miralles", 
-    "Torà", "Torre de Claramunt (La)", "Vilanova del Camí", "Altres"
+    "Calaf", "Calonge de Segarra", "Els Prats de Rei", "Sant Martí Sesgueioles", "Sant Pere Sallavinera",
+    "Castellfollit de Riubregós", "Pujalt", "Argençola", "Copons", "Jorba",
+    "Òdena", "Rubió", "Igualada", "Santa Maria de Miralles", "Vilanova del Camí",
+    "Santa Margarida de Montbui", "Cervera", "Sant Guim de Freixenet", "Sant Ramon", "Les Oluges",
+    "Estaràs", "Ribera d'Ondara", "Torà", "Ivorra", "Massoteres",
+    "Guissona", "La Molsosa", "Pinós", "Riner", "Sanahuja",
+    "Olius", "Solsona", "Castellfollit del Boix", "Fonollosa", "Rajadell",
+    "Sant Salvador de Guardiola", "Manresa", "El Pont de Vilomara i Rocafort", "Navarcles", "Sant Fruitós de Bages",
+    "Altres"
 ]
 CATEGORIES = [
     ("Classes i Formació", "📚 Classes i Formació (Idiomes, repàs escolar, música...)"),
