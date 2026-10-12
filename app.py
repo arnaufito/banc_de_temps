@@ -20,9 +20,18 @@ DB_PATH = os.environ.get("DATABASE", os.path.join(BASE_DIR, "banc_temps.db"))
 # ==========================================
 # CONFIGURACIÓ
 # ==========================================
-CIUTATS = ["Barcelona", "Girona", "Lleida", "Tarragona",
-           "L'Hospitalet de Llobregat", "Badalona", "Terrassa", "Sabadell", "Altres"]
-
+# ==========================================
+# CONFIGURACIÓ
+# ==========================================
+CIUTATS = [
+    "Igualada", "<bos>33", "Argençola", "Bellprat", "El Bruc", "Cabrera d'Anoia", 
+    "Calaf", "Calonge de Segarra", "Capellades", "Carme", "Castellfollit de Riubregós", 
+    "Castellolí", "Copons", "Els Hostalets de Pierola", "<bos>20", "Jorba", 
+    "La Llacuna", "Mas de Bondia", "Montmaneu", "Òdena", "Piera", "La Pobla de Claramunt", 
+    "Els Prats de Rei", "Pujalt", "Rubió", "Sant Martí de Sesgueioles", "Sant Martí Tous", 
+    "Sant Pere Sallavinera", "Santa Margarida de Montbui", "Santa Maria de Miralles", 
+    "Torà", "Torre de Claramunt (La)", "Vilanova del Camí", "Altres"
+]
 CATEGORIES = [
     ("Classes i Formació", "📚 Classes i Formació (Idiomes, repàs escolar, música...)"),
     ("Cures i Acompanyament", "🤝 Cures i Acompanyament (Cangur, passejar mascotes, gent gran...)"),
