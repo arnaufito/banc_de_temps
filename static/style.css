@@ -252,7 +252,7 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; border-radius: 0.2rem; }
 
 /* --- 4.6 Moneda (distintiu "1 h") i etiquetes grogues --- */
-.bt-moneda, .bt-moneda-mini, .bt-cost, .bt-hores-gran, .bt-error-codi { background-color: var(--bt-moneda); color: var(--bt-ink); font-weight: 800; }
+.bt-moneda, .bt-moneda-mini, .bt-cost, .bt-hores-gran, .bt-error-codi { background-color: var(--bt-moneda); color:rgb(226, 27, 27) ; font-weight: 800; }
 .bt-moneda, .bt-moneda-mini { align-items: center; justify-content: center; border-radius: 50%; }
 .bt-moneda { display: flex; width: 7.5rem; height: 7.5rem; font-size: 2.5rem; letter-spacing: -0.02em; box-shadow: 0 0 0 0.5rem rgba(var(--bt-moneda-rgb), 0.2); }
 .bt-moneda-mini { display: inline-flex; width: 2.75rem; height: 2.75rem; font-size: 0.95rem; }
