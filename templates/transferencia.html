@@ -1,3 +1,4 @@
+<!-- transferencia.html -->
 <!DOCTYPE html>
 <html lang="ca">
 <head>
@@ -11,13 +12,16 @@
 {% set actiu = 'pagar' %}
 {% include '_navbar.html' %}
 
-    <div class="container mt-5">
+    <div class="container bt-pagina">
         <div class="row justify-content-center">
-            <div class="col-md-5">
-                <div class="card shadow border-0 border-top border-primary border-4">
-                    <div class="card-body p-5">
-                        <h3 class="text-center text-primary mb-4">Pagar Hores</h3>
-                        <p class="text-center text-muted mb-4">Transfereix el temps acordat per un servei realitzat.</p>
+            <div class="col-md-6">
+                <div class="card bt-card border-0">
+                    <div class="card-body bt-card-cos">
+                        <div class="text-center mb-4">
+                            <span class="bt-moneda-mini bt-moneda-titol">1h</span>
+                            <h3 class="bt-titol-card mt-3 mb-2">Pagar Hores</h3>
+                            <p class="text-muted mb-0">Transfereix el temps acordat per un servei realitzat.</p>
+                        </div>
 
                         {% include '_flash.html' %}
 
@@ -25,29 +29,31 @@
                             {% if oferta %}
                                 <!-- Pagament d'una oferta concreta: el destinatari és el seu propietari -->
                                 <input type="hidden" name="id_oferta" value="{{ oferta['id'] }}">
-                                <div class="alert alert-info">
-                                    Pagaràs a <strong>{{ oferta['nom_venedor'] }}</strong> per l'oferta «{{ oferta['titol'] }}».
-                                    <br><a href="/transferencia" class="small">Pagar a un altre usuari</a>
+                                <div class="bt-destinatari mb-4">
+                                    <div>
+                                        Pagaràs a <strong>{{ oferta['nom_venedor'] }}</strong> per l'oferta «{{ oferta['titol'] }}».
+                                    </div>
+                                    <a href="/transferencia" class="small">Pagar a un altre usuari</a>
                                 </div>
                             {% else %}
                                 <div class="mb-3">
-                                    <label class="form-label">Correu del Destinatari (A qui pagues?)</label>
-                                    <input type="email" name="correu_destinatari" class="form-control" placeholder="correu@exemple.cat" value="{{ form.get('correu_destinatari', '') }}" required>
+                                    <label class="form-label fw-bold">Correu del Destinatari <span class="text-muted fw-normal">(A qui pagues?)</span></label>
+                                    <input type="email" name="correu_destinatari" class="form-control form-control-lg" placeholder="correu@exemple.cat" value="{{ form.get('correu_destinatari', '') }}" required>
                                 </div>
                             {% endif %}
 
                             <div class="mb-3">
-                                <label class="form-label">Hores a transferir</label>
+                                <label class="form-label fw-bold">Hores a transferir</label>
                                 <div class="input-group">
-                                    <input type="number" name="hores" class="form-control" step="0.01" min="0.01" max="1000" placeholder="Ex: 1.25" value="{{ form.get('hores', '') }}" required>
+                                    <input type="number" name="hores" class="form-control form-control-lg" step="0.01" min="0.01" max="1000" placeholder="Ex: 1.25" value="{{ form.get('hores', '') }}" required>
                                     <span class="input-group-text bg-white">hores</span>
                                 </div>
                                 <small class="text-muted">Pots usar decimals (0.25, 0.5, 1.5...)</small>
                             </div>
 
                             <div class="mb-4">
-                                <label class="form-label">Concepte</label>
-                                <input type="text" name="concepte" class="form-control" placeholder="Ex: Classes de mates del divendres" value="{{ form.get('concepte', '') }}" maxlength="120" required>
+                                <label class="form-label fw-bold">Concepte</label>
+                                <input type="text" name="concepte" class="form-control form-control-lg" placeholder="Ex: Classes de mates del divendres" value="{{ form.get('concepte', '') }}" maxlength="120" required>
                             </div>
 
                             <button type="submit" class="btn btn-primary w-100 btn-lg">Confirmar Transferència</button>

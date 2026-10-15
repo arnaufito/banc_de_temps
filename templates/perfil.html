@@ -1,3 +1,4 @@
+<!-- perfil.html -->
 <!DOCTYPE html>
 <html lang="ca">
 <head>
@@ -11,33 +12,33 @@
 {% set actiu = 'perfil' %}
 {% include '_navbar.html' %}
 
-    <div class="container">
+    <div class="container bt-pagina">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-5">
-                        <h3 class="text-primary border-bottom pb-2 mb-4">Configuració del Perfil</h3>
+                <div class="card bt-card border-0">
+                    <div class="card-body bt-card-cos">
+                        <h3 class="bt-titol-card border-bottom pb-3 mb-4">Configuració del Perfil</h3>
 
                         {% include '_flash.html' %}
 
                         <form method="POST" action="/perfil">
                             <div class="text-center mb-4">
-                                <div class="bg-secondary rounded-circle d-inline-block" style="width: 120px; height: 120px; line-height: 120px; color: white; font-size: 3rem;">
+                                <div class="bt-avatar">
                                     👤
                                 </div>
-                                <div class="mt-2">
-                                    <span class="text-muted small">Correu electrònic: <strong>{{ usuari[1] }}</strong></span>
+                                <div class="mt-3">
+                                    <span class="bt-correu-perfil">Correu electrònic: <strong>{{ usuari[1] }}</strong></span>
                                 </div>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted">Nom a mostrar</label>
-                                    <input type="text" name="nom" class="form-control" value="{{ usuari[0] }}" minlength="2" maxlength="60" required>
+                                    <label class="form-label fw-bold">Nom a mostrar</label>
+                                    <input type="text" name="nom" class="form-control form-control-lg" value="{{ usuari[0] }}" minlength="2" maxlength="60" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Ciutat o Població</label>
-                                    <select class="form-select" name="ciutat" required>
+                                    <label class="form-label fw-bold">Ciutat o Població</label>
+                                    <select class="form-select form-control-lg" name="ciutat" required>
                                         {% for c in CIUTATS %}
                                             <option value="{{ c }}" {% if usuari[2] == c or (c == 'Altres' and usuari[2] not in CIUTATS) %}selected{% endif %}>{{ c if c != 'Altres' else 'Altres poblacions...' }}</option>
                                         {% endfor %}
@@ -45,15 +46,16 @@
                                 </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">La meva descripció</label>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">La meva descripció</label>
                                 <textarea name="descripcio" class="form-control" rows="4" maxlength="500" placeholder="Escriu alguna cosa sobre tu...">{{ usuari[3] or '' }}</textarea>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100">Guardar Canvis</button>
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Guardar Canvis</button>
                         </form>
-                        <div class="text-center mt-4">
-                            <a href="/normes" class="text-secondary" style="text-decoration: underline;">Llegir les Normes d'Ús</a>
+
+                        <div class="text-center mt-4 pt-3 border-top">
+                            <a href="/normes" class="text-secondary small" style="text-decoration: underline;">Llegir les Normes d'Ús</a>
                         </div>
                     </div>
                 </div>

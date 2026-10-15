@@ -1,3 +1,4 @@
+<!-- historial.html -->
 <!DOCTYPE html>
 <html lang="ca">
 <head>
@@ -11,26 +12,26 @@
 {% set actiu = 'historial' %}
 {% include '_navbar.html' %}
 
-    <div class="container">
+    <div class="container bt-pagina">
         {% include '_flash.html' %}
 
         <!-- LES MEVES OFERTES -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="text-primary m-0">Les meves ofertes publicades</h2>
+        <div class="bt-pagina-cap">
+            <h2 class="bt-h2-gran text-primary m-0">Les meves ofertes publicades</h2>
             <a href="/crear_oferta" class="btn btn-success">➕ Nova Oferta</a>
         </div>
 
         <div class="row">
             {% for oferta in ofertes %}
                 <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm h-100 border-0">
+                    <div class="card bt-oferta h-100 border-0">
                         <div class="card-body">
-                            <h5 class="card-title fw-bold text-dark">{{ oferta['titol'] }}</h5>
-                            <p class="card-text text-muted">{{ oferta['descripcio']|truncate(150) }}</p>
-                            <p class="mb-0"><strong>{{ oferta['hores'] }}</strong> hores</p>
+                            <h5 class="card-title bt-oferta-titol">{{ oferta['titol'] }}</h5>
+                            <p class="card-text bt-oferta-desc">{{ oferta['descripcio']|truncate(150) }}</p>
+                            <p class="mb-0"><span class="bt-cost">{{ oferta['hores'] }}</span> <span class="text-muted">hores</span></p>
                         </div>
-                        <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center">
-                            <span class="badge bg-info text-dark">Activa</span>
+                        <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                            <span class="badge bt-categoria">Activa</span>
                             <form action="/eliminar_oferta/{{ oferta['id'] }}" method="POST" data-confirm="Estàs segur que vols eliminar aquesta oferta del mercat?">
                                 <input type="hidden" name="desti" value="historial">
                                 <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Eliminar</button>
@@ -39,21 +40,24 @@
                     </div>
                 </div>
             {% else %}
-                <div class="col-12 text-center py-5 bg-white shadow-sm rounded">
-                    <h4 class="text-muted mb-3">Encara no has publicat cap oferta.</h4>
-                    <p class="text-secondary">Quan ofereixis el teu temps o algun servei, apareixerà aquí perquè ho puguis gestionar.</p>
+                <div class="col-12">
+                    <div class="bt-buit text-center">
+                        <h4 class="text-muted mb-3">Encara no has publicat cap oferta.</h4>
+                        <p class="text-secondary mb-0">Quan ofereixis el teu temps o algun servei, apareixerà aquí perquè ho puguis gestionar.</p>
+                    </div>
                 </div>
             {% endfor %}
         </div>
 
         <!-- ELS MEUS MOVIMENTS D'HORES -->
-        <h2 class="text-primary mt-5 mb-4">Els meus moviments d'hores</h2>
+        <h2 class="bt-h2-gran text-primary mt-5 mb-4">Els meus moviments d'hores</h2>
 
-        <div class="bg-white shadow-sm rounded mb-5">
+        <div class="bt-moviments mb-5">
             {% for m in moviments %}
                 {% set he_pagat = (m['id_pagador'] == jo.id) %}
-                <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
-                    <div>
+                <div class="bt-moviment">
+                    <span class="bt-moviment-icona {% if he_pagat %}bt-moviment-pagat{% else %}bt-moviment-cobrat{% endif %}">{% if he_pagat %}↑{% else %}↓{% endif %}</span>
+                    <div class="flex-grow-1 bt-moviment-info">
                         {% if he_pagat %}
                             <strong class="text-danger">Pagament a {{ m['nom_cobrador'] }}</strong>
                         {% else %}
@@ -62,7 +66,7 @@
                         <br>
                         <small class="text-muted">{{ m['concepte'] or 'Sense concepte' }} · {{ (m['data'] or '')[:16] }}</small>
                     </div>
-                    <span class="fw-bold fs-5 {% if he_pagat %}text-danger{% else %}text-success{% endif %}">
+                    <span class="fw-bold fs-5 bt-moviment-hores {% if he_pagat %}text-danger{% else %}text-success{% endif %}">
                         {% if he_pagat %}-{% else %}+{% endif %}{{ m['hores'] }}h
                     </span>
                 </div>
