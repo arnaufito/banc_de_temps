@@ -375,3 +375,58 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 .bt-moviment-cobrat { background-color: var(--bt-tint, #eaf2ff); color: var(--bt-blau, #0d6efd); }
 .bt-moviment-info { min-width: 0; }
 .bt-moviment-hores { white-space: nowrap; }
+
+
+/* =========================================
+   16. BLOC 4: XAT I ADMIN — afegir al final de style.css, després del bloc 15
+========================================= */
+
+/* Xat: contenidor */
+.bt-xat { background-color: #fff; border-radius: 0.75rem; box-shadow: 0 0.25rem 1rem rgba(15, 35, 71, 0.08); }
+.bt-xat .sidebar-xats { background-color: #fff; border-right: 1px solid #eef1f6; }
+.bt-xat-cap-llista { padding: 1rem 1.25rem; background-color: var(--bt-tint, #eaf2ff); color: var(--bt-ink, #0f2347); font-weight: 700; border-bottom: 1px solid #dbe6fa; }
+.bt-xat-cap { padding: 1rem 1.25rem; background-color: var(--bt-ink, #0f2347); color: #fff; font-weight: 700; }
+
+/* Xat: llista de converses */
+.xat-item { border-left: 4px solid transparent; border-bottom: 1px solid #eef1f6; padding: 0.75rem 1rem; transition: background-color .15s ease-in-out; }
+.xat-item:hover { background-color: #f4f7fd; }
+.xat-item.active { background-color: var(--bt-tint, #eaf2ff); border-left-color: var(--bt-blau, #0d6efd); }
+.xat-item a { color: var(--bt-ink, #0f2347) !important; font-weight: 500; }
+
+/* Xat: missatges */
+.fons-xat { background-color: #eef2f9; border-radius: 0; }
+.bombolla-meva { background-color: #cfe2ff; color: var(--bt-ink, #0f2347); box-shadow: 0 1px 1px rgba(15, 35, 71, 0.08); }
+.bombolla-altre { color: #212529; }
+.bt-bombolla-nom { font-size: 0.8rem; color: #495057; }
+
+/* Xat: enviament i estat buit */
+.bt-xat-envio { padding: 1rem 1.25rem; background-color: #fff; border-top: 1px solid #eef1f6; }
+.bt-xat-envio .form-control { border-radius: 2rem; padding-left: 1.1rem; }
+.bt-xat-buit { min-height: 60vh; }
+.bt-xat-buit-icona { font-size: 3rem; margin-bottom: 0.75rem; }
+
+@media (max-width: 767px) {
+    .bt-xat .sidebar-xats { height: auto; max-height: 14rem; border-right: 0; border-bottom: 1px solid #eef1f6; }
+    .fons-xat { height: 55vh; }
+    .bombolla-meva, .bombolla-altre { max-width: 90%; }
+}
+
+/* Admin: sobri i funcional */
+.bt-admin-titol { font-size: 1.75rem; font-weight: 700; color: var(--bt-ink, #0f2347); }
+.bt-admin-resum { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; }
+.bt-admin-dada { background-color: #fff; border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 0.5rem 1rem; color: #495057; font-size: 0.95rem; }
+.bt-admin-dada strong { font-size: 1.25rem; color: var(--bt-ink, #0f2347); margin-right: 0.25rem; }
+.bt-admin-panell { background-color: #fff; border: 1px solid #dee2e6; border-radius: 0.5rem; overflow: hidden; }
+.bt-admin-panell-cap { padding: 0.85rem 1.25rem; background-color: #f8f9fa; border-bottom: 1px solid #dee2e6; font-weight: 600; color: var(--bt-ink, #0f2347); }
+
+/* Taules de dades */
+.bt-taula-scroll { max-height: 26rem; overflow: auto; }
+.bt-taula { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.bt-taula th { position: sticky; top: 0; z-index: 1; background-color: #f8f9fa; text-align: left; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #6c757d; padding: 0.6rem 1.25rem; border-bottom: 2px solid #dee2e6; white-space: nowrap; }
+.bt-taula td { padding: 0.65rem 1.25rem; border-bottom: 1px solid #eef1f6; vertical-align: middle; }
+.bt-taula tbody tr:last-child td { border-bottom: 0; }
+.bt-taula tbody tr:hover { background-color: #f8faff; }
+.bt-taula .bt-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bt-taula .bt-accio { text-align: right; white-space: nowrap; }
+.bt-taula-buida { text-align: center; color: #6c757d; padding: 2rem 1rem !important; }
+

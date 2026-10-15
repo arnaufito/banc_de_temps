@@ -1,3 +1,4 @@
+<!-- xat.html -->
 <!DOCTYPE html>
 <html lang="ca">
 <head>
@@ -11,14 +12,14 @@
 {% set actiu = 'xat' %}
 {% include '_navbar.html' %}
 
-    <div class="container">
+    <div class="container bt-pagina">
         {% include '_flash.html' %}
 
-        <div class="row bg-white shadow rounded overflow-hidden">
+        <div class="row bt-xat overflow-hidden">
 
             <!-- COLUMNA ESQUERRA: Llista de Xats -->
             <div class="col-md-4 sidebar-xats p-0">
-                <div class="p-3 bg-secondary text-white fw-bold">Les teves converses</div>
+                <div class="bt-xat-cap-llista">Les teves converses</div>
                 <div class="llista">
                     {% for chat in chats %}
                         <div class="xat-item {% if id_oferta == chat[0] and id_client == chat[2] %}active{% endif %}">
@@ -39,7 +40,7 @@
             <!-- COLUMNA DRETA: Contingut del Xat -->
             <div class="col-md-8 d-flex flex-column p-0">
                 {% if id_oferta %}
-                    <div class="p-3 bg-dark text-white fw-bold">
+                    <div class="bt-xat-cap">
                         Xat de l'oferta: {{ titol }}{% if interlocutor %} · amb {{ interlocutor }}{% endif %}
                     </div>
 
@@ -48,11 +49,11 @@
                         {% for msg in missatges %}
                             {% if msg[2] == el_meu_id %}
                                 <div class="bombolla-meva">
-                                    <strong>Jo:</strong><br>{{ msg[1] }}
+                                    <strong class="bt-bombolla-nom">Jo:</strong><br>{{ msg[1] }}
                                 </div>
                             {% else %}
                                 <div class="bombolla-altre">
-                                    <strong>{{ msg[0] }}:</strong><br>{{ msg[1] }}
+                                    <strong class="bt-bombolla-nom">{{ msg[0] }}:</strong><br>{{ msg[1] }}
                                 </div>
                             {% endif %}
                         {% else %}
@@ -61,17 +62,18 @@
                     </div>
 
                     <!-- Caixa per escriure i enviar missatges -->
-                    <div class="p-3 bg-white border-top">
+                    <div class="bt-xat-envio">
                         <form action="/xat/{{ id_oferta }}/{{ id_client }}" method="POST" class="d-flex">
                             <input type="text" name="missatge" class="form-control me-2" placeholder="Escriu un missatge..." maxlength="1000" required autocomplete="off">
-                            <button type="submit" class="btn btn-primary">Enviar ✈️</button>
+                            <button type="submit" class="btn btn-primary px-4">Enviar ✈️</button>
                         </form>
                     </div>
                 {% else %}
                     <!-- Pantalla de benvinguda si no s'ha triat cap xat -->
-                    <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted p-5" style="height: 70vh !important;">
-                        <h4>Selecciona un xat a l'esquerra per començar a parlar</h4>
-                        <p>Parla amb altres usuaris per coordinar els vostres intercanvis de temps.</p>
+                    <div class="d-flex flex-column justify-content-center align-items-center flex-grow-1 text-center text-muted p-5 bt-xat-buit">
+                        <div class="bt-xat-buit-icona">💬</div>
+                        <h4 class="bt-oferta-titol">Selecciona un xat a l'esquerra per començar a parlar</h4>
+                        <p class="mb-0">Parla amb altres usuaris per coordinar els vostres intercanvis de temps.</p>
                     </div>
                 {% endif %}
             </div>
