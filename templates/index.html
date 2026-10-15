@@ -5,39 +5,149 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Banc de Temps</title>
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
 <body class="bg-light">
-    <div class="container text-center mt-5" style="max-width: 900px;">
-        {% if jo %}
-            <h1 class="text-primary">Hola, {{ jo.nom }}!</h1>
-            <p class="lead">Benvingut de nou al teu espai.</p>
-            <a href="/mercat" class="btn btn-primary mt-3">Anar al mercat</a>
-            <a href="/logout" class="btn btn-danger mt-3">Tancar sessió</a>
-        {% else %}
-            <h1 class="text-primary mb-3">Benvingut al Banc de Temps</h1>
-            
-            <!-- Requadre informatiu sobre què és i les funcions de la web -->
-            <div class="card shadow-sm border-0 text-start my-4 p-4 bg-white rounded">
-                <h4 class="text-dark mb-3">Què és el Banc de Temps i com funciona?</h4>
-                <p class="text-muted mb-3">
-                    Un <strong>Banc de Temps</strong> és una xarxa d'intercanvi local on la moneda de canvi és el temps (1 hora = 1 hora, independentment del servei). En registrar-te, obtens un saldo inicial de <strong>5 hores</strong>.
-                </p>
-                <h5 class="text-dark mb-2 mt-4">Què pots fer a la nostra plataforma?</h5>
-                <ul class="text-muted mb-0 ps-3">
-                    <li class="mb-2"><strong>Mercat de Serveis:</strong> Explora totes les ofertes de classes, cures, bricolatge i molts altres serveis publicades pels veïns de la teva zona.</li>
-                    <li class="mb-2"><strong>Crear Ofertes:</strong> Publica els teus propis serveis i habilitats perquè altres usuaris puguin sol·licitar el teu temps.</li>
-                    <li class="mb-2"><strong>Pagar Hores:</strong> Transfereix hores de manera fàcil i segura a un altre usuari quan t'hagi prestat un servei acordat.</li>
-                    <li class="mb-2"><strong>Historial de Moviments:</strong> Consulta en tot moment les teves ofertes actives i el registre de tots els teus pagaments i cobraments.</li>
-                    <li class="mb-0"><strong>Xats Privats:</strong> Parla directament amb altres membres per coordinar els detalls dels vostres intercanvis de manera ràpida.</li>
-                </ul>
+{# ⚠ COMPROVA: si el teu index.html original no incloïa la navbar o el flash, esborra aquestes línies #}
+{% set actiu = 'inici' %}
+{% include '_navbar.html' %}
+
+<header class="bt-hero">
+    <div class="container">
+        <div class="bt-hero-grid">
+            <div>
+                <h1 class="bt-h1">La teva hora val tant com la de qualsevol altra persona</h1>
+                <p class="bt-lead">Al Banc de Temps no es paga amb diners, sinó amb temps. Ajuda algú del teu entorn durant una hora i, quan ho necessitis, algú t'ajudarà a tu.</p>
+
+                {# ⚠ COMPROVA: la condició {% if jo %} i els href han de ser els del teu index.html original #}
+                {% if jo %}
+                    <div class="bt-botons">
+                        <a href="/mercat" class="btn btn-primary btn-lg">Anar al mercat</a>
+                        <a href="/perfil" class="btn btn-outline-light btn-lg">El meu perfil</a>
+                    </div>
+                {% else %}
+                    <div class="bt-botons">
+                        <a href="/registre" class="btn btn-primary btn-lg">Crea el teu compte</a>
+                        <a href="/login" class="btn btn-outline-light btn-lg">Ja tinc compte</a>
+                    </div>
+                    <p class="bt-nota">Només registrar-te, reps <strong>5 hores de benvinguda</strong> per començar.</p>
+                {% endif %}
             </div>
 
-            <p class="lead text-secondary">El teu saldo inicial serà de 5 hores.</p>
-            <div class="mt-4 mb-5">
-                <a href="/login" class="btn btn-primary btn-lg px-4 me-2">Inicia Sessió</a>
-                <a href="/registre" class="btn btn-outline-primary btn-lg px-4">Registra't</a>
+            <div class="bt-equacio" role="img" aria-label="Una hora de qualsevol servei val una hora de qualsevol altre">
+                <div class="bt-hora">
+                    <span class="bt-moneda">1 h</span>
+                    <span class="bt-peu">Reparar un ordinador</span>
+                </div>
+                <span class="bt-igual">=</span>
+                <div class="bt-hora">
+                    <span class="bt-moneda">1 h</span>
+                    <span class="bt-peu">Fer companyia a una persona gran</span>
+                </div>
             </div>
-        {% endif %}
+        </div>
     </div>
+</header>
+
+<main>
+    <div class="container">
+        {% include '_flash.html' %}
+    </div>
+
+    <section class="bt-seccio">
+        <div class="container">
+            <div class="bt-dues-columnes">
+                <div>
+                    <h2 class="bt-h2">Què és un Banc de Temps?</h2>
+                </div>
+                <div class="bt-text">
+                    <p>És una xarxa de veïns que s'ajuden entre ells. Tothom pot oferir alguna cosa que sap fer: classes, cures, tasques, reparacions o simplement companyia. A canvi, pot demanar el que necessiti.</p>
+                    <p>La norma és una sola: <strong>1 hora = 1 hora</strong>. No importa si ets enginyer, estudiant o jubilat. Una hora d'informàtica val exactament el mateix que una hora de cuinar o de reforç escolar.</p>
+                    <p>Aquí el que compta és el que pots aportar, no el que pots pagar.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bt-seccio bt-seccio-blanca">
+        <div class="container">
+            <h2 class="bt-h2">Com funciona</h2>
+            <p class="bt-subtitol">Quatre passos, sense paperassa i sense diners pel mig.</p>
+            <ol class="bt-passos">
+                <li>
+                    <span class="bt-numero">1</span>
+                    <h3>Registra't</h3>
+                    <p>Crea el teu perfil en un minut. Rebràs 5 hores de benvinguda per poder demanar ajuda des del primer dia.</p>
+                </li>
+                <li>
+                    <span class="bt-numero">2</span>
+                    <h3>Mira el mercat</h3>
+                    <p>Descobreix què ofereixen altres persones o publica el que tu saps fer i quantes hores costa.</p>
+                </li>
+                <li>
+                    <span class="bt-numero">3</span>
+                    <h3>Parla pel xat</h3>
+                    <p>Queda amb l'altra persona dins de la plataforma: dia, hora i lloc. Sense haver de compartir el teu correu.</p>
+                </li>
+                <li>
+                    <span class="bt-numero">4</span>
+                    <h3>Paga en hores</h3>
+                    <p>Quan s'acaba el servei, traspasses les hores acordades. El saldo s'actualitza al moment.</p>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <section class="bt-seccio">
+        <div class="container">
+            <h2 class="bt-h2">Per què et pot anar bé</h2>
+            <div class="bt-avantatges">
+                <div class="bt-avantatge">
+                    <h3>Tothom té alguna cosa a oferir</h3>
+                    <p>Tinguis l'edat que tinguis i facis la feina que facis, els teus coneixements ajuden algú.</p>
+                </div>
+                <div class="bt-avantatge">
+                    <h3>Els diners no són una barrera</h3>
+                    <p>Si no pots pagar un servei en euros, pots aconseguir-lo amb el teu temps.</p>
+                </div>
+                <div class="bt-avantatge">
+                    <h3>Coneixes gent del teu entorn</h3>
+                    <p>Cada intercanvi és una excusa per tractar amb veïns i reforçar la comunitat.</p>
+                </div>
+                <div class="bt-avantatge">
+                    <h3>Sempre a mà</h3>
+                    <p>Consulta ofertes des del mòbil o l'ordinador, a qualsevol hora, sense desplaçar-te enlloc.</p>
+                </div>
+            </div>
+
+            <p class="bt-exemples-titol">Alguns exemples del que es pot intercanviar:</p>
+            <ul class="bt-etiquetes">
+                <li>Reforç escolar</li>
+                <li>Acompanyar gent gran</li>
+                <li>Reparar un ordinador</li>
+                <li>Classes d'idiomes</li>
+                <li>Cuinar per algú</li>
+                <li>Passejar un gos</li>
+                <li>Ajudar amb una mudança</li>
+                <li>Cuidar fills</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="bt-final">
+        <div class="container text-center">
+            <h2 class="bt-h2 bt-h2-clar">Comença a donar i a rebre temps</h2>
+            {% if jo %}
+                <p class="bt-lead bt-lead-centre">Mira què s'ofereix ara mateix al teu voltant.</p>
+                <a href="/mercat" class="btn btn-outline-light btn-lg">Anar al mercat</a>
+            {% else %}
+                <p class="bt-lead bt-lead-centre">És gratuït i només tardes un minut a registrar-te.</p>
+                <a href="/registre" class="btn btn-outline-light btn-lg">Crea el teu compte</a>
+            {% endif %}
+            <p class="bt-nota mt-4"><a href="/normes" class="bt-enllac-clar">Llegeix les normes d'ús</a></p>
+        </div>
+    </section>
+</main>
+
 </body>
 </html>

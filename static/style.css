@@ -221,3 +221,73 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
     box-shadow: 0 1px 1px rgba(0,0,0,0.1);
 }
 
+/* =========================================
+   11. PÀGINA D'INICI (afegir al final de style.css)
+========================================= */
+:root {
+    --bt-ink: #0f2347;
+    --bt-blau: #0d6efd;
+    --bt-moneda: #ffc107;
+    --bt-tint: #eaf2ff;
+}
+
+/* Hero */
+.bt-hero { background-color: var(--bt-ink); color: #fff; padding: 4rem 0 4.5rem; }
+.bt-hero-grid { display: grid; grid-template-columns: 1fr; gap: 3rem; align-items: center; }
+.bt-h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1.25rem; }
+.bt-lead { font-size: 1.15rem; line-height: 1.6; color: #c9d6ee; max-width: 34rem; margin: 0 0 1.75rem; }
+.bt-botons { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.bt-nota { font-size: 0.95rem; color: #c9d6ee; margin: 1rem 0 0; }
+.bt-nota strong { color: #fff; }
+
+/* Equació 1 h = 1 h */
+.bt-equacio { display: flex; align-items: flex-start; justify-content: center; gap: 1rem; }
+.bt-hora { display: flex; flex-direction: column; align-items: center; text-align: center; width: 9.5rem; }
+.bt-moneda { display: flex; align-items: center; justify-content: center; width: 7.5rem; height: 7.5rem; border-radius: 50%; background-color: var(--bt-moneda); color: var(--bt-ink); font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; box-shadow: 0 0 0 0.5rem rgba(255, 193, 7, 0.2); }
+.bt-igual { font-size: 3rem; font-weight: 300; line-height: 7.5rem; color: #fff; }
+.bt-peu { margin-top: 1.25rem; font-size: 0.95rem; line-height: 1.35; color: #c9d6ee; }
+
+/* Seccions */
+.bt-seccio { padding: 4rem 0; }
+.bt-seccio-blanca { background-color: #fff; }
+.bt-h2 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.01em; color: var(--bt-ink); margin-bottom: 0.75rem; }
+.bt-h2-clar { color: #fff; }
+.bt-subtitol { color: #6c757d; font-size: 1.1rem; margin: 0 0 2.5rem; }
+.bt-dues-columnes { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+.bt-text p { font-size: 1.1rem; line-height: 1.7; max-width: 38rem; margin: 0 0 1rem; }
+
+/* Passos (seqüència real: 1 → 4) */
+.bt-passos { display: grid; grid-template-columns: 1fr; gap: 2rem; list-style: none; padding: 0; margin: 0; }
+.bt-passos h3 { font-size: 1.15rem; font-weight: 700; color: var(--bt-ink); margin: 0.75rem 0 0.4rem; }
+.bt-passos p { margin: 0; color: #495057; line-height: 1.6; }
+.bt-numero { display: inline-flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; background-color: var(--bt-blau); color: #fff; font-weight: 700; }
+
+/* Avantatges */
+.bt-avantatges { display: grid; grid-template-columns: 1fr; gap: 1.75rem 3rem; margin-top: 2rem; }
+.bt-avantatge { border-left: 4px solid var(--bt-blau); padding-left: 1.25rem; }
+.bt-avantatge h3 { font-size: 1.15rem; font-weight: 700; color: var(--bt-ink); margin-bottom: 0.3rem; }
+.bt-avantatge p { margin: 0; color: #495057; line-height: 1.6; }
+
+/* Exemples */
+.bt-exemples-titol { margin: 3rem 0 0.75rem; font-weight: 500; color: var(--bt-ink); }
+.bt-etiquetes { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; margin: 0; }
+.bt-etiquetes li { background-color: var(--bt-tint); color: var(--bt-ink); padding: 0.4rem 0.9rem; border-radius: 2rem; font-size: 0.95rem; }
+
+/* Crida final */
+.bt-final { background-color: var(--bt-blau); color: #fff; padding: 4rem 0; }
+.bt-lead-centre { margin-left: auto; margin-right: auto; color: #e7f0ff; }
+.bt-enllac-clar { color: #fff; text-decoration: underline; }
+.bt-enllac-clar:hover { color: #fff; }
+
+/* Accessibilitat: focus visible */
+.bt-hero a:focus-visible, .bt-final a:focus-visible { outline: 3px solid var(--bt-moneda); outline-offset: 3px; }
+
+/* Pantalles mitjanes i grans */
+@media (min-width: 768px) {
+    .bt-hero { padding: 5.5rem 0; }
+    .bt-hero-grid { grid-template-columns: 1.2fr 1fr; }
+    .bt-h1 { font-size: 3.25rem; }
+    .bt-dues-columnes { grid-template-columns: 1fr 1.6fr; gap: 3rem; }
+    .bt-passos { grid-template-columns: repeat(4, 1fr); gap: 1.75rem; }
+    .bt-avantatges { grid-template-columns: 1fr 1fr; }
+}
