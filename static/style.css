@@ -327,3 +327,28 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
     .bt-card-cos { padding: 2.5rem; }
     .bt-h1-mitja { font-size: 2.5rem; }
 }
+/* =========================================
+   13. PÀGINES INTERNES (mercat i següents) — afegir al final de style.css, després del bloc 12
+========================================= */
+.bt-pagina { padding-top: 2rem; padding-bottom: 3rem; }
+.bt-pagina-cap { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+
+/* Targeta d'oferta */
+.bt-oferta { border-radius: 0.75rem; overflow: hidden; box-shadow: 0 0.25rem 1rem rgba(15, 35, 71, 0.08); transition: box-shadow .15s ease-in-out; }
+.bt-oferta:hover { box-shadow: 0 0.75rem 1.75rem rgba(15, 35, 71, 0.16); }
+.bt-oferta .card-body { padding: 1.5rem; }
+.bt-oferta .card-footer { padding: 0.9rem 1.5rem; border-top: 1px solid #eef1f6; }
+.bt-oferta-titol { font-size: 1.15rem; font-weight: 700; color: var(--bt-ink, #0f2347); }
+.bt-oferta-desc { color: #495057; line-height: 1.55; }
+.bt-categoria { background-color: var(--bt-tint, #eaf2ff); color: var(--bt-ink, #0f2347); font-weight: 600; }
+.bt-cost { display: inline-flex; align-items: center; justify-content: center; min-width: 3rem; padding: 0.3rem 0.8rem; border-radius: 2rem; background-color: var(--bt-moneda, #ffc107); color: var(--bt-ink, #0f2347); font-weight: 800; }
+
+/* Estat buit */
+.bt-buit { background-color: #fff; border-radius: 0.75rem; box-shadow: 0 0.25rem 1rem rgba(15, 35, 71, 0.08); padding: 3rem 1.5rem; margin-top: 1rem; }
+/* =========================================
+   14. DETALL D'OFERTA — afegir al final de style.css, després del bloc 13
+   (crear_oferta.html reutilitza els blocs 12 i 13)
+========================================= */
+.bt-h2-gran { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em; }
+.bt-descripcio { font-size: 1.1rem; line-height: 1.7; color: #343a40; }
+.bt-hores-gran { display: inline-block; align-self: center; padding: 0.5rem 1.5rem; border-radius: 3rem; background-color: var(--bt-moneda, #ffc107); color: var(--bt-ink, #0f2347); font-size: 1.75rem; font-weight: 800; margin: 0; }

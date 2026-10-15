@@ -11,33 +11,33 @@
 {% set actiu = 'mercat' %}
 {% include '_navbar.html' %}
 
-    <div class="container">
+    <div class="container bt-pagina">
         {% include '_flash.html' %}
 
         <!-- Botó per tirar enrere i títol de l'oferta -->
         <a href="/mercat" class="text-decoration-none text-muted mb-3 d-inline-block">← Tornar al mercat</a>
-        <h2 class="text-primary fw-bold mb-4">{{ oferta['titol'] }}</h2>
+        <h2 class="bt-h2 bt-h2-gran mb-4">{{ oferta['titol'] }}</h2>
 
         <div class="row">
             <!-- Detalls de la tasca -->
             <div class="col-md-8 mb-4">
-                <div class="card shadow-sm border-0 h-100">
+                <div class="card bt-card border-0 h-100">
                     <div class="card-body p-4">
                         <div class="mb-4">
                             <span class="badge bg-info text-dark px-3 py-2">Servei Ofert</span>
-                            <span class="badge bg-secondary px-3 py-2 ms-2">{{ oferta['categoria'] }}</span>
+                            <span class="badge bt-categoria px-3 py-2 ms-2">{{ oferta['categoria'] }}</span>
                         </div>
                         <h5 class="text-secondary border-bottom pb-2 mb-3">Descripció de la tasca:</h5>
-                        <p class="card-text fs-5" style="white-space: pre-wrap;">{{ oferta['descripcio'] }}</p>
+                        <p class="card-text bt-descripcio" style="white-space: pre-wrap;">{{ oferta['descripcio'] }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- Hores i Venedor (o Panell Propietari) -->
             <div class="col-md-4 mb-4">
-                <div class="card shadow-sm border-0 h-100 text-center">
+                <div class="card bt-card border-0 h-100 text-center">
                     <div class="card-body p-4 d-flex flex-column justify-content-center">
-                        <h2 class="text-success fw-bold">{{ oferta['hores'] }} Hores</h2>
+                        <h2 class="bt-hores-gran">{{ oferta['hores'] }} Hores</h2>
                         <hr class="my-4">
 
                         {% if es_propietari %}

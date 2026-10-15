@@ -11,11 +11,14 @@
 {% set actiu = 'mercat' %}
 {% include '_navbar.html' %}
 
-    <div class="container">
+    <div class="container bt-pagina">
         {% include '_flash.html' %}
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="text-primary">Ofertes Disponibles</h2>
+        <div class="bt-pagina-cap">
+            <div>
+                <h2 class="bt-h2 mb-1">Ofertes Disponibles</h2>
+                <p class="text-muted mb-0">Cada hora val una hora: tria què necessites i contacta amb qui ho ofereix.</p>
+            </div>
             <a href="/crear_oferta" class="btn btn-primary">➕ Nova Oferta</a>
         </div>
 
@@ -23,23 +26,28 @@
         <div class="row">
             {% for oferta in ofertes %}
             <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
+                <div class="card h-100 border-0 bt-oferta">
                     <div class="card-body">
-                        <span class="badge bg-secondary mb-2">{{ oferta['categoria'] }}</span>
-                        <h5 class="card-title">{{ oferta['titol'] }}</h5>
-                        <p class="card-text">{{ oferta['descripcio']|truncate(150) }}</p>
-                        <p class="mb-1"><strong>Hores de cost:</strong> {{ oferta['hores'] }}</p>
-                        <p class="text-muted small">👤 {{ oferta['nom_autor'] }}{% if oferta['ciutat'] %} · 📍 {{ oferta['ciutat'] }}{% endif %}</p>
-                        <a href="/oferta/{{ oferta['id'] }}" class="btn btn-outline-primary">
+                        <span class="badge bt-categoria mb-3">{{ oferta['categoria'] }}</span>
+                        <h5 class="card-title bt-oferta-titol">{{ oferta['titol'] }}</h5>
+                        <p class="card-text bt-oferta-desc">{{ oferta['descripcio']|truncate(150) }}</p>
+                        <p class="text-muted small mb-0">👤 {{ oferta['nom_autor'] }}{% if oferta['ciutat'] %} · 📍 {{ oferta['ciutat'] }}{% endif %}</p>
+                    </div>
+                    <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                        <span class="bt-cost" title="Hores de cost">{{ oferta['hores'] }} h</span>
+                        <a href="/oferta/{{ oferta['id'] }}" class="btn btn-outline-primary btn-sm">
                             Veure detalls
                         </a>
                     </div>
                 </div>
             </div>
             {% else %}
-            <div class="col-12 text-center mt-5">
-                <h4>El mercat està buit ara mateix.</h4>
-                <p class="text-muted">Anima't i publica la primera feina!</p>
+            <div class="col-12 text-center">
+                <div class="bt-buit">
+                    <h4>El mercat està buit ara mateix.</h4>
+                    <p class="text-muted mb-3">Anima't i publica la primera feina!</p>
+                    <a href="/crear_oferta" class="btn btn-primary">➕ Nova Oferta</a>
+                </div>
             </div>
             {% endfor %}
         </div>

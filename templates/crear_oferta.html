@@ -11,12 +11,13 @@
 {% set actiu = 'crear' %}
 {% include '_navbar.html' %}
 
-    <div class="container mt-5">
+    <div class="container bt-pagina">
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-5">
-                        <h3 class="text-center text-primary mb-4">Publicar un nou servei</h3>
+                <div class="card bt-card border-0">
+                    <div class="card-body bt-card-cos">
+                        <h3 class="text-center bt-titol-card mb-2">Publicar un nou servei</h3>
+                        <p class="text-center text-muted mb-4">Explica què saps fer i quantes hores necessites. Recorda: 1 hora = 1 hora.</p>
 
                         {% include '_flash.html' %}
 
@@ -24,13 +25,13 @@
                             <!-- Títol -->
                             <div class="mb-3">
                                 <label class="form-label">Títol de l'oferta</label>
-                                <input type="text" name="titol" class="form-control" placeholder="Ex: Classes de piano" value="{{ form.get('titol', '') }}" minlength="3" maxlength="100" required>
+                                <input type="text" name="titol" class="form-control form-control-lg" placeholder="Ex: Classes de piano" value="{{ form.get('titol', '') }}" minlength="3" maxlength="100" required>
                             </div>
 
                             <!-- Categoria -->
                             <div class="mb-3">
                                 <label for="categoria" class="form-label">Categoria de l'oferta</label>
-                                <select class="form-select text-muted" name="categoria" id="categoria" required>
+                                <select class="form-select form-control-lg" name="categoria" id="categoria" required>
                                     <option value="" {% if not form.get('categoria') %}selected{% endif %} disabled>Selecciona una categoria</option>
                                     {% for valor, text in CATEGORIES %}
                                         <option value="{{ valor }}" {% if form.get('categoria') == valor %}selected{% endif %}>{{ text }}</option>
@@ -41,16 +42,17 @@
                             <!-- Descripció -->
                             <div class="mb-3">
                                 <label class="form-label">Descripció</label>
-                                <textarea name="descripcio" class="form-control" rows="3" placeholder="Explica els detalls de la teva oferta..." minlength="5" maxlength="1000" required>{{ form.get('descripcio', '') }}</textarea>
+                                <textarea name="descripcio" class="form-control form-control-lg" rows="4" placeholder="Explica els detalls de la teva oferta..." minlength="5" maxlength="1000" required>{{ form.get('descripcio', '') }}</textarea>
                             </div>
 
                             <!-- Hores -->
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <label class="form-label">Hores</label>
-                                <input type="number" name="hores" class="form-control" placeholder="Ex:1.25" step="0.01" min="0.01" max="50" value="{{ form.get('hores', '') }}" required>
+                                <input type="number" name="hores" class="form-control form-control-lg" placeholder="Ex:1.25" step="0.01" min="0.01" max="50" value="{{ form.get('hores', '') }}" required>
+                                <small class="text-muted">Pots usar decimals (0.25, 0.5, 1.5...)</small>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100">Publicar nova oferta</button>
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Publicar nova oferta</button>
                         </form>
 
                     </div>
