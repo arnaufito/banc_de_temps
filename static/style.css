@@ -1,92 +1,75 @@
-/* =========================================
-   1. RESET I TIPOGRAFIA (Estil Bootstrap)
-========================================= */
-* { box-sizing: border-box; }
-body { 
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
-    background-color: #f8f9fa; 
-    color: #212529; 
-    margin: 0; 
-    line-height: 1.5; 
+/* =========================================================
+   BANC DE TEMPS · style.css
+   Índex
+   1. Variables i reset
+   2. Grid i layout
+   3. Tipografia i utilitats
+   4. Components generals
+   5. Vistes específiques
+   6. Responsive (tots els @media, al final)
+========================================================= */
+
+
+/* =========================================================
+   1. VARIABLES I RESET
+========================================================= */
+:root {
+    /* Marca */
+    --bt-ink: #0f2347;
+    --bt-ink-rgb: 15, 35, 71;
+    --bt-blau: #0d6efd;
+    --bt-blau-rgb: 13, 110, 253;
+    --bt-blau-hover: #0b5ed7;
+    --bt-blau-fosc: #0a58ca;
+    --bt-moneda: #ffc107;
+    --bt-moneda-rgb: 255, 193, 7;
+    --bt-tint: #eaf2ff;
+    --bt-clar: #c9d6ee;
+    --bt-vermell: #dc3545;
+
+    /* Neutres */
+    --bt-text: #212529;
+    --bt-gris: #6c757d;
+    --bt-gris-fosc: #495057;
+    --bt-fons: #f8f9fa;
+    --bt-vora: #dee2e6;
+    --bt-vora-camp: #ced4da;
+    --bt-vora-suau: #eef1f6;
+    --bt-hover: #f8faff;
+
+    /* Superfícies */
+    --bt-radi: 0.75rem;
+    --bt-sombra: 0 0.25rem 1rem rgba(var(--bt-ink-rgb), 0.08);
 }
-a { text-decoration: none; color: #0d6efd; }
-a:hover { color: #0a58ca; }
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--bt-fons);
+    color: var(--bt-text);
+    margin: 0;
+    line-height: 1.5;
+}
+
+a { text-decoration: none; color: var(--bt-blau); }
+a:hover { color: var(--bt-blau-fosc); }
+
 h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; line-height: 1.2; }
 
-/* =========================================
-   2. BARRA DE NAVEGACIÓ
-========================================= */
-.navbar { background-color: #0d6efd; padding: 0.5rem 1rem; display: flex; align-items: center; }
-.navbar-brand { color: #fff; font-size: 1.25rem; margin-right: 1rem; }
-.navbar-brand:hover { color: #fff; }
-.navbar-nav { display: flex; flex-direction: row; padding-left: 0; margin-bottom: 0; list-style: none; align-items: center; }
-.nav-link { display: block; padding: 0.5rem; color: rgba(255, 255, 255, 0.75); transition: color 0.15s; }
-.nav-link:hover, .nav-link.active { color: #fff; }
-.navbar-text { color: rgba(255, 255, 255, 0.75); }
 
-/* =========================================
-   3. SISTEMA DE GRAELLA (GRID)
-========================================= */
-.container { width: 100%; padding-right: 15px; padding-left: 15px; margin-right: auto; margin-left: auto; max-width: 1140px; }
-.container-fluid { width: 100%; padding-right: 15px; padding-left: 15px;  display: flex; align-items: center; }
+/* =========================================================
+   2. GRID I LAYOUT
+========================================================= */
+.container, .container-fluid { width: 100%; padding-right: 15px; padding-left: 15px; }
+.container { margin-right: auto; margin-left: auto; max-width: 1140px; }
+.container-fluid { display: flex; align-items: center; }
+
 .row { display: flex; flex-wrap: wrap; margin-right: -15px; margin-left: -15px; }
 .row > * { padding-right: 15px; padding-left: 15px; width: 100%; max-width: 100%; }
-
-@media (min-width: 768px) {
-    .col-md-4 { flex: 0 0 auto; width: 33.33333333%; }
-    .col-md-5 { flex: 0 0 auto; width: 41.66666667%; }
-    .col-md-6 { flex: 0 0 auto; width: 50%; }
-    .col-md-8 { flex: 0 0 auto; width: 66.66666667%; }
-}
 .col-12 { flex: 0 0 auto; width: 100%; }
 
-/* =========================================
-   4. CAIXES (CARDS) I ALERTES
-========================================= */
-.card { position: relative; display: flex; flex-direction: column; min-width: 0; word-wrap: break-word; background-color: #fff; background-clip: border-box; border: 1px solid rgba(0,0,0,.125); border-radius: 0.25rem; }
-.card-body { flex: 1 1 auto; padding: 1rem 1.5rem; }
-.card-footer { padding: 0.5rem 1rem; background-color: rgba(0,0,0,.03); border-top: 1px solid rgba(0,0,0,.125); }
-.card-title { margin-bottom: 0.5rem; }
-.card-text { margin-top: 0; margin-bottom: 1rem; }
-.alert { position: relative; padding: 1rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: 0.25rem; }
-.alert-info { color: #055160; background-color: #cff4fc; border-color: #b6effb; }
-.alert-success { color: #0a3622; background-color: #d1e7dd; border-color: #badbcc; }
-.alert-danger { color: #58151c; background-color: #f8d7da; border-color: #f1aeb5; }
-.alert-warning { color: #664d03; background-color: #fff3cd; border-color: #ffecb5; }
-
-/* =========================================
-   5. FORMULARIS
-========================================= */
-.form-label { margin-bottom: 0.5rem; display: inline-block; }
-.form-control, .form-select { display: block; width: 100%; padding: 0.375rem 0.75rem; font-size: 1rem; font-weight: 400; line-height: 1.5; color: #212529; font-family: Arial, Helvetica, sans-serif; background-color: #fff; background-clip: padding-box; border: 1px solid #ced4da; border-radius: 0.25rem; transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out; }
-.form-control:focus, .form-select:focus { color: #212529; background-color: #fff; border-color: #86b7fe; outline: 0; box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25); }
-.form-control-lg { min-height: calc(1.5em + 1rem + 2px); padding: 0.5rem 1rem; font-size: 1.25rem; border-radius: 0.3rem; }
-.input-group { position: relative; display: flex; flex-wrap: wrap; align-items: stretch; width: 100%; }
-.input-group > .form-control { position: relative; flex: 1 1 auto; width: 1%; min-width: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
-.input-group-text { display: flex; align-items: center; padding: 0.375rem 0.75rem; font-size: 1rem; font-weight: 400; line-height: 1.5; color: #212529; text-align: center; white-space: nowrap; background-color: #e9ecef; border: 1px solid #ced4da; border-radius: 0.25rem; border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: 0; }
-
-/* =========================================
-   6. BOTONS
-========================================= */
-.btn { display: inline-block; font-weight: 400; line-height: 1.5; text-align: center; text-decoration: none; vertical-align: middle; cursor: pointer; user-select: none; border: 1px solid transparent; padding: 0.375rem 0.75rem; font-size: 1rem; border-radius: 0.25rem; transition: color .15s, background-color .15s, border-color .15s, box-shadow .15s; }
-.btn-primary { color: #fff; background-color: #0d6efd; border-color: #0d6efd; }
-.btn-primary:hover { color: #fff; background-color: #0b5ed7; border-color: #0a58ca; }
-.btn-success { color: #fff; background-color: #0d6efd; border-color: #0d6efd; }
-.btn-success:hover { color: #fff; background-color: #0b5ed7; border-color: #0b5ed7; }
-.btn-danger { color: #fff; background-color: #dc3545; border-color: #dc3545; }
-.btn-danger:hover { color: #fff; background-color: #bb2d3b; border-color: #b02a37; }
-.btn-outline-primary { color: #0d6efd; border-color: #0d6efd; }
-.btn-outline-primary:hover { color: #fff; background-color: #0d6efd; }
-.btn-outline-danger { color: #dc3545; border-color: #dc3545; }
-.btn-outline-danger:hover { color: #fff; background-color: #dc3545; }
-.btn-outline-light { color: #f8f9fa; border-color: #f8f9fa; }
-.btn-outline-light:hover { color: #000; background-color: #f8f9fa; }
-.btn-lg { padding: 0.5rem 1rem; font-size: 1.25rem; border-radius: 0.3rem; }
-.btn-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; border-radius: 0.2rem; }
-
-/* =========================================
-   7. UTILITATS DE FLEXBOX I ALINEACIÓ
-========================================= */
+/* Flexbox i dimensions */
 .d-flex { display: flex !important; }
 .flex-column { flex-direction: column !important; }
 .d-inline { display: inline !important; }
@@ -95,17 +78,56 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 .justify-content-center { justify-content: center !important; }
 .justify-content-between { justify-content: space-between !important; }
 .align-items-center { align-items: center !important; }
-.me-auto { margin-right: auto !important; }
+.w-100 { width: 100% !important; }
+.h-100 { height: 100% !important; }
+
+
+/* =========================================================
+   3. TIPOGRAFIA I UTILITATS
+========================================================= */
+
+/* Text */
 .text-center { text-align: center !important; }
 .text-start { text-align: left !important; }
 .text-decoration-none { text-decoration: none !important; }
 .text-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.w-100 { width: 100% !important; }
-.h-100 { height: 100% !important; }
+.fw-bold { font-weight: 700 !important; }
+.fs-5 { font-size: 1.25rem !important; }
+.small { font-size: 0.875em; }
+.lead { font-size: 1.25rem; font-weight: 300; }
 
-/* =========================================
-   8. ESPAIATS (MARGINS I PADDINGS)
-========================================= */
+/* Colors */
+.bg-light { background-color: var(--bt-fons) !important; }
+.bg-white { background-color: #fff !important; }
+.bg-primary { background-color: var(--bt-blau) !important; }
+.bg-secondary { background-color: var(--bt-gris) !important; }
+.bg-dark { background-color: var(--bt-text) !important; }
+.bg-info { background-color: #0dcaf0 !important; }
+.bg-warning { background-color: var(--bt-moneda) !important; }
+
+.text-primary { color: var(--bt-blau) !important; }
+.text-success { color: var(--bt-blau) !important; }
+.text-danger { color: var(--bt-vermell) !important; }
+.text-warning { color: var(--bt-moneda) !important; }
+.text-muted { color: var(--bt-gris) !important; }
+.text-secondary { color: var(--bt-gris) !important; }
+.text-white { color: #fff !important; }
+.text-dark { color: var(--bt-text) !important; }
+
+/* Vores, radis i ombres */
+.border { border: 1px solid var(--bt-vora) !important; }
+.border-0 { border: 0 !important; }
+.border-top { border-top: 1px solid var(--bt-vora) !important; }
+.border-bottom { border-bottom: 1px solid var(--bt-vora) !important; }
+.border-primary { border-color: var(--bt-blau) !important; }
+.border-4 { border-width: 4px !important; }
+.rounded { border-radius: 0.25rem !important; }
+.rounded-circle { border-radius: 50% !important; }
+.shadow { box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important; }
+.shadow-sm { box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important; }
+.overflow-hidden { overflow: hidden !important; }
+
+/* Espaiats */
 .m-0 { margin: 0 !important; }
 .mb-0 { margin-bottom: 0 !important; }
 .mb-1 { margin-bottom: 0.25rem !important; }
@@ -121,7 +143,9 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 .my-4 { margin-top: 1.5rem !important; margin-bottom: 1.5rem !important; }
 .me-2 { margin-right: 0.5rem !important; }
 .me-3 { margin-right: 1rem !important; }
+.me-auto { margin-right: auto !important; }
 .ms-2 { margin-left: 0.5rem !important; }
+
 .p-0 { padding: 0 !important; }
 .p-3 { padding: 1rem !important; }
 .p-4 { padding: 1.5rem !important; }
@@ -135,138 +159,140 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 .px-4 { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
 .pe-2 { padding-right: 0.5rem !important; }
 
-/* =========================================
-   9. COLORS, BORDES I TEXT EXTRA
-========================================= */
-.bg-light { background-color: #f8f9fa !important; }
-.bg-white { background-color: #fff !important; }
-.bg-primary { background-color: #0d6efd !important; }
-.bg-secondary { background-color: #6c757d !important; }
-.bg-dark { background-color: #212529 !important; }
-.bg-info { background-color: #0dcaf0 !important; }
-.bg-warning { background-color: #ffc107 !important; }
-
-.text-primary { color: #0d6efd !important; }
-.text-success { color: #0d6efd !important; }
-.text-danger { color: #dc3545 !important; }
-.text-warning { color: #ffc107 !important; }
-.text-muted { color: #6c757d !important; }
-.text-secondary { color: #6c757d !important; }
-.text-white { color: #fff !important; }
-.text-dark { color: #212529 !important; }
-
-.fw-bold { font-weight: 700 !important; }
-.fs-5 { font-size: 1.25rem !important; }
-.small { font-size: 0.875em; }
-.lead { font-size: 1.25rem; font-weight: 300; }
+/* Badge (ha d'anar abans de .bt-categoria) */
 .badge { display: inline-block; padding: 0.35em 0.65em; font-size: 0.75em; font-weight: 700; line-height: 1; color: #fff; text-align: center; white-space: nowrap; vertical-align: baseline; border-radius: 0.25rem; }
 
-.border { border: 1px solid #dee2e6 !important; }
-.border-0 { border: 0 !important; }
-.border-top { border-top: 1px solid #dee2e6 !important; }
-.border-bottom { border-bottom: 1px solid #dee2e6 !important; }
-.border-primary { border-color: #0d6efd !important; }
-.border-4 { border-width: 4px !important; }
-.rounded { border-radius: 0.25rem !important; }
-.rounded-circle { border-radius: 50% !important; }
-.shadow { box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important; }
-.shadow-sm { box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important; }
-.overflow-hidden { overflow: hidden !important; }
-
-/* =========================================
-   10. XATS
-========================================= */
-.sidebar-xats {
-    background-color: #f8f9fa;
-    border-right: 1px solid #dee2e6;
-    height: 75vh;
-    overflow-y: auto;
-}
-.xat-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    border-bottom: 1px solid #e9ecef;
-    text-decoration: none;
-    color: #333;
-}
-.xat-item:hover, .xat-item.active {
-    background-color: #e2e6ea;
-}
-.fons-xat {
-    background-color: #e5ddd5; /* Color clàssic de WhatsApp */
-    height: 60vh;
-    overflow-y: auto;
-    padding: 20px;
-    border-radius: 5px;
-}
-.bombolla-meva {
-    background-color: #d1e7dd; /* Verd clar */
-    border-radius: 15px 15px 0px 15px;
-    padding: 10px 15px;
-    margin-bottom: 15px;
-    max-width: 75%;
-    float: right;
-    clear: both;
-}
-.bombolla-altre {
-    background-color: #ffffff; /* Blanc */
-    border-radius: 15px 15px 15px 0px;
-    padding: 10px 15px;
-    margin-bottom: 15px;
-    max-width: 75%;
-    float: left;
-    clear: both;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-}
-
-/* =========================================
-   11. PÀGINA D'INICI (afegir al final de style.css)
-========================================= */
-:root {
-    --bt-ink: #0f2347;
-    --bt-blau: #0d6efd;
-    --bt-moneda: #ffc107;
-    --bt-tint: #eaf2ff;
-}
-
-/* Hero */
-.bt-hero { background-color: var(--bt-ink); color: #fff; padding: 4rem 0 4.5rem; }
-.bt-hero-grid { display: grid; grid-template-columns: 1fr; gap: 3rem; align-items: center; }
+/* Titulars i textos de marca */
 .bt-h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1.25rem; }
-.bt-lead { font-size: 1.15rem; line-height: 1.6; color: #c9d6ee; max-width: 34rem; margin: 0 0 1.75rem; }
+.bt-h1-mitja { font-size: 2rem; }
+.bt-h2 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.01em; color: var(--bt-ink); margin-bottom: 0.75rem; }
+.bt-h2-clar { color: #fff; }
+.bt-h2-gran { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em; }
+.bt-lead { font-size: 1.15rem; line-height: 1.6; color: var(--bt-clar); max-width: 34rem; margin: 0 0 1.75rem; }
+.bt-lead-centre { margin-left: auto; margin-right: auto; color: #e7f0ff; }
+
+
+/* =========================================================
+   4. COMPONENTS GENERALS
+========================================================= */
+
+/* --- 4.1 Barra de navegació --- */
+.navbar { background-color: var(--bt-blau); padding: 0.5rem 1rem; display: flex; align-items: center; }
+.navbar-brand { color: #fff; font-size: 1.25rem; margin-right: 1rem; }
+.navbar-brand:hover { color: #fff; }
+.navbar-nav { display: flex; flex-direction: row; padding-left: 0; margin-bottom: 0; list-style: none; align-items: center; }
+.nav-link { display: block; padding: 0.5rem; color: rgba(255, 255, 255, 0.75); transition: color 0.15s; }
+.nav-link:hover, .nav-link.active { color: #fff; }
+.navbar-text { color: rgba(255, 255, 255, 0.75); }
+
+.bt-navbar { background-color: var(--bt-ink); box-shadow: 0 0.25rem 1rem rgba(var(--bt-ink-rgb), 0.2); padding: 0.4rem 1rem; }
+.bt-navbar .container-fluid { flex-wrap: wrap; gap: 0.25rem 1rem; }
+.bt-navbar .navbar-nav { flex-wrap: wrap; }
+.bt-navbar .navbar-brand { font-size: 1.3rem; letter-spacing: -0.01em; margin-right: 1.25rem; }
+.bt-navbar .nav-link { border-radius: 0.4rem; padding: 0.5rem 0.75rem; box-shadow: inset 0 -3px 0 transparent; transition: color 0.15s, background-color 0.15s, box-shadow 0.15s; }
+.bt-navbar .nav-link:hover { background-color: rgba(255, 255, 255, 0.08); }
+.bt-navbar .nav-link.active { background-color: rgba(255, 255, 255, 0.12); box-shadow: inset 0 -3px 0 var(--bt-moneda); }
+.bt-saldo { display: inline-block; background-color: rgba(var(--bt-moneda-rgb), 0.15); color: var(--bt-moneda); border: 1px solid rgba(var(--bt-moneda-rgb), 0.45); border-radius: 2rem; padding: 0.3rem 0.9rem; font-size: 0.95rem; white-space: nowrap; }
+
+/* --- 4.2 Targetes i superfícies --- */
+.card { position: relative; display: flex; flex-direction: column; min-width: 0; word-wrap: break-word; background-color: #fff; background-clip: border-box; border: 1px solid rgba(0, 0, 0, 0.125); border-radius: 0.25rem; }
+.card-body { flex: 1 1 auto; padding: 1rem 1.5rem; }
+.card-footer { padding: 0.5rem 1rem; background-color: rgba(0, 0, 0, 0.03); border-top: 1px solid rgba(0, 0, 0, 0.125); }
+.card-title { margin-bottom: 0.5rem; }
+.card-text { margin-top: 0; margin-bottom: 1rem; }
+
+.bt-card { border-radius: var(--bt-radi); box-shadow: 0 1rem 2.5rem rgba(var(--bt-ink-rgb), 0.15); }
+.bt-card-cos { padding: 2rem 1.5rem; }
+.bt-titol-card { font-size: 1.6rem; font-weight: 700; color: var(--bt-ink); }
+
+/* Superfícies blanques amb ombra suau (ofertes, estat buit, moviments, xat, error) */
+.bt-oferta, .bt-buit, .bt-moviments, .bt-xat, .bt-error { background-color: #fff; border-radius: var(--bt-radi); box-shadow: var(--bt-sombra); }
+
+/* Franges de capçalera fosques (inici, accés, normes) */
+.bt-hero, .bt-auth-cap, .bt-normes-cap { background-color: var(--bt-ink); color: #fff; }
+
+/* --- 4.3 Alertes --- */
+.alert { position: relative; padding: 1rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: 0.25rem; }
+.alert-info { color: #055160; background-color: #cff4fc; border-color: #b6effb; }
+.alert-success { color: #0a3622; background-color: #d1e7dd; border-color: #badbcc; }
+.alert-danger { color: #58151c; background-color: #f8d7da; border-color: #f1aeb5; }
+.alert-warning { color: #664d03; background-color: #fff3cd; border-color: #ffecb5; }
+
+.bt-alert { display: flex; align-items: flex-start; gap: 0.75rem; border-radius: 0.5rem; border-left-width: 5px; box-shadow: 0 0.125rem 0.5rem rgba(var(--bt-ink-rgb), 0.06); line-height: 1.45; }
+.bt-alert-icona { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background-color: rgba(255, 255, 255, 0.65); font-size: 0.85rem; font-weight: 800; }
+.bt-alert.alert-info { border-left-color: #0dcaf0; }
+.bt-alert.alert-success { border-left-color: #198754; }
+.bt-alert.alert-danger { border-left-color: var(--bt-vermell); }
+.bt-alert.alert-warning { border-left-color: var(--bt-moneda); }
+.container > .bt-alert:first-child { margin-top: 1.5rem; }
+
+/* --- 4.4 Formularis --- */
+.form-label { margin-bottom: 0.5rem; display: inline-block; }
+.form-control, .form-select { display: block; width: 100%; padding: 0.375rem 0.75rem; font-size: 1rem; font-weight: 400; line-height: 1.5; color: var(--bt-text); font-family: Arial, Helvetica, sans-serif; background-color: #fff; background-clip: padding-box; border: 1px solid var(--bt-vora-camp); border-radius: 0.25rem; transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; }
+.form-control:focus, .form-select:focus { color: var(--bt-text); background-color: #fff; border-color: #86b7fe; outline: 0; box-shadow: 0 0 0 0.25rem rgba(var(--bt-blau-rgb), 0.25); }
+.form-control-lg { min-height: calc(1.5em + 1rem + 2px); padding: 0.6rem 1rem; font-size: 1.05rem; border-radius: 0.3rem; }
+.input-group { position: relative; display: flex; flex-wrap: wrap; align-items: stretch; width: 100%; }
+.input-group > .form-control { position: relative; flex: 1 1 auto; width: 1%; min-width: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.input-group-text { display: flex; align-items: center; padding: 0.375rem 0.75rem; font-size: 1rem; font-weight: 400; line-height: 1.5; color: var(--bt-text); text-align: center; white-space: nowrap; background-color: #e9ecef; border: 1px solid var(--bt-vora-camp); border-radius: 0.25rem; border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: 0; }
+
+/* --- 4.5 Botons --- */
+.btn { display: inline-block; font-weight: 400; line-height: 1.5; text-align: center; text-decoration: none; vertical-align: middle; cursor: pointer; user-select: none; border: 1px solid transparent; padding: 0.375rem 0.75rem; font-size: 1rem; border-radius: 0.25rem; transition: color 0.15s, background-color 0.15s, border-color 0.15s, box-shadow 0.15s; }
+.btn-primary, .btn-success { color: #fff; background-color: var(--bt-blau); border-color: var(--bt-blau); }
+.btn-primary:hover, .btn-success:hover { color: #fff; background-color: var(--bt-blau-hover); border-color: var(--bt-blau-fosc); }
+.btn-success:hover { border-color: var(--bt-blau-hover); }
+.btn-danger { color: #fff; background-color: var(--bt-vermell); border-color: var(--bt-vermell); }
+.btn-danger:hover { color: #fff; background-color: #bb2d3b; border-color: #b02a37; }
+.btn-outline-primary { color: var(--bt-blau); border-color: var(--bt-blau); }
+.btn-outline-primary:hover { color: #fff; background-color: var(--bt-blau); }
+.btn-outline-danger { color: var(--bt-vermell); border-color: var(--bt-vermell); }
+.btn-outline-danger:hover { color: #fff; background-color: var(--bt-vermell); }
+.btn-outline-light { color: var(--bt-fons); border-color: var(--bt-fons); }
+.btn-outline-light:hover { color: #000; background-color: var(--bt-fons); }
+.btn-lg { padding: 0.5rem 1rem; font-size: 1.25rem; border-radius: 0.3rem; }
+.btn-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; border-radius: 0.2rem; }
+
+/* --- 4.6 Moneda (distintiu "1 h") i etiquetes grogues --- */
+.bt-moneda, .bt-moneda-mini, .bt-cost, .bt-hores-gran, .bt-error-codi { background-color: var(--bt-moneda); color: var(--bt-ink); font-weight: 800; }
+.bt-moneda, .bt-moneda-mini { align-items: center; justify-content: center; border-radius: 50%; }
+.bt-moneda { display: flex; width: 7.5rem; height: 7.5rem; font-size: 2.5rem; letter-spacing: -0.02em; box-shadow: 0 0 0 0.5rem rgba(var(--bt-moneda-rgb), 0.2); }
+.bt-moneda-mini { display: inline-flex; width: 2.75rem; height: 2.75rem; font-size: 0.95rem; }
+.bt-moneda-titol { width: 3.5rem; height: 3.5rem; font-size: 1.15rem; box-shadow: 0 0 0 0.4rem rgba(var(--bt-moneda-rgb), 0.2); }
+
+
+/* =========================================================
+   5. VISTES ESPECÍFIQUES
+========================================================= */
+
+/* --- 5.1 Pàgina d'inici --- */
+.bt-hero { padding: 4rem 0 4.5rem; }
+.bt-hero-grid { display: grid; grid-template-columns: 1fr; gap: 3rem; align-items: center; }
 .bt-botons { display: flex; flex-wrap: wrap; gap: 0.75rem; }
-.bt-nota { font-size: 0.95rem; color: #c9d6ee; margin: 1rem 0 0; }
+.bt-nota { font-size: 0.95rem; color: var(--bt-clar); margin: 1rem 0 0; }
 .bt-nota strong { color: #fff; }
 
 /* Equació 1 h = 1 h */
 .bt-equacio { display: flex; align-items: flex-start; justify-content: center; gap: 1rem; }
 .bt-hora { display: flex; flex-direction: column; align-items: center; text-align: center; width: 9.5rem; }
-.bt-moneda { display: flex; align-items: center; justify-content: center; width: 7.5rem; height: 7.5rem; border-radius: 50%; background-color: var(--bt-moneda); color: var(--bt-ink); font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; box-shadow: 0 0 0 0.5rem rgba(255, 193, 7, 0.2); }
 .bt-igual { font-size: 3rem; font-weight: 300; line-height: 7.5rem; color: #fff; }
-.bt-peu { margin-top: 1.25rem; font-size: 0.95rem; line-height: 1.35; color: #c9d6ee; }
+.bt-peu { margin-top: 1.25rem; font-size: 0.95rem; line-height: 1.35; color: var(--bt-clar); }
 
 /* Seccions */
 .bt-seccio { padding: 4rem 0; }
 .bt-seccio-blanca { background-color: #fff; }
-.bt-h2 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.01em; color: var(--bt-ink); margin-bottom: 0.75rem; }
-.bt-h2-clar { color: #fff; }
-.bt-subtitol { color: #6c757d; font-size: 1.1rem; margin: 0 0 2.5rem; }
+.bt-subtitol { color: var(--bt-gris); font-size: 1.1rem; margin: 0 0 2.5rem; }
 .bt-dues-columnes { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
 .bt-text p { font-size: 1.1rem; line-height: 1.7; max-width: 38rem; margin: 0 0 1rem; }
 
-/* Passos (seqüència real: 1 → 4) */
+/* Passos (1 → 4) i avantatges */
 .bt-passos { display: grid; grid-template-columns: 1fr; gap: 2rem; list-style: none; padding: 0; margin: 0; }
-.bt-passos h3 { font-size: 1.15rem; font-weight: 700; color: var(--bt-ink); margin: 0.75rem 0 0.4rem; }
-.bt-passos p { margin: 0; color: #495057; line-height: 1.6; }
+.bt-passos h3, .bt-avantatge h3 { font-size: 1.15rem; font-weight: 700; color: var(--bt-ink); }
+.bt-passos h3 { margin: 0.75rem 0 0.4rem; }
+.bt-passos p, .bt-avantatge p { margin: 0; color: var(--bt-gris-fosc); line-height: 1.6; }
 .bt-numero { display: inline-flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; background-color: var(--bt-blau); color: #fff; font-weight: 700; }
 
-/* Avantatges */
 .bt-avantatges { display: grid; grid-template-columns: 1fr; gap: 1.75rem 3rem; margin-top: 2rem; }
 .bt-avantatge { border-left: 4px solid var(--bt-blau); padding-left: 1.25rem; }
-.bt-avantatge h3 { font-size: 1.15rem; font-weight: 700; color: var(--bt-ink); margin-bottom: 0.3rem; }
-.bt-avantatge p { margin: 0; color: #495057; line-height: 1.6; }
+.bt-avantatge h3 { margin-bottom: 0.3rem; }
 
 /* Exemples */
 .bt-exemples-titol { margin: 3rem 0 0.75rem; font-weight: 500; color: var(--bt-ink); }
@@ -275,186 +301,146 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
 
 /* Crida final */
 .bt-final { background-color: var(--bt-blau); color: #fff; padding: 4rem 0; }
-.bt-lead-centre { margin-left: auto; margin-right: auto; color: #e7f0ff; }
 .bt-enllac-clar { color: #fff; text-decoration: underline; }
 .bt-enllac-clar:hover { color: #fff; }
 
 /* Accessibilitat: focus visible */
 .bt-hero a:focus-visible, .bt-final a:focus-visible { outline: 3px solid var(--bt-moneda); outline-offset: 3px; }
 
+/* --- 5.2 Accés (login i registre) --- */
+.bt-auth-cap { padding: 2.5rem 0 6rem; }
+.bt-auth-marca { display: inline-flex; align-items: center; gap: 0.75rem; color: #fff; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.01em; }
+.bt-auth-marca:hover { color: #fff; }
+.bt-auth-lema { margin: 0.75rem 0 0; color: var(--bt-clar); font-size: 1rem; }
+.bt-auth-contingut { margin-top: -4rem; padding-bottom: 3rem; }
+.bt-benvinguda { text-align: center; background-color: var(--bt-tint); color: var(--bt-ink); border-radius: 0.5rem; padding: 0.6rem 0.75rem; }
+.bt-check label { display: flex; align-items: flex-start; gap: 0.6rem; line-height: 1.4; cursor: pointer; }
+.bt-check input[type="checkbox"] { margin-top: 0.25rem; width: 1.1rem; height: 1.1rem; flex-shrink: 0; }
+
+/* --- 5.3 Normes d'ús --- */
+.bt-normes-cap { padding: 3rem 0 5rem; }
+.bt-normes { max-width: 800px; }
+.bt-normes-llista { margin-top: -2.5rem; }
+.bt-norma { background-color: #fff; border-left: 5px solid var(--bt-blau); border-radius: 0.5rem; box-shadow: 0 0.5rem 1.5rem rgba(var(--bt-ink-rgb), 0.08); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+.bt-norma h4 { font-size: 1.2rem; font-weight: 700; color: var(--bt-ink); margin-bottom: 0.5rem; }
+.bt-norma p { line-height: 1.6; color: var(--bt-gris-fosc); }
+.bt-norma-prohibit { border-left-color: var(--bt-vermell); }
+.bt-norma-contacte { border-left-color: var(--bt-moneda); }
+
+/* --- 5.4 Pàgines internes i mercat --- */
+.bt-pagina { padding-top: 2rem; padding-bottom: 3rem; }
+.bt-pagina-cap { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+
+.bt-oferta { overflow: hidden; transition: box-shadow 0.15s ease-in-out; }
+.bt-oferta:hover { box-shadow: 0 0.75rem 1.75rem rgba(var(--bt-ink-rgb), 0.16); }
+.bt-oferta .card-body { padding: 1.5rem; }
+.bt-oferta .card-footer { padding: 0.9rem 1.5rem; border-top: 1px solid var(--bt-vora-suau); }
+.bt-oferta-titol { font-size: 1.15rem; font-weight: 700; color: var(--bt-ink); }
+.bt-oferta-desc { color: var(--bt-gris-fosc); line-height: 1.55; }
+.bt-categoria { background-color: var(--bt-tint); color: var(--bt-ink); font-weight: 600; }
+.bt-cost { display: inline-flex; align-items: center; justify-content: center; min-width: 3rem; padding: 0.3rem 0.8rem; border-radius: 2rem; }
+
+/* Estat buit */
+.bt-buit { padding: 3rem 1.5rem; margin-top: 1rem; }
+
+/* --- 5.5 Detall d'oferta --- */
+.bt-descripcio { font-size: 1.1rem; line-height: 1.7; color: #343a40; }
+.bt-hores-gran { display: inline-block; align-self: center; padding: 0.5rem 1.5rem; border-radius: 3rem; font-size: 1.75rem; margin: 0; }
+
+/* --- 5.6 Transferència --- */
+.bt-destinatari { display: flex; flex-direction: column; gap: 0.35rem; background-color: var(--bt-tint); color: var(--bt-ink); border-left: 4px solid var(--bt-blau); border-radius: 0.5rem; padding: 0.9rem 1.1rem; line-height: 1.5; }
+
+/* --- 5.7 Perfil --- */
+.bt-avatar { display: inline-flex; align-items: center; justify-content: center; width: 7.5rem; height: 7.5rem; border-radius: 50%; background-color: var(--bt-tint); color: var(--bt-ink); font-size: 3.25rem; border: 4px solid #fff; box-shadow: 0 0 0 4px var(--bt-blau), 0 0.5rem 1.25rem rgba(var(--bt-ink-rgb), 0.15); }
+.bt-correu-perfil { display: inline-block; background-color: #f1f3f5; color: var(--bt-gris-fosc); font-size: 0.9rem; padding: 0.3rem 0.9rem; border-radius: 2rem; word-break: break-all; }
+
+/* --- 5.8 Historial: moviments d'hores --- */
+.bt-moviments { overflow: hidden; }
+.bt-moviment { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid var(--bt-vora-suau); transition: background-color 0.15s ease-in-out; }
+.bt-moviment:last-child { border-bottom: 0; }
+.bt-moviment:hover { background-color: var(--bt-hover); }
+.bt-moviment-icona { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 2.5rem; height: 2.5rem; border-radius: 50%; font-weight: 800; font-size: 1.1rem; }
+.bt-moviment-pagat { background-color: #fde8ea; color: var(--bt-vermell); }
+.bt-moviment-cobrat { background-color: var(--bt-tint); color: var(--bt-blau); }
+.bt-moviment-info { min-width: 0; }
+.bt-moviment-hores { white-space: nowrap; }
+
+/* --- 5.9 Xat --- */
+.sidebar-xats { background-color: #fff; border-right: 1px solid var(--bt-vora-suau); height: 75vh; overflow-y: auto; }
+.bt-xat-cap-llista, .bt-xat-cap { padding: 1rem 1.25rem; font-weight: 700; }
+.bt-xat-cap-llista { background-color: var(--bt-tint); color: var(--bt-ink); border-bottom: 1px solid #dbe6fa; }
+.bt-xat-cap { background-color: var(--bt-ink); color: #fff; }
+
+/* Llista de converses */
+.xat-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--bt-vora-suau); border-left: 4px solid transparent; transition: background-color 0.15s ease-in-out; }
+.xat-item:hover { background-color: #f4f7fd; }
+.xat-item.active { background-color: var(--bt-tint); border-left-color: var(--bt-blau); }
+.xat-item a { color: var(--bt-ink) !important; font-weight: 500; }
+
+/* Missatges */
+.fons-xat { background-color: #eef2f9; height: 60vh; overflow-y: auto; padding: 20px; }
+.bombolla-meva, .bombolla-altre { padding: 10px 15px; margin-bottom: 15px; max-width: 75%; clear: both; }
+.bombolla-meva { background-color: #cfe2ff; color: var(--bt-ink); border-radius: 15px 15px 0 15px; float: right; box-shadow: 0 1px 1px rgba(var(--bt-ink-rgb), 0.08); }
+.bombolla-altre { background-color: #fff; border-radius: 15px 15px 15px 0; float: left; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1); }
+.bt-bombolla-nom { font-size: 0.8rem; color: var(--bt-gris-fosc); }
+
+/* Enviament i estat buit */
+.bt-xat-envio { padding: 1rem 1.25rem; background-color: #fff; border-top: 1px solid var(--bt-vora-suau); }
+.bt-xat-envio .form-control { border-radius: 2rem; padding-left: 1.1rem; }
+.bt-xat-buit { min-height: 60vh; }
+.bt-xat-buit-icona { font-size: 3rem; margin-bottom: 0.75rem; }
+
+/* --- 5.10 Administració --- */
+.bt-admin-titol { font-size: 1.75rem; font-weight: 700; color: var(--bt-ink); }
+.bt-admin-resum { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; }
+.bt-admin-dada, .bt-admin-panell { background-color: #fff; border: 1px solid var(--bt-vora); border-radius: 0.5rem; }
+.bt-admin-dada { padding: 0.5rem 1rem; color: var(--bt-gris-fosc); font-size: 0.95rem; }
+.bt-admin-dada strong { font-size: 1.25rem; color: var(--bt-ink); margin-right: 0.25rem; }
+.bt-admin-panell { overflow: hidden; }
+.bt-admin-panell-cap { padding: 0.85rem 1.25rem; background-color: var(--bt-fons); border-bottom: 1px solid var(--bt-vora); font-weight: 600; color: var(--bt-ink); }
+
+/* Taules de dades */
+.bt-taula-scroll { max-height: 26rem; overflow: auto; }
+.bt-taula { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.bt-taula th { position: sticky; top: 0; z-index: 1; background-color: var(--bt-fons); text-align: left; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--bt-gris); padding: 0.6rem 1.25rem; border-bottom: 2px solid var(--bt-vora); white-space: nowrap; }
+.bt-taula td { padding: 0.65rem 1.25rem; border-bottom: 1px solid var(--bt-vora-suau); vertical-align: middle; }
+.bt-taula tbody tr:last-child td { border-bottom: 0; }
+.bt-taula tbody tr:hover { background-color: var(--bt-hover); }
+.bt-taula .bt-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bt-taula .bt-accio { text-align: right; white-space: nowrap; }
+.bt-taula-buida { text-align: center; color: var(--bt-gris); padding: 2rem 1rem !important; }
+
+/* --- 5.11 Pàgina d'error --- */
+.bt-error { max-width: 36rem; margin: 2rem auto 0; padding: 3rem 1.5rem; }
+.bt-error-codi { display: inline-flex; align-items: center; justify-content: center; min-width: 7.5rem; height: 7.5rem; padding: 0 1.5rem; margin-bottom: 1.5rem; border-radius: 4rem; font-size: 2.75rem; letter-spacing: -0.02em; box-shadow: 0 0 0 0.5rem rgba(var(--bt-moneda-rgb), 0.2); }
+.bt-error-missatge { color: var(--bt-gris-fosc); max-width: 28rem; margin: 0 auto; }
+
+
+/* =========================================================
+   6. RESPONSIVE
+========================================================= */
+
 /* Pantalles mitjanes i grans */
 @media (min-width: 768px) {
+    .col-md-4 { flex: 0 0 auto; width: 33.33333333%; }
+    .col-md-5 { flex: 0 0 auto; width: 41.66666667%; }
+    .col-md-6 { flex: 0 0 auto; width: 50%; }
+    .col-md-8 { flex: 0 0 auto; width: 66.66666667%; }
+
     .bt-hero { padding: 5.5rem 0; }
     .bt-hero-grid { grid-template-columns: 1.2fr 1fr; }
     .bt-h1 { font-size: 3.25rem; }
     .bt-dues-columnes { grid-template-columns: 1fr 1.6fr; gap: 3rem; }
     .bt-passos { grid-template-columns: repeat(4, 1fr); gap: 1.75rem; }
     .bt-avantatges { grid-template-columns: 1fr 1fr; }
-}
-/* =========================================
-   12. ACCÉS (login/registre) I NORMES — afegir al final de style.css, després del bloc 11
-========================================= */
 
-/* Franja superior de marca (login i registre) */
-.bt-auth-cap { background-color: var(--bt-ink, #0f2347); color: #fff; padding: 2.5rem 0 6rem; }
-.bt-auth-marca { display: inline-flex; align-items: center; gap: 0.75rem; color: #fff; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.01em; }
-.bt-auth-marca:hover { color: #fff; }
-.bt-moneda-mini { display: inline-flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border-radius: 50%; background-color: var(--bt-moneda, #ffc107); color: var(--bt-ink, #0f2347); font-size: 0.95rem; font-weight: 800; }
-.bt-auth-lema { margin: 0.75rem 0 0; color: #c9d6ee; font-size: 1rem; }
-
-/* Targeta que sobreïx la franja */
-.bt-auth-contingut { margin-top: -4rem; padding-bottom: 3rem; }
-.bt-card { border-radius: 0.75rem; box-shadow: 0 1rem 2.5rem rgba(15, 35, 71, 0.15); }
-.bt-card-cos { padding: 2rem 1.5rem; }
-.bt-titol-card { font-size: 1.6rem; font-weight: 700; color: var(--bt-ink, #0f2347); }
-.bt-benvinguda { text-align: center; background-color: var(--bt-tint, #eaf2ff); color: var(--bt-ink, #0f2347); border-radius: 0.5rem; padding: 0.6rem 0.75rem; }
-.bt-check label { display: flex; align-items: flex-start; gap: 0.6rem; line-height: 1.4; cursor: pointer; }
-.bt-check input[type="checkbox"] { margin-top: 0.25rem; width: 1.1rem; height: 1.1rem; flex-shrink: 0; }
-.form-control-lg, .form-select.form-control-lg { padding: 0.6rem 1rem; font-size: 1.05rem; }
-
-/* Normes */
-.bt-normes-cap { background-color: var(--bt-ink, #0f2347); color: #fff; padding: 3rem 0 5rem; }
-.bt-normes { max-width: 800px; }
-.bt-h1-mitja { font-size: 2rem; }
-.bt-normes-llista { margin-top: -2.5rem; }
-.bt-norma { background-color: #fff; border-left: 5px solid var(--bt-blau, #0d6efd); border-radius: 0.5rem; box-shadow: 0 0.5rem 1.5rem rgba(15, 35, 71, 0.08); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
-.bt-norma h4 { font-size: 1.2rem; font-weight: 700; color: var(--bt-ink, #0f2347); margin-bottom: 0.5rem; }
-.bt-norma p { line-height: 1.6; color: #495057; }
-.bt-norma-prohibit { border-left-color: #dc3545; }
-.bt-norma-contacte { border-left-color: var(--bt-moneda, #ffc107); }
-
-@media (min-width: 768px) {
     .bt-card-cos { padding: 2.5rem; }
     .bt-h1-mitja { font-size: 2.5rem; }
 }
-/* =========================================
-   13. PÀGINES INTERNES (mercat i següents) — afegir al final de style.css, després del bloc 12
-========================================= */
-.bt-pagina { padding-top: 2rem; padding-bottom: 3rem; }
-.bt-pagina-cap { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2rem; }
 
-/* Targeta d'oferta */
-.bt-oferta { border-radius: 0.75rem; overflow: hidden; box-shadow: 0 0.25rem 1rem rgba(15, 35, 71, 0.08); transition: box-shadow .15s ease-in-out; }
-.bt-oferta:hover { box-shadow: 0 0.75rem 1.75rem rgba(15, 35, 71, 0.16); }
-.bt-oferta .card-body { padding: 1.5rem; }
-.bt-oferta .card-footer { padding: 0.9rem 1.5rem; border-top: 1px solid #eef1f6; }
-.bt-oferta-titol { font-size: 1.15rem; font-weight: 700; color: var(--bt-ink, #0f2347); }
-.bt-oferta-desc { color: #495057; line-height: 1.55; }
-.bt-categoria { background-color: var(--bt-tint, #eaf2ff); color: var(--bt-ink, #0f2347); font-weight: 600; }
-.bt-cost { display: inline-flex; align-items: center; justify-content: center; min-width: 3rem; padding: 0.3rem 0.8rem; border-radius: 2rem; background-color: var(--bt-moneda, #ffc107); color: var(--bt-ink, #0f2347); font-weight: 800; }
-
-/* Estat buit */
-.bt-buit { background-color: #fff; border-radius: 0.75rem; box-shadow: 0 0.25rem 1rem rgba(15, 35, 71, 0.08); padding: 3rem 1.5rem; margin-top: 1rem; }
-/* =========================================
-   14. DETALL D'OFERTA — afegir al final de style.css, després del bloc 13
-   (crear_oferta.html reutilitza els blocs 12 i 13)
-========================================= */
-.bt-h2-gran { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em; }
-.bt-descripcio { font-size: 1.1rem; line-height: 1.7; color: #343a40; }
-.bt-hores-gran { display: inline-block; align-self: center; padding: 0.5rem 1.5rem; border-radius: 3rem; background-color: var(--bt-moneda, #ffc107); color: var(--bt-ink, #0f2347); font-size: 1.75rem; font-weight: 800; margin: 0; }
-
-/* =========================================
-   15. BLOC 3: TRANSFERÈNCIA, PERFIL I HISTORIAL — afegir al final de style.css, després del bloc 14
-========================================= */
-
-/* Transferència */
-.bt-moneda-titol { width: 3.5rem; height: 3.5rem; font-size: 1.15rem; box-shadow: 0 0 0 0.4rem rgba(255, 193, 7, 0.2); }
-.bt-destinatari { display: flex; flex-direction: column; gap: 0.35rem; background-color: var(--bt-tint, #eaf2ff); color: var(--bt-ink, #0f2347); border-left: 4px solid var(--bt-blau, #0d6efd); border-radius: 0.5rem; padding: 0.9rem 1.1rem; line-height: 1.5; }
-
-/* Perfil */
-.bt-avatar { display: inline-flex; align-items: center; justify-content: center; width: 7.5rem; height: 7.5rem; border-radius: 50%; background-color: var(--bt-tint, #eaf2ff); color: var(--bt-ink, #0f2347); font-size: 3.25rem; border: 4px solid #fff; box-shadow: 0 0 0 4px var(--bt-blau, #0d6efd), 0 0.5rem 1.25rem rgba(15, 35, 71, 0.15); }
-.bt-correu-perfil { display: inline-block; background-color: #f1f3f5; color: #495057; font-size: 0.9rem; padding: 0.3rem 0.9rem; border-radius: 2rem; word-break: break-all; }
-
-/* Historial: moviments d'hores */
-.bt-moviments { background-color: #fff; border-radius: 0.75rem; box-shadow: 0 0.25rem 1rem rgba(15, 35, 71, 0.08); overflow: hidden; }
-.bt-moviment { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid #eef1f6; transition: background-color .15s ease-in-out; }
-.bt-moviment:last-child { border-bottom: 0; }
-.bt-moviment:hover { background-color: #f8faff; }
-.bt-moviment-icona { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 2.5rem; height: 2.5rem; border-radius: 50%; font-weight: 800; font-size: 1.1rem; }
-.bt-moviment-pagat { background-color: #fde8ea; color: #dc3545; }
-.bt-moviment-cobrat { background-color: var(--bt-tint, #eaf2ff); color: var(--bt-blau, #0d6efd); }
-.bt-moviment-info { min-width: 0; }
-.bt-moviment-hores { white-space: nowrap; }
-
-
-/* =========================================
-   16. BLOC 4: XAT I ADMIN — afegir al final de style.css, després del bloc 15
-========================================= */
-
-/* Xat: contenidor */
-.bt-xat { background-color: #fff; border-radius: 0.75rem; box-shadow: 0 0.25rem 1rem rgba(15, 35, 71, 0.08); }
-.bt-xat .sidebar-xats { background-color: #fff; border-right: 1px solid #eef1f6; }
-.bt-xat-cap-llista { padding: 1rem 1.25rem; background-color: var(--bt-tint, #eaf2ff); color: var(--bt-ink, #0f2347); font-weight: 700; border-bottom: 1px solid #dbe6fa; }
-.bt-xat-cap { padding: 1rem 1.25rem; background-color: var(--bt-ink, #0f2347); color: #fff; font-weight: 700; }
-
-/* Xat: llista de converses */
-.xat-item { border-left: 4px solid transparent; border-bottom: 1px solid #eef1f6; padding: 0.75rem 1rem; transition: background-color .15s ease-in-out; }
-.xat-item:hover { background-color: #f4f7fd; }
-.xat-item.active { background-color: var(--bt-tint, #eaf2ff); border-left-color: var(--bt-blau, #0d6efd); }
-.xat-item a { color: var(--bt-ink, #0f2347) !important; font-weight: 500; }
-
-/* Xat: missatges */
-.fons-xat { background-color: #eef2f9; border-radius: 0; }
-.bombolla-meva { background-color: #cfe2ff; color: var(--bt-ink, #0f2347); box-shadow: 0 1px 1px rgba(15, 35, 71, 0.08); }
-.bombolla-altre { color: #212529; }
-.bt-bombolla-nom { font-size: 0.8rem; color: #495057; }
-
-/* Xat: enviament i estat buit */
-.bt-xat-envio { padding: 1rem 1.25rem; background-color: #fff; border-top: 1px solid #eef1f6; }
-.bt-xat-envio .form-control { border-radius: 2rem; padding-left: 1.1rem; }
-.bt-xat-buit { min-height: 60vh; }
-.bt-xat-buit-icona { font-size: 3rem; margin-bottom: 0.75rem; }
-
+/* Mòbil */
 @media (max-width: 767px) {
-    .bt-xat .sidebar-xats { height: auto; max-height: 14rem; border-right: 0; border-bottom: 1px solid #eef1f6; }
+    .bt-xat .sidebar-xats { height: auto; max-height: 14rem; border-right: 0; border-bottom: 1px solid var(--bt-vora-suau); }
     .fons-xat { height: 55vh; }
     .bombolla-meva, .bombolla-altre { max-width: 90%; }
 }
-
-/* Admin: sobri i funcional */
-.bt-admin-titol { font-size: 1.75rem; font-weight: 700; color: var(--bt-ink, #0f2347); }
-.bt-admin-resum { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; }
-.bt-admin-dada { background-color: #fff; border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 0.5rem 1rem; color: #495057; font-size: 0.95rem; }
-.bt-admin-dada strong { font-size: 1.25rem; color: var(--bt-ink, #0f2347); margin-right: 0.25rem; }
-.bt-admin-panell { background-color: #fff; border: 1px solid #dee2e6; border-radius: 0.5rem; overflow: hidden; }
-.bt-admin-panell-cap { padding: 0.85rem 1.25rem; background-color: #f8f9fa; border-bottom: 1px solid #dee2e6; font-weight: 600; color: var(--bt-ink, #0f2347); }
-
-/* Taules de dades */
-.bt-taula-scroll { max-height: 26rem; overflow: auto; }
-.bt-taula { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-.bt-taula th { position: sticky; top: 0; z-index: 1; background-color: #f8f9fa; text-align: left; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #6c757d; padding: 0.6rem 1.25rem; border-bottom: 2px solid #dee2e6; white-space: nowrap; }
-.bt-taula td { padding: 0.65rem 1.25rem; border-bottom: 1px solid #eef1f6; vertical-align: middle; }
-.bt-taula tbody tr:last-child td { border-bottom: 0; }
-.bt-taula tbody tr:hover { background-color: #f8faff; }
-.bt-taula .bt-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.bt-taula .bt-accio { text-align: right; white-space: nowrap; }
-.bt-taula-buida { text-align: center; color: #6c757d; padding: 2rem 1rem !important; }
-
-/* =========================================
-   17. BLOC 5: NAVBAR, ALERTES I ERROR — afegir al final de style.css, després del bloc 16
-========================================= */
-
-/* Navbar */
-.bt-navbar { background-color: var(--bt-ink, #0f2347); box-shadow: 0 0.25rem 1rem rgba(15, 35, 71, 0.2); padding: 0.4rem 1rem; }
-.bt-navbar .container-fluid { flex-wrap: wrap; gap: 0.25rem 1rem; }
-.bt-navbar .navbar-nav { flex-wrap: wrap; }
-.bt-navbar .navbar-brand { font-size: 1.3rem; letter-spacing: -0.01em; margin-right: 1.25rem; }
-.bt-navbar .nav-link { border-radius: 0.4rem; padding: 0.5rem 0.75rem; box-shadow: inset 0 -3px 0 transparent; transition: color .15s, background-color .15s, box-shadow .15s; }
-.bt-navbar .nav-link:hover { background-color: rgba(255, 255, 255, 0.08); }
-.bt-navbar .nav-link.active { background-color: rgba(255, 255, 255, 0.12); box-shadow: inset 0 -3px 0 var(--bt-moneda, #ffc107); }
-.bt-saldo { display: inline-block; background-color: rgba(255, 193, 7, 0.15); color: var(--bt-moneda, #ffc107); border: 1px solid rgba(255, 193, 7, 0.45); border-radius: 2rem; padding: 0.3rem 0.9rem; font-size: 0.95rem; white-space: nowrap; }
-
-/* Alertes (flash) */
-.bt-alert { display: flex; align-items: flex-start; gap: 0.75rem; border-radius: 0.5rem; border-left-width: 5px; box-shadow: 0 0.125rem 0.5rem rgba(15, 35, 71, 0.06); line-height: 1.45; }
-.bt-alert-icona { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background-color: rgba(255, 255, 255, 0.65); font-size: 0.85rem; font-weight: 800; }
-.bt-alert.alert-info { border-left-color: #0dcaf0; }
-.bt-alert.alert-success { border-left-color: #198754; }
-.bt-alert.alert-danger { border-left-color: #dc3545; }
-.bt-alert.alert-warning { border-left-color: #ffc107; }
-.container > .bt-alert:first-child { margin-top: 1.5rem; }
-
-/* Pàgina d'error */
-.bt-error { background-color: #fff; border-radius: 0.75rem; box-shadow: 0 0.25rem 1rem rgba(15, 35, 71, 0.08); max-width: 36rem; margin: 2rem auto 0; padding: 3rem 1.5rem; }
-.bt-error-codi { display: inline-flex; align-items: center; justify-content: center; min-width: 7.5rem; height: 7.5rem; padding: 0 1.5rem; margin-bottom: 1.5rem; border-radius: 4rem; background-color: var(--bt-moneda, #ffc107); color: var(--bt-ink, #0f2347); font-size: 2.75rem; font-weight: 800; letter-spacing: -0.02em; box-shadow: 0 0 0 0.5rem rgba(255, 193, 7, 0.2); }
-.bt-error-missatge { color: #495057; max-width: 28rem; margin: 0 auto; }
-
