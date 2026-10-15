@@ -8,18 +8,24 @@
 </head>
 <body class="bg-light">
 
-    <div class="container mt-5">
+    <div class="bt-auth-cap">
+        <div class="container text-center">
+            <a href="/" class="bt-auth-marca"><span class="bt-moneda-mini">1 h</span> Banc de Temps</a>
+            <p class="bt-auth-lema">La teva hora val tant com la de qualsevol altra persona</p>
+        </div>
+    </div>
+
+    <div class="container bt-auth-contingut">
         <div class="row justify-content-center">
             <div class="col-md-5">
 
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-5">
-                        <h2 class="text-center text-success mb-4">Crea el teu compte</h2>
-                        <p class="text-center text-muted mb-4">Rebràs 5 hores de saldo inicial de benvinguda!</p>
+                <div class="card bt-card border-0">
+                    <div class="card-body bt-card-cos">
+                        <h2 class="text-center bt-titol-card mb-3">Crea el teu compte</h2>
+                        <p class="bt-benvinguda mb-4">Rebràs <strong>5 hores</strong> de saldo inicial de benvinguda!</p>
 
                         {% include '_flash.html' %}
 
-                        <!-- Formulari que enviarà les dades a la ruta /registre -->
                         <form method="POST" action="/registre">
                             <div class="mb-3">
                                 <label class="form-label">Nom complet</label>
@@ -27,7 +33,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Ciutat o Població</label>
-                                <select class="form-select text-muted" name="ciutat" required>
+                                <select class="form-select form-control-lg" name="ciutat" required>
                                     <option value="" {% if not form.get('ciutat') %}selected{% endif %} disabled>Selecciona on vius</option>
                                     {% for c in CIUTATS %}
                                         <option value="{{ c }}" {% if form.get('ciutat') == c %}selected{% endif %}>{{ c if c != 'Altres' else 'Altres poblacions...' }}</option>
@@ -36,28 +42,27 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Correu electrònic</label>
-                                <input type="email" name="correu" class="form-control form-control-lg text-muted" placeholder="correu@exemple.cat" value="{{ form.get('correu', '') }}" maxlength="120" required>
+                                <input type="email" name="correu" class="form-control form-control-lg" placeholder="correu@exemple.cat" value="{{ form.get('correu', '') }}" maxlength="120" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Contrasenya</label>
-                                <input type="password" name="contrasenya" class="form-control form-control-lg text-muted" minlength="8" maxlength="128" required>
+                                <input type="password" name="contrasenya" class="form-control form-control-lg" minlength="8" maxlength="128" required>
                                 <small class="text-muted">Mínim 8 caràcters.</small>
                             </div>
 
-                            <div class="mb-4">
+                            <div class="mb-4 bt-check">
                                 <label>
                                     <input type="checkbox" name="normes" value="on" required>
-                                    He llegit i accepto les <a href="/normes" target="_blank" class="fw-bold">Normes d'Ús</a>
+                                    <span>He llegit i accepto les <a href="/normes" target="_blank" class="fw-bold">Normes d'Ús</a></span>
                                 </label>
                             </div>
 
                             <button type="submit" class="btn btn-success btn-lg w-100">Registrar-me ara</button>
                         </form>
 
-                        <!-- Enllaç per tornar a l'inici de sessió -->
-                        <div class="text-center mt-4">
-                            <p class="mb-0">Ja formes part del banc? <a href="/login" class="text-decoration-none fw-bold text-success">Inicia sessió</a></p>
+                        <div class="text-center mt-4 pt-3 border-top">
+                            <p class="mb-0">Ja formes part del banc? <a href="/login" class="text-decoration-none fw-bold">Inicia sessió</a></p>
                         </div>
                     </div>
                 </div>

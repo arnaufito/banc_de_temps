@@ -2,46 +2,45 @@
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Normes d'Ús - Banc de Temps</title>
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
 </head>
 <body class="bg-light">
 
-    <!-- Si tens una barra de navegació al teu arxiu base, pots copiar-la aquí a dalt -->
+    <header class="bt-normes-cap">
+        <div class="container bt-normes">
+            <h1 class="bt-h1 bt-h1-mitja">Normes Bàsiques d’Ús</h1>
+            <p class="bt-lead mb-0">
+                Per assegurar la convivència dins de la comunitat, tots els usuaris hauran d’acceptar i complir les següents normes d’ús i conducta:
+            </p>
+        </div>
+    </header>
 
-    <div class="container" style="max-width: 800px; margin-top: 50px; margin-bottom: 50px;">
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-5">
-                <h2 class="text-primary border-bottom pb-3 mb-4">Normes Bàsiques d’Ús</h2>
-                
-                <p class="fs-5 mb-4 text-muted">
-                    Per assegurar la convivència dins de la comunitat, tots els usuaris hauran d’acceptar i complir les següents normes d’ús i conducta:
-                </p>
-                
-                <div class="mb-4 p-3 bg-white border rounded">
-                    <h4 class="text-dark">⚖️ 1. Igualtat</h4>
-                    <p class="mb-0">Acceptació de la moneda igualitària, és a dir, acceptar que la teva hora té el mateix valor que la de qualsevol altre membre de la web, independentment del servei prestat.</p>
-                </div>
+    <div class="container bt-normes bt-normes-llista">
 
-                <div class="mb-4 p-3 bg-white border rounded">
-                    <h4 class="text-dark">🤝 2. Respecte</h4>
-                    <p class="mb-0">Els usuaris hauran de tenir un tracte cordial, o si més no, amb respecte. Qualsevol mal ús intencionat o falta de respecte cap a un altre usuari implicarà l’expulsió immediata de l’aplicació (fent ús de les eines d'Administració).</p>
-                </div>
+        <div class="bt-norma">
+            <h4>⚖️ 1. Igualtat</h4>
+            <p class="mb-0">Acceptació de la moneda igualitària, és a dir, acceptar que la teva hora té el mateix valor que la de qualsevol altre membre de la web, independentment del servei prestat.</p>
+        </div>
 
-                <div class="mb-4 p-3 bg-white border rounded">
-                    <h4 class="text-danger">🚫 3. Prohibició de comerç extern</h4>
-                    <p class="mb-0">Queda totalment prohibit oferir o demanar el pagament amb diners reals a canvi de qualsevol servei dins de la web. La nostra única moneda de canvi és el temps.</p>
-                </div>
-                <div class="mb-4 p-3 bg-white border rounded">
-                    <h4 class="text-danger">Correu d'incidències: admin@bancdetemps.cat</h4>
-                    <p class="mb-0">Per qualsevol incidència, dubte, o incompliment de la normativa, pots escriure a aquest correu.</p>
-                </div>
+        <div class="bt-norma">
+            <h4>🤝 2. Respecte</h4>
+            <p class="mb-0">Els usuaris hauran de tenir un tracte cordial, o si més no, amb respecte. Qualsevol mal ús intencionat o falta de respecte cap a un altre usuari implicarà l’expulsió immediata de l’aplicació (fent ús de les eines d'Administració).</p>
+        </div>
 
-                <div class="text-center mt-5">
-                    <!-- Aquest botó torna a l'usuari on vulguis, per exemple a l'índex o al mercat -->
-                    <a href="/" class="btn btn-primary px-4 py-2">Tornar a la plataforma</a>
-                </div>
-            </div>
+        <div class="bt-norma bt-norma-prohibit">
+            <h4>🚫 3. Prohibició de comerç extern</h4>
+            <p class="mb-0">Queda totalment prohibit oferir o demanar el pagament amb diners reals a canvi de qualsevol servei dins de la web. La nostra única moneda de canvi és el temps.</p>
+        </div>
+
+        <div class="bt-norma bt-norma-contacte">
+            <h4>Correu d'incidències: admin@bancdetemps.cat</h4>
+            <p class="mb-0">Per qualsevol incidència, dubte, o incompliment de la normativa, pots escriure a aquest correu.</p>
+        </div>
+
+        <div class="text-center mt-5 mb-5">
+            <a href="/" class="btn btn-primary btn-lg px-4">Tornar a la plataforma</a>
         </div>
     </div>
 

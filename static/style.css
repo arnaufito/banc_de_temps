@@ -291,3 +291,39 @@ h1, h2, h3, h4, h5 { margin-top: 0; margin-bottom: 0.5rem; font-weight: 500; lin
     .bt-passos { grid-template-columns: repeat(4, 1fr); gap: 1.75rem; }
     .bt-avantatges { grid-template-columns: 1fr 1fr; }
 }
+/* =========================================
+   12. ACCÉS (login/registre) I NORMES — afegir al final de style.css, després del bloc 11
+========================================= */
+
+/* Franja superior de marca (login i registre) */
+.bt-auth-cap { background-color: var(--bt-ink, #0f2347); color: #fff; padding: 2.5rem 0 6rem; }
+.bt-auth-marca { display: inline-flex; align-items: center; gap: 0.75rem; color: #fff; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.01em; }
+.bt-auth-marca:hover { color: #fff; }
+.bt-moneda-mini { display: inline-flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border-radius: 50%; background-color: var(--bt-moneda, #ffc107); color: var(--bt-ink, #0f2347); font-size: 0.95rem; font-weight: 800; }
+.bt-auth-lema { margin: 0.75rem 0 0; color: #c9d6ee; font-size: 1rem; }
+
+/* Targeta que sobreïx la franja */
+.bt-auth-contingut { margin-top: -4rem; padding-bottom: 3rem; }
+.bt-card { border-radius: 0.75rem; box-shadow: 0 1rem 2.5rem rgba(15, 35, 71, 0.15); }
+.bt-card-cos { padding: 2rem 1.5rem; }
+.bt-titol-card { font-size: 1.6rem; font-weight: 700; color: var(--bt-ink, #0f2347); }
+.bt-benvinguda { text-align: center; background-color: var(--bt-tint, #eaf2ff); color: var(--bt-ink, #0f2347); border-radius: 0.5rem; padding: 0.6rem 0.75rem; }
+.bt-check label { display: flex; align-items: flex-start; gap: 0.6rem; line-height: 1.4; cursor: pointer; }
+.bt-check input[type="checkbox"] { margin-top: 0.25rem; width: 1.1rem; height: 1.1rem; flex-shrink: 0; }
+.form-control-lg, .form-select.form-control-lg { padding: 0.6rem 1rem; font-size: 1.05rem; }
+
+/* Normes */
+.bt-normes-cap { background-color: var(--bt-ink, #0f2347); color: #fff; padding: 3rem 0 5rem; }
+.bt-normes { max-width: 800px; }
+.bt-h1-mitja { font-size: 2rem; }
+.bt-normes-llista { margin-top: -2.5rem; }
+.bt-norma { background-color: #fff; border-left: 5px solid var(--bt-blau, #0d6efd); border-radius: 0.5rem; box-shadow: 0 0.5rem 1.5rem rgba(15, 35, 71, 0.08); padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+.bt-norma h4 { font-size: 1.2rem; font-weight: 700; color: var(--bt-ink, #0f2347); margin-bottom: 0.5rem; }
+.bt-norma p { line-height: 1.6; color: #495057; }
+.bt-norma-prohibit { border-left-color: #dc3545; }
+.bt-norma-contacte { border-left-color: var(--bt-moneda, #ffc107); }
+
+@media (min-width: 768px) {
+    .bt-card-cos { padding: 2.5rem; }
+    .bt-h1-mitja { font-size: 2.5rem; }
+}

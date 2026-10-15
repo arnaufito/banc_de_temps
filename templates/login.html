@@ -8,39 +8,40 @@
 </head>
 <body class="bg-light">
 
-    <!-- Contenidor principal que centra els elements -->
-    <div class="container mt-5">
+    <div class="bt-auth-cap">
+        <div class="container text-center">
+            <a href="/" class="bt-auth-marca"><span class="bt-moneda-mini">1 h</span> Banc de Temps</a>
+            <p class="bt-auth-lema">La teva hora val tant com la de qualsevol altra persona</p>
+        </div>
+    </div>
+
+    <div class="container bt-auth-contingut">
         <div class="row justify-content-center">
             <div class="col-md-5">
 
-                <!-- Caixa del formulari (Card) -->
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-5">
-                        <h2 class="text-center text-primary mb-4">Inicia Sessió</h2>
+                <div class="card bt-card border-0">
+                    <div class="card-body bt-card-cos">
+                        <h2 class="text-center bt-titol-card mb-4">Inicia Sessió</h2>
 
                         {% include '_flash.html' %}
 
-                        <!-- Formulari que enviarà les dades a la ruta /login -->
                         <form method="POST" action="/login">
                             <div class="mb-3">
                                 <label class="form-label">Correu electrònic</label>
-                                <input type="email" name="correu" class="form-control form-control-lg text-muted" placeholder="nom@exemple.cat" value="{{ correu or '' }}" required>
+                                <input type="email" name="correu" class="form-control form-control-lg" placeholder="nom@exemple.cat" value="{{ correu or '' }}" required>
                             </div>
 
                             <div class="mb-4">
                                 <label class="form-label">Contrasenya</label>
-                                <input type="password" name="contrasenya" class="form-control form-control-lg text-muted" required>
+                                <input type="password" name="contrasenya" class="form-control form-control-lg" required>
                             </div>
 
                             <button type="submit" class="btn btn-primary btn-lg w-100">Entrar al Banc</button>
                         </form>
 
-                        <!-- Enllaç per anar al registre -->
-                        <div class="text-center mt-4">
-                            <p class="mb-0">No tens compte? <a href="/registre" class="text-decoration-none fw-bold">Crea'n un aquí</a></p>
-                        </div>
-                        <div class="text-center mt-4">
-                            <a href="/normes" class="text-secondary" style="text-decoration: underline;">Llegir les Normes d'Ús</a>
+                        <div class="text-center mt-4 pt-3 border-top">
+                            <p class="mb-3">No tens compte? <a href="/registre" class="text-decoration-none fw-bold">Crea'n un aquí</a></p>
+                            <a href="/normes" class="text-secondary small" style="text-decoration: underline;">Llegir les Normes d'Ús</a>
                         </div>
                     </div>
                 </div>
