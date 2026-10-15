@@ -1,5 +1,6 @@
+<!-- _navbar.html -->
 {# Barra de navegació única per a tota la web. Cada pàgina defineix la variable 'actiu' abans d'incloure-la #}
-<nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
+<nav class="navbar navbar-expand navbar-dark bt-navbar">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="/mercat">⏳ Banc de Temps</a>
 
@@ -16,7 +17,7 @@
 
         <ul class="navbar-nav align-items-center">
             <li class="nav-item me-3">
-                <span class="navbar-text text-white fw-bold">💰 Saldo: {{ saldo }} hores</span>
+                <span class="navbar-text bt-saldo fw-bold">💰 Saldo: {{ saldo }} hores</span>
             </li>
             <li class="nav-item"><a class="nav-link {% if actiu == 'perfil' %}active fw-bold{% endif %}" href="/perfil">👤 Perfil</a></li>
             <li class="nav-item"><a class="nav-link {% if actiu == 'logout' %}active fw-bold{% endif %}" href="/logout">🚫 Sortir</a></li>

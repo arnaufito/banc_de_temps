@@ -1,5 +1,9 @@
+<!-- _flash.html -->
 {% with missatges = get_flashed_messages(with_categories=true) %}
     {% for categoria, text in missatges %}
-        <div class="alert alert-{{ categoria }}" role="alert">{{ text }}</div>
+        <div class="alert bt-alert alert-{{ categoria }}" role="alert">
+            <span class="bt-alert-icona" aria-hidden="true">{% if categoria == 'success' %}✔{% elif categoria == 'danger' %}✖{% elif categoria == 'warning' %}⚠{% else %}ℹ{% endif %}</span>
+            <span>{{ text }}</span>
+        </div>
     {% endfor %}
 {% endwith %}

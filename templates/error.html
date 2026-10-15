@@ -1,3 +1,4 @@
+<!-- error.html -->
 <!DOCTYPE html>
 <html lang="ca">
 <head>
@@ -12,10 +13,13 @@
         {% include '_navbar.html' %}
     {% endif %}
 
-    <div class="container text-center mt-5">
-        <h1 class="text-danger">Error {{ codi }}</h1>
-        <p class="lead">{{ missatge }}</p>
-        <a href="/" class="btn btn-primary mt-3">Tornar a l'inici</a>
+    <div class="container bt-pagina">
+        <div class="bt-error text-center">
+            <div class="bt-error-codi" aria-hidden="true">{{ codi }}</div>
+            <h1 class="bt-h2-gran text-danger mb-3">Error {{ codi }}</h1>
+            <p class="lead bt-error-missatge">{{ missatge }}</p>
+            <a href="/" class="btn btn-primary btn-lg mt-3">Tornar a l'inici</a>
+        </div>
     </div>
 
 </body>
