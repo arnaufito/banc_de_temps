@@ -298,8 +298,6 @@ def mostrar_errors(errors):
 # ==========================================
 @app.route("/")
 def inici():
-    if g.usuari:
-        return redirect(url_for("mercat"))
     return render_template("index.html")
 
 @app.route("/normes")
