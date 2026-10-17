@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ oferta['titol'] }} - Banc de Temps</title>
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
-    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
 <body class="bg-light">
 {% set actiu = 'mercat' %}
@@ -48,7 +47,7 @@
                                 <small>Així és com els altres usuaris veuen la teva publicació.</small>
                             </div>
 
-                            <form action="/eliminar_oferta/{{ oferta['id'] }}" method="POST" class="mt-auto" data-confirm="Estàs segur que vols eliminar aquesta oferta del mercat?">
+                            <form action="/eliminar_oferta/{{ oferta['id'] }}" method="POST" class="mt-auto" >
                                 <input type="hidden" name="desti" value="mercat">
                                 <button type="submit" class="btn btn-outline-danger w-100 py-2 fw-bold">
                                     🗑️ Eliminar la meva oferta

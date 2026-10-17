@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panell de Control - Admin</title>
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
-    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
 <body class="bg-light">
 
@@ -58,7 +57,7 @@
                                         <td class="bt-accio">
                                             <!-- Protecció: l'admin no es pot esborrar a ell mateix -->
                                             {% if u['id'] != jo.id %}
-                                                <form action="/eliminar_usuari/{{ u['id'] }}" method="POST" class="d-inline" data-confirm="ATENCIÓ: Esborraràs aquest usuari, les seves ofertes i els seus xats. Estàs segur?">
+                                                <form action="/eliminar_usuari/{{ u['id'] }}" method="POST" class="d-inline" ="ATENCIÓ: Esborraràs aquest usuari, les seves ofertes i els seus xats. Estàs segur?">
                                                     <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Expulsar</button>
                                                 </form>
                                             {% else %}
@@ -94,7 +93,7 @@
                                         <td>{{ o['titol'] }}</td>
                                         <td class="text-muted">de {{ o['nom_autor'] }}</td>
                                         <td class="bt-accio">
-                                            <form action="/eliminar_oferta/{{ o['id'] }}" method="POST" class="d-inline" data-confirm="Esborrar definitivament?">
+                                            <form action="/eliminar_oferta/{{ o['id'] }}" method="POST" class="d-inline" >
                                                 <input type="hidden" name="desti" value="admin">
                                                 <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Forçar esborrat</button>
                                             </form>

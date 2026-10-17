@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xats - Banc de Temps</title>
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
-    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
 <body class="bg-light">
 {% set actiu = 'xat' %}
@@ -26,8 +25,8 @@
                             <a href="/xat/{{ chat[0] }}/{{ chat[2] }}" class="text-decoration-none text-dark flex-grow-1 text-truncate pe-2">
                                 💬 {{ chat[1] }}
                             </a>
-                            <!-- Paperera: esborra aquesta conversa (és un formulari POST amb confirmació) -->
-                            <form action="/eliminar_xat/{{ chat[0] }}/{{ chat[2] }}" method="POST" data-confirm="Estàs segur que vols eliminar aquesta conversa per complet?">
+                            <!-- Paperera: esborra aquesta conversa (és un formulari POST) -->
+                            <form action="/eliminar_xat/{{ chat[0] }}/{{ chat[2] }}" method="POST">
                                 <button type="submit" class="btn btn-outline-danger btn-sm">🗑️</button>
                             </form>
                         </div>

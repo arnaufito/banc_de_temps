@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Banc de Temps</title>
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
-    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
 <body class="bg-light">
 
@@ -17,7 +16,6 @@
                 <h1 class="bt-h1">La teva hora val tant com la de qualsevol altra persona</h1>
                 <p class="bt-lead">Al Banc de Temps no es paga amb diners, sinó amb temps. Ajuda algú del teu entorn durant una hora i, quan ho necessitis, algú t'ajudarà a tu.</p>
 
-                {# ⚠ COMPROVA: la condició {% if jo %} i els href han de ser els del teu index.html original #}
                 {% if jo %}
                     <div class="bt-botons">
                         <a href="/mercat" class="btn btn-primary btn-lg">Anar al mercat</a>

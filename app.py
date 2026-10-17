@@ -83,9 +83,7 @@ if os.environ.get("PROXY") == "1":  # darrere d'un proxy (Render, Railway...)
     from werkzeug.middleware.proxy_fix import ProxyFix
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 
-# ==========================================
-# CONTRASENYES (SHA-256 amb sal: instantani i sense consum de CPU/RAM)
-# ==========================================
+
 # ==========================================
 # BASE DE DADES
 # ==========================================
@@ -191,7 +189,7 @@ inicialitzar_bd()
 
 
 # ==========================================
-# SEGURETAT: SESSIÓ I LÍMIT D'INTENTS
+# LÍMIT D'INTENTS
 # ==========================================
 
 
@@ -200,7 +198,7 @@ _intents = defaultdict(deque)
 
 def massa_intents(clau, maxim, finestra):
     ara = time.time()
-    cua = _intents[clau]
+    cua = _intents.get(clau, ())
     while cua and ara - cua[0] > finestra:
         cua.popleft()
     return len(cua) >= maxim
@@ -482,6 +480,8 @@ def perfil():
             return redirect(url_for("perfil"))
             
     usuari = db.execute("SELECT nom, correu, ciutat, descripcio FROM usuaris WHERE id = ?", (yo,)).fetchone()
+    if request.method == "POST":  # només s'hi arriba amb errors: es conserva el que s'ha escrit
+        usuari = (nom, usuari["correu"], ciutat, descripcio)
     return render_template("perfil.html", usuari=usuari)
 
 @app.route("/historial")
@@ -491,7 +491,7 @@ def historial():
     ofertes = db.execute(
         "SELECT id, titol, descripcio, hores FROM ofertes WHERE id_usuari = ? ORDER BY id DESC", (yo,)).fetchall()
     moviments = db.execute('''
-        SELECT t.hores, t.data, t.concepte, t.id_pagador,
+        SELECT t.hores, datetime(t.data, 'localtime') AS data, t.concepte, t.id_pagador,
                COALESCE(p.nom, 'Usuari eliminat') AS nom_pagador,
                COALESCE(c.nom, 'Usuari eliminat') AS nom_cobrador
         FROM transaccions t
@@ -521,7 +521,7 @@ def transferencia():
         concepte = camp("concepte")
         errors = []
         if hores is None:
-            errors.append("Les hores han de ser un número positiu (màxim 2 decimals).")
+            errors.append(f"Les hores han de ser un número entre 0.01 i {MAX_HORES_TRANSFERENCIA}.")
         if not 1 <= len(concepte) <= 120:
             errors.append("El concepte ha de tenir entre 1 i 120 caràcters.")
             
@@ -541,20 +541,26 @@ def transferencia():
             
         if not errors:
             try:
-                with transaccio(db):
-                    descomptat = db.execute(
-                        "UPDATE usuaris SET saldo = ROUND(saldo - ?, 2) WHERE id = ? AND saldo >= ?",
-                        (hores, yo, hores)).rowcount
-                    if descomptat != 1:
-                        raise ValueError("saldo")
-                    ingressat = db.execute(
-                        "UPDATE usuaris SET saldo = ROUND(saldo + ?, 2) WHERE id = ?",
-                        (hores, id_cobrador)).rowcount
-                    if ingressat != 1:
-                        raise ValueError("destinatari")
-                    db.execute(
-                        "INSERT INTO transaccions (id_pagador, id_cobrador, hores, concepte) VALUES (?, ?, ?, ?)",
-                        (yo, id_cobrador, hores, concepte))
+                 with transaccio(db):
+                    # Doble clic: si fa menys de 10 s que s'ha fet exactament el mateix pagament, no es repeteix
+                    repetit = db.execute(
+                        "SELECT 1 FROM transaccions WHERE id_pagador = ? AND id_cobrador = ? AND hores = ? "
+                        "AND concepte = ? AND data >= datetime('now', '-10 seconds')",
+                        (yo, id_cobrador, hores, concepte)).fetchone()
+                    if not repetit:
+                        descomptat = db.execute(
+                            "UPDATE usuaris SET saldo = ROUND(saldo - ?, 2) WHERE id = ? AND saldo >= ?",
+                            (hores, yo, hores)).rowcount
+                        if descomptat != 1:
+                            raise ValueError("saldo")
+                        ingressat = db.execute(
+                            "UPDATE usuaris SET saldo = ROUND(saldo + ?, 2) WHERE id = ?",
+                            (hores, id_cobrador)).rowcount
+                        if ingressat != 1:
+                            raise ValueError("destinatari")
+                        db.execute(
+                            "INSERT INTO transaccions (id_pagador, id_cobrador, hores, concepte) VALUES (?, ?, ?, ?)",
+                            (yo, id_cobrador, hores, concepte))
             except ValueError as e:
                 errors.append("No tens prou saldo per fer aquest pagament." if str(e) == "saldo"
                               else "El destinatari ja no existeix.")
@@ -682,8 +688,11 @@ def eliminar_usuari(id_usuari_a_esborrar):
                       OR id_oferta IN (SELECT id FROM ofertes WHERE id_usuari = ?)""",
                    (id_usuari_a_esborrar,) * 3)
         db.execute("DELETE FROM ofertes WHERE id_usuari = ?", (id_usuari_a_esborrar,))
-        db.execute("DELETE FROM usuaris WHERE id = ?", (id_usuari_a_esborrar,))
-    flash("Usuari expulsat.", "success")
+        esborrats = db.execute("DELETE FROM usuaris WHERE id = ?", (id_usuari_a_esborrar,)).rowcount
+        if esborrats:
+            flash("Usuari expulsat.", "success")
+        else:
+            flash("Aquest usuari ja no existeix.", "warning")
     return redirect(url_for("admin"))
 
 
@@ -695,7 +704,7 @@ def pagina_error(codi, missatge):
 
 @app.errorhandler(400)
 def error_400(_e):
-    return pagina_error(400, "Petició no vàlida o sessió caducada. Torna enrere, recarrega la pàgina i torna-ho a provar.")
+    return pagina_error(400, "Petició no vàlida. Torna enrere, recarrega la pàgina i torna-ho a provar.")
 
 @app.errorhandler(403)
 def error_403(_e):
