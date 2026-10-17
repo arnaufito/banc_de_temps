@@ -1,7 +1,14 @@
+# Base de dades (conté les dades dels usuaris)
 banc_temps.db
-__pycache__/
-.env
-.secret_key
 *.db-journal
+
+# Clau secreta de les sessions: MAI al repositori
+.secret_key
+
+# Configuració local
+.env
+
+# Python
+__pycache__/
 venv/
 .venv/

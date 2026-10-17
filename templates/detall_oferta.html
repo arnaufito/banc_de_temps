@@ -1,3 +1,4 @@
+{# detall_oferta.html — Detall d'una oferta: descripció, hores i accions (contactar, pagar o eliminar). -#}
 <!DOCTYPE html>
 <html lang="ca">
 <head>
@@ -47,7 +48,7 @@
                                 <small>Així és com els altres usuaris veuen la teva publicació.</small>
                             </div>
 
-                            <form action="/eliminar_oferta/{{ oferta['id'] }}" method="POST" class="mt-auto" >
+                            <form action="/eliminar_oferta/{{ oferta['id'] }}" method="POST" class="mt-auto">
                                 <input type="hidden" name="desti" value="mercat">
                                 <button type="submit" class="btn btn-outline-danger w-100 py-2 fw-bold">
                                     🗑️ Eliminar la meva oferta

@@ -1,4 +1,4 @@
-<!-- perfil.html -->
+{# perfil.html — Edició del perfil de l'usuari. -#}
 <!DOCTYPE html>
 <html lang="ca">
 <head>
@@ -32,12 +32,12 @@
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Nom a mostrar</label>
-                                    <input type="text" name="nom" class="form-control form-control-lg" value="{{ usuari[0] }}" minlength="2" maxlength="60" required>
+                                    <label for="nom" class="form-label fw-bold">Nom a mostrar</label>
+                                    <input type="text" name="nom" id="nom" class="form-control form-control-lg" value="{{ usuari[0] }}" minlength="2" maxlength="60" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-bold">Ciutat o Població</label>
-                                    <select class="form-select form-control-lg" name="ciutat" required>
+                                    <label for="ciutat" class="form-label fw-bold">Ciutat o Població</label>
+                                    <select class="form-select form-control-lg" name="ciutat" id="ciutat" required>
                                         {% for c in CIUTATS %}
                                             <option value="{{ c }}" {% if usuari[2] == c or (c == 'Altres' and usuari[2] not in CIUTATS) %}selected{% endif %}>{{ c if c != 'Altres' else 'Altres poblacions...' }}</option>
                                         {% endfor %}
@@ -46,8 +46,8 @@
                             </div>
 
                             <div class="mb-4">
-                                <label class="form-label fw-bold">La meva descripció</label>
-                                <textarea name="descripcio" class="form-control" rows="4" maxlength="500" placeholder="Escriu alguna cosa sobre tu...">{{ usuari[3] or '' }}</textarea>
+                                <label for="descripcio" class="form-label fw-bold">La meva descripció</label>
+                                <textarea name="descripcio" id="descripcio" class="form-control" rows="4" maxlength="500" placeholder="Escriu alguna cosa sobre tu...">{{ usuari[3] or '' }}</textarea>
                             </div>
 
                             <button type="submit" class="btn btn-primary btn-lg w-100">Guardar Canvis</button>

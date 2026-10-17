@@ -1,4 +1,4 @@
-<!-- admin.html -->
+{# admin.html — Panell d'administració: llista d'usuaris i d'ofertes, amb els botons per expulsar i esborrar. -#}
 <!DOCTYPE html>
 <html lang="ca">
 <head>
@@ -57,7 +57,7 @@
                                         <td class="bt-accio">
                                             <!-- Protecció: l'admin no es pot esborrar a ell mateix -->
                                             {% if u['id'] != jo.id %}
-                                                <form action="/eliminar_usuari/{{ u['id'] }}" method="POST" class="d-inline" ="ATENCIÓ: Esborraràs aquest usuari, les seves ofertes i els seus xats. Estàs segur?">
+                                                <form action="/eliminar_usuari/{{ u['id'] }}" method="POST" class="d-inline">
                                                     <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Expulsar</button>
                                                 </form>
                                             {% else %}
@@ -93,7 +93,7 @@
                                         <td>{{ o['titol'] }}</td>
                                         <td class="text-muted">de {{ o['nom_autor'] }}</td>
                                         <td class="bt-accio">
-                                            <form action="/eliminar_oferta/{{ o['id'] }}" method="POST" class="d-inline" >
+                                            <form action="/eliminar_oferta/{{ o['id'] }}" method="POST" class="d-inline">
                                                 <input type="hidden" name="desti" value="admin">
                                                 <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Forçar esborrat</button>
                                             </form>

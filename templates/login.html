@@ -1,3 +1,4 @@
+{# login.html — Formulari d'inici de sessió. -#}
 <!DOCTYPE html>
 <html lang="ca">
 <head>
@@ -27,13 +28,13 @@
 
                         <form method="POST" action="/login">
                             <div class="mb-3">
-                                <label class="form-label">Correu electrònic</label>
-                                <input type="email" name="correu" class="form-control form-control-lg" placeholder="nom@exemple.cat" value="{{ correu or '' }}" required>
+                                <label for="correu" class="form-label">Correu electrònic</label>
+                                <input type="email" name="correu" id="correu" class="form-control form-control-lg" placeholder="nom@exemple.cat" value="{{ correu or '' }}" required>
                             </div>
 
                             <div class="mb-4">
-                                <label class="form-label">Contrasenya</label>
-                                <input type="password" name="contrasenya" class="form-control form-control-lg" required>
+                                <label for="contrasenya" class="form-label">Contrasenya</label>
+                                <input type="password" name="contrasenya" id="contrasenya" class="form-control form-control-lg" required>
                             </div>
 
                             <button type="submit" class="btn btn-primary btn-lg w-100">Entrar al Banc</button>

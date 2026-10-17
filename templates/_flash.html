@@ -1,4 +1,4 @@
-<!-- _flash.html -->
+{# _flash.html — Missatges flash (èxit, error, avís). S'inclou a les pàgines que els mostren. -#}
 {% with missatges = get_flashed_messages(with_categories=true) %}
     {% for categoria, text in missatges %}
         <div class="alert bt-alert alert-{{ categoria }}" role="alert">

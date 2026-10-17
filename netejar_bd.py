@@ -1,10 +1,24 @@
+"""
+netejar_bd.py · ESBORRA TOTES LES DADES de la base de dades (usuaris, ofertes, pagaments i xats).
+L'estructura de les taules es manté.
+
+Ús:   py netejar_bd.py      (demana confirmació: cal escriure SI)
+Atura l'app abans d'executar-lo.
+"""
+
 import os
 import sqlite3
 
 # Mateixa base de dades que fa servir l'app (variable DATABASE o el banc_temps.db de la carpeta del projecte)
 DB_PATH = os.environ.get("DATABASE", os.path.join(os.path.dirname(os.path.abspath(__file__)), "banc_temps.db"))
 
+
 def netejar_base_de_dades():
+    """Buida totes les taules després de demanar confirmació."""
+    if not os.path.exists(DB_PATH):
+        print(f"No existeix la base de dades ({DB_PATH}). No hi ha res a netejar.")
+        return
+
     # Operació destructiva: demanem confirmació
     resposta = input(f"Això ESBORRARÀ TOTES LES DADES de {DB_PATH}. Escriu SI per continuar: ")
     if resposta.strip().upper() != "SI":
@@ -26,9 +40,10 @@ def netejar_base_de_dades():
         print("S'han buidat totes les taules correctament!")
         print("Recorda: l'administrador es torna a crear en arrencar l'app si tens ADMIN_CORREU i ADMIN_CONTRASENYA definits.")
     except sqlite3.OperationalError as e:
-        print(f"Avís: No s'ha pogut trobar alguna taula o s'ha produït un error: {e}")
+        print(f"Error de la base de dades: {e}. Si l'app està en marxa, atura-la i torna-ho a provar.")
 
     conn.close()
+
 
 if __name__ == "__main__":
     netejar_base_de_dades()

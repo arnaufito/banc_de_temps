@@ -4,19 +4,31 @@ import sqlite3
 # Mateixa base de dades que fa servir l'app (variable DATABASE o el banc_temps.db de la carpeta del projecte)
 DB_PATH = os.environ.get("DATABASE", os.path.join(os.path.dirname(os.path.abspath(__file__)), "banc_temps.db"))
 
-conn = sqlite3.connect(DB_PATH)
-cursor = conn.cursor()
+def netejar_base_de_dades():
+    # Operació destructiva: demanem confirmació
+    resposta = input(f"Això ESBORRARÀ TOTES LES DADES de {DB_PATH}. Escriu SI per continuar: ")
+    if resposta.strip().upper() != "SI":
+        print("Cancel·lat. No s'ha esborrat res.")
+        return
 
-# Només demanem les dades segures, excloent la contrasenya
-cursor.execute("SELECT id, nom, correu, saldo, es_admin FROM usuaris")
-usuaris = cursor.fetchall()
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
 
-print("--- Usuaris a la Base de Dades ---")
-if not usuaris:
-    print("La base de dades està BUIDA!")
-else:
-    for u in usuaris:
-        rol = "ADMIN" if u[4] == 1 else "Usuari"
-        print(f"ID: {u[0]} | Nom: {u[1]} | Correu: {u[2]} | Saldo: {u[3]}h | Rol: {rol}")
+    print("Netejant la base de dades...")
 
-conn.close()
+    # Esborrem les dades de totes les taules (mantenint l'estructura)
+    try:
+        cursor.execute("DELETE FROM missatges")
+        cursor.execute("DELETE FROM transaccions")
+        cursor.execute("DELETE FROM ofertes")
+        cursor.execute("DELETE FROM usuaris")
+        conn.commit()
+        print("S'han buidat totes les taules correctament!")
+        print("Recorda: l'administrador es torna a crear en arrencar l'app si tens ADMIN_CORREU i ADMIN_CONTRASENYA definits.")
+    except sqlite3.OperationalError as e:
+        print(f"Avís: No s'ha pogut trobar alguna taula o s'ha produït un error: {e}")
+
+    conn.close()
+
+if __name__ == "__main__":
+    netejar_base_de_dades()

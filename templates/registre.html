@@ -1,3 +1,4 @@
+{# registre.html — Formulari de registre de comptes nous. -#}
 <!DOCTYPE html>
 <html lang="ca">
 <head>
@@ -28,12 +29,12 @@
 
                         <form method="POST" action="/registre">
                             <div class="mb-3">
-                                <label class="form-label">Nom complet</label>
-                                <input type="text" name="nom" class="form-control form-control-lg" placeholder="Com et dius?" value="{{ form.get('nom', '') }}" minlength="2" maxlength="60" required>
+                                <label for="nom" class="form-label">Nom complet</label>
+                                <input type="text" name="nom" id="nom" class="form-control form-control-lg" placeholder="Com et dius?" value="{{ form.get('nom', '') }}" minlength="2" maxlength="60" required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Ciutat o Població</label>
-                                <select class="form-select form-control-lg" name="ciutat" required>
+                                <label for="ciutat" class="form-label">Ciutat o Població</label>
+                                <select class="form-select form-control-lg" name="ciutat" id="ciutat" required>
                                     <option value="" {% if not form.get('ciutat') %}selected{% endif %} disabled>Selecciona on vius</option>
                                     {% for c in CIUTATS %}
                                         <option value="{{ c }}" {% if form.get('ciutat') == c %}selected{% endif %}>{{ c if c != 'Altres' else 'Altres poblacions...' }}</option>
@@ -41,13 +42,13 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Correu electrònic</label>
-                                <input type="email" name="correu" class="form-control form-control-lg" placeholder="correu@exemple.cat" value="{{ form.get('correu', '') }}" maxlength="120" required>
+                                <label for="correu" class="form-label">Correu electrònic</label>
+                                <input type="email" name="correu" id="correu" class="form-control form-control-lg" placeholder="correu@exemple.cat" value="{{ form.get('correu', '') }}" maxlength="120" required>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Contrasenya</label>
-                                <input type="password" name="contrasenya" class="form-control form-control-lg" minlength="8" maxlength="128" required>
+                                <label for="contrasenya" class="form-label">Contrasenya</label>
+                                <input type="password" name="contrasenya" id="contrasenya" class="form-control form-control-lg" minlength="8" maxlength="128" required>
                                 <small class="text-muted">Mínim 8 caràcters.</small>
                             </div>
 
