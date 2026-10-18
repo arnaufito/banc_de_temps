@@ -1,34 +1,34 @@
+"""
+verificar_bd.py · Llista els usuaris registrats a la base de dades (mai en mostra les contrasenyes).
+Només llegeix: no canvia res.
+
+Ús:   py verificar_bd.py
+"""
+
 import os
 import sqlite3
 
 # Mateixa base de dades que fa servir l'app (variable DATABASE o el banc_temps.db de la carpeta del projecte)
 DB_PATH = os.environ.get("DATABASE", os.path.join(os.path.dirname(os.path.abspath(__file__)), "banc_temps.db"))
 
-def netejar_base_de_dades():
-    # Operació destructiva: demanem confirmació
-    resposta = input(f"Això ESBORRARÀ TOTES LES DADES de {DB_PATH}. Escriu SI per continuar: ")
-    if resposta.strip().upper() != "SI":
-        print("Cancel·lat. No s'ha esborrat res.")
-        return
+# Si el fitxer no existeix, sqlite3 en crearia un de buit; ho evitem avisant abans
+if not os.path.exists(DB_PATH):
+    raise SystemExit(f"No existeix la base de dades ({DB_PATH}). Arrenca l'app una vegada perquè es creï.")
 
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
+conn = sqlite3.connect(DB_PATH)
+cursor = conn.cursor()
 
-    print("Netejant la base de dades...")
+# Només demanem les dades segures, excloent la contrasenya
+cursor.execute("SELECT id, nom, correu, saldo, es_admin FROM usuaris")
+usuaris = cursor.fetchall()
 
-    # Esborrem les dades de totes les taules (mantenint l'estructura)
-    try:
-        cursor.execute("DELETE FROM missatges")
-        cursor.execute("DELETE FROM transaccions")
-        cursor.execute("DELETE FROM ofertes")
-        cursor.execute("DELETE FROM usuaris")
-        conn.commit()
-        print("S'han buidat totes les taules correctament!")
-        print("Recorda: l'administrador es torna a crear en arrencar l'app si tens ADMIN_CORREU i ADMIN_CONTRASENYA definits.")
-    except sqlite3.OperationalError as e:
-        print(f"Avís: No s'ha pogut trobar alguna taula o s'ha produït un error: {e}")
+print("--- Usuaris a la Base de Dades ---")
+if not usuaris:
+    print("La base de dades està BUIDA!")
+else:
+    for u in usuaris:
+        # u = (id, nom, correu, saldo, es_admin); es_admin val 1 per als administradors
+        rol = "ADMIN" if u[4] == 1 else "Usuari"
+        print(f"ID: {u[0]} | Nom: {u[1]} | Correu: {u[2]} | Saldo: {u[3]}h | Rol: {rol}")
 
-    conn.close()
-
-if __name__ == "__main__":
-    netejar_base_de_dades()
+conn.close()
